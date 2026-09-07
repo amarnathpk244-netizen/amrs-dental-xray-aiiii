@@ -11,33 +11,8 @@ st.set_page_config(
 # ---------------- STYLE ----------------
 st.markdown("""
 <style>
-
-/* MAIN BACKGROUND */
 .stApp {
     background-color: #f5f8fb;
-}
-
-/* MAKE ALL INPUT LABELS CLEAR */
-.stTextInput label,
-.stNumberInput label,
-.stSelectbox label,
-.stDateInput label,
-.stFileUploader label {
-    color: #12344d !important;
-    font-size: 16px !important;
-    font-weight: 700 !important;
-}
-
-/* INPUT BOX */
-.stTextInput input,
-.stNumberInput input {
-    color: #172b3a !important;
-    background-color: white !important;
-}
-
-/* SELECT BOX */
-.stSelectbox div[data-baseweb="select"] {
-    background-color: white !important;
 }
 
 /* HEADER */
@@ -66,7 +41,7 @@ st.markdown("""
     margin-top: 12px;
 }
 
-/* SECTION TITLES */
+/* SECTION HEADINGS */
 .section-title {
     color: #12344d !important;
     font-size: 26px;
@@ -75,7 +50,7 @@ st.markdown("""
     margin-bottom: 12px;
 }
 
-/* WORKFLOW CARDS */
+/* WORKFLOW */
 .workflow-card {
     background-color: white;
     padding: 18px;
@@ -101,9 +76,9 @@ st.markdown("""
     font-size: 14px;
 }
 
-/* REPORT CARD */
+/* REPORT */
 .report-card {
-    background-color: white !important;
+    background-color: #ffffff !important;
     color: #172b3a !important;
     padding: 22px;
     border-radius: 16px;
@@ -141,7 +116,6 @@ st.markdown("""
     padding: 20px;
     font-size: 13px;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -218,7 +192,7 @@ c1, c2 = st.columns(2)
 with c1:
 
     st.markdown(
-        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Patient Name</div>',
+        '<div style="color:#12344d;font-size:17px;font-weight:800;margin-bottom:6px;">Patient Name</div>',
         unsafe_allow_html=True
     )
 
@@ -228,7 +202,7 @@ with c1:
     )
 
     st.markdown(
-        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Age</div>',
+        '<div style="color:#12344d;font-size:17px;font-weight:800;margin-top:14px;margin-bottom:6px;">Age</div>',
         unsafe_allow_html=True
     )
 
@@ -241,7 +215,7 @@ with c1:
     )
 
     st.markdown(
-        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Sex</div>',
+        '<div style="color:#12344d;font-size:17px;font-weight:800;margin-top:14px;margin-bottom:6px;">Sex</div>',
         unsafe_allow_html=True
     )
 
@@ -255,7 +229,7 @@ with c1:
 with c2:
 
     st.markdown(
-        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">OP Number</div>',
+        '<div style="color:#12344d;font-size:17px;font-weight:800;margin-bottom:6px;">OP Number</div>',
         unsafe_allow_html=True
     )
 
@@ -265,7 +239,7 @@ with c2:
     )
 
     st.markdown(
-        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Examination Date</div>',
+        '<div style="color:#12344d;font-size:17px;font-weight:800;margin-top:14px;margin-bottom:6px;">Examination Date</div>',
         unsafe_allow_html=True
     )
 
@@ -274,7 +248,6 @@ with c2:
         value=date.today(),
         label_visibility="collapsed"
     )
-
 
 st.divider()
 
@@ -301,7 +274,6 @@ if xray is not None:
     c1, c2 = st.columns([2, 1])
 
     with c1:
-
         st.image(
             xray,
             caption="Uploaded Dental Radiograph",
@@ -309,7 +281,6 @@ if xray is not None:
         )
 
     with c2:
-
         st.markdown("### 📋 Image Information")
 
         st.write("**File:**", xray.name)
