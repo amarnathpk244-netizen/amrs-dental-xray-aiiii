@@ -8,9 +8,11 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ---------------- STYLE ----------------
+# ==================== STYLE ====================
+
 st.markdown("""
 <style>
+
 .stApp {
     background-color: #f5f8fb;
 }
@@ -32,7 +34,8 @@ st.markdown("""
 .hero-subtitle {
     color: white !important;
     font-size: 19px;
-    margin-top: 5px;
+    font-weight: 600;
+    margin-top: 6px;
 }
 
 .hero-text {
@@ -116,14 +119,19 @@ st.markdown("""
     padding: 20px;
     font-size: 13px;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
 
-# ---------------- HEADER ----------------
+# ==================== HEADER ====================
+
 st.markdown("""
 <div class="hero">
-    <div class="hero-title">🦷 AMRs Dental X-ray AI</div>
+
+    <div class="hero-title">
+        🦷 AMRs Dental X-ray AI
+    </div>
 
     <div class="hero-subtitle">
         AI-Assisted Dental Radiographic Assessment
@@ -133,11 +141,13 @@ st.markdown("""
         A research-oriented platform for preliminary assessment
         of dental radiographs using artificial intelligence.
     </div>
+
 </div>
 """, unsafe_allow_html=True)
 
 
-# ---------------- WORKFLOW ----------------
+# ==================== WORKFLOW ====================
+
 st.markdown(
     '<div class="section-title">🔄 Assessment Workflow</div>',
     unsafe_allow_html=True
@@ -149,9 +159,11 @@ with c1:
     st.markdown("""
     <div class="workflow-card">
         <div class="workflow-number">01</div>
-        <div class="workflow-title">👤 Patient Information</div>
+        <div class="workflow-title">
+            👤 Patient Information
+        </div>
         <div class="workflow-text">
-        Enter basic patient details.
+            Enter basic patient details.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -160,9 +172,11 @@ with c2:
     st.markdown("""
     <div class="workflow-card">
         <div class="workflow-number">02</div>
-        <div class="workflow-title">🩻 Upload Radiograph</div>
+        <div class="workflow-title">
+            🩻 Upload Radiograph
+        </div>
         <div class="workflow-text">
-        Upload the dental X-ray image.
+            Upload the dental X-ray image.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -171,9 +185,11 @@ with c3:
     st.markdown("""
     <div class="workflow-card">
         <div class="workflow-number">03</div>
-        <div class="workflow-title">🤖 AI Assessment</div>
+        <div class="workflow-title">
+            🤖 AI Assessment
+        </div>
         <div class="workflow-text">
-        Generate an AI-assisted assessment.
+            Generate an AI-assisted assessment.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -181,7 +197,8 @@ with c3:
 st.divider()
 
 
-# ---------------- PATIENT INFORMATION ----------------
+# ==================== PATIENT INFORMATION ====================
+
 st.markdown(
     '<div class="section-title">👤 Patient Information</div>',
     unsafe_allow_html=True
@@ -252,7 +269,8 @@ with c2:
 st.divider()
 
 
-# ---------------- X-RAY ----------------
+# ==================== X-RAY UPLOAD ====================
+
 st.markdown(
     '<div class="section-title">🩻 Dental Radiograph</div>',
     unsafe_allow_html=True
@@ -262,11 +280,13 @@ st.write("Upload the patient's dental radiograph.")
 
 xray = st.file_uploader(
     "Choose X-ray image",
-    type=["jpg", "jpeg", "png"]
+    type=["jpg", "jpeg", "png"],
+    label_visibility="visible"
 )
 
 
-# ---------------- AFTER UPLOAD ----------------
+# ==================== AFTER UPLOAD ====================
+
 if xray is not None:
 
     st.success("✅ Dental radiograph uploaded successfully.")
@@ -274,6 +294,7 @@ if xray is not None:
     c1, c2 = st.columns([2, 1])
 
     with c1:
+
         st.image(
             xray,
             caption="Uploaded Dental Radiograph",
@@ -281,6 +302,7 @@ if xray is not None:
         )
 
     with c2:
+
         st.markdown("### 📋 Image Information")
 
         st.write("**File:**", xray.name)
@@ -289,11 +311,11 @@ if xray is not None:
 
         st.success("🟢 Image received")
 
-
     st.divider()
 
 
-    # ---------------- AI ASSESSMENT ----------------
+    # ==================== AI ASSESSMENT ====================
+
     st.markdown(
         '<div class="section-title">🤖 AI-Assisted Provisional Assessment</div>',
         unsafe_allow_html=True
@@ -302,35 +324,37 @@ if xray is not None:
     st.markdown("""
     <div class="report-card">
 
-    <div class="report-heading">
-    🔍 Radiographic Assessment
-    </div>
+        <div class="report-heading">
+            🔍 Radiographic Assessment
+        </div>
 
-    <div class="report-text">
+        <div class="report-text">
 
-    <b>Current status:</b><br>
-    AI radiographic analysis module is currently under development.
+            <b>Current status:</b><br>
 
-    <br><br>
+            AI radiographic analysis module is currently under development.
 
-    The final system will analyse the
-    <b>actual uploaded dental radiograph</b>
-    and identify selected radiographic findings.
+            <br><br>
 
-    <br><br>
+            The final system will analyse the
+            <b>actual uploaded dental radiograph</b>
+            and identify selected radiographic findings.
 
-    <b>Planned assessment areas:</b>
+            <br><br>
 
-    <ul>
-        <li>🦷 Dental caries</li>
-        <li>🦴 Alveolar bone loss</li>
-        <li>🔬 Periapical radiolucency / lesions</li>
-        <li>📍 Location of radiographic findings</li>
-        <li>📊 Extent and severity where appropriate</li>
-        <li>📄 AI-assisted provisional radiographic report</li>
-    </ul>
+            <b>Planned assessment areas:</b>
 
-    </div>
+            <ul>
+                <li>🦷 Dental caries</li>
+                <li>🦴 Alveolar bone loss</li>
+                <li>🔬 Periapical radiolucency / lesions</li>
+                <li>📍 Location of radiographic findings</li>
+                <li>📊 Extent and severity where appropriate</li>
+                <li>📄 AI-assisted provisional radiographic report</li>
+            </ul>
+
+        </div>
+
     </div>
     """, unsafe_allow_html=True)
 
@@ -338,7 +362,8 @@ if xray is not None:
     st.divider()
 
 
-    # ---------------- PROVISIONAL REPORT ----------------
+    # ==================== PROVISIONAL REPORT ====================
+
     st.markdown(
         '<div class="section-title">📄 Provisional Radiographic Report</div>',
         unsafe_allow_html=True
@@ -350,71 +375,89 @@ if xray is not None:
     st.markdown(f"""
     <div class="report-card">
 
-    <div class="report-heading">
-    🦷 AMRs Dental X-ray AI — Provisional Report
-    </div>
+        <div class="report-heading">
+            🦷 AMRs Dental X-ray AI — Provisional Report
+        </div>
 
-    <div class="report-text">
+        <div class="report-text">
 
-    <b>Patient Name:</b> {patient_name}<br>
-    <b>Age:</b> {age}<br>
-    <b>Sex:</b> {sex}<br>
-    <b>OP Number:</b> {patient_op}<br>
-    <b>Examination Date:</b> {examination_date}
+            <b>Patient Name:</b> {patient_name}<br>
 
-    <hr>
+            <b>Age:</b> {age}<br>
 
-    <b>Radiograph:</b> Uploaded successfully.
+            <b>Sex:</b> {sex}<br>
 
-    <br><br>
+            <b>OP Number:</b> {patient_op}<br>
 
-    <b>Radiographic Findings:</b><br>
-    AI analysis pending.
+            <b>Examination Date:</b> {examination_date}
 
-    <br><br>
+            <hr>
 
-    <b>Provisional Interpretation:</b><br>
-    The AI analysis module will provide findings after integration
-    of a validated radiographic AI model.
+            <b>Radiograph:</b>
+            Uploaded successfully.
 
-    <br><br>
+            <br><br>
 
-    <b>Recommendation:</b><br>
-    Radiographic findings should be correlated with clinical examination
-    and other appropriate diagnostic information by a qualified dentist.
+            <b>Radiographic Findings:</b><br>
 
-    </div>
+            AI analysis pending.
+
+            <br><br>
+
+            <b>Provisional Interpretation:</b><br>
+
+            The AI analysis module will provide findings after
+            integration of a validated radiographic AI model.
+
+            <br><br>
+
+            <b>Recommendation:</b><br>
+
+            Radiographic findings should be correlated with clinical
+            examination and other appropriate diagnostic information
+            by a qualified dentist.
+
+        </div>
+
     </div>
     """, unsafe_allow_html=True)
 
 
-# ---------------- DISCLAIMER ----------------
+# ==================== DISCLAIMER ====================
+
 st.divider()
 
 st.markdown("""
 <div class="disclaimer">
 
-<b>⚠️ Clinical Disclaimer</b>
+    <b>⚠️ Clinical Disclaimer</b>
 
-<br><br>
+    <br><br>
 
-This platform is intended for AI-assisted radiographic assessment
-and educational/research purposes. It does not provide a definitive
-clinical diagnosis.
+    This platform is intended for AI-assisted radiographic assessment
+    and educational/research purposes. It does not provide a definitive
+    clinical diagnosis.
 
-Radiographic findings should be interpreted together with clinical
-examination and other appropriate diagnostic information by a
-qualified dental professional.
+    <br><br>
+
+    Radiographic findings should be interpreted together with clinical
+    examination and other appropriate diagnostic information by a
+    qualified dental professional.
 
 </div>
 """, unsafe_allow_html=True)
 
 
-# ---------------- FOOTER ----------------
+# ==================== FOOTER ====================
+
 st.markdown("""
 <div class="footer">
-🦷 AMRs Dental X-ray AI
-<br>
-AI-Assisted Dental Radiographic Assessment • Research & Educational Platform
+
+    🦷 AMRs Dental X-ray AI
+    <br>
+
+    AI-Assisted Dental Radiographic Assessment
+    • Research & Educational Platform
+
 </div>
 """, unsafe_allow_html=True)
