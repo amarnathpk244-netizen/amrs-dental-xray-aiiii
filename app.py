@@ -1,7 +1,6 @@
 import streamlit as st
 from datetime import date
 
-# ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="AMRs Dental X-ray AI",
     page_icon="🦷",
@@ -9,102 +8,119 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ---------------- CUSTOM CSS ----------------
+# ---------------- STYLE ----------------
 st.markdown("""
 <style>
-    .stApp {
-        background: #f5f8fb;
-    }
+.stApp {
+    background-color: #f5f8fb;
+}
 
-    .hero {
-        background: linear-gradient(135deg, #0b3d62, #176b9c);
-        padding: 38px 30px;
-        border-radius: 22px;
-        margin-bottom: 25px;
-        color: white;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
+/* HEADER */
+.hero {
+    background: linear-gradient(135deg, #083b5c, #176b9c);
+    padding: 32px 25px;
+    border-radius: 20px;
+    margin-bottom: 25px;
+}
 
-    .hero-title {
-        font-size: 42px;
-        font-weight: 800;
-        line-height: 1.15;
-        color: white;
-    }
+.hero-title {
+    color: white !important;
+    font-size: 38px;
+    font-weight: 800;
+}
 
-    .hero-subtitle {
-        font-size: 20px;
-        margin-top: 8px;
-        color: #e9f5ff;
-    }
+.hero-subtitle {
+    color: white !important;
+    font-size: 19px;
+    margin-top: 5px;
+}
 
-    .hero-text {
-        font-size: 16px;
-        margin-top: 14px;
-        color: #f4fbff;
-    }
+.hero-text {
+    color: #eef8ff !important;
+    font-size: 15px;
+    margin-top: 12px;
+}
 
-    .section-title {
-        font-size: 27px;
-        font-weight: 750;
-        color: #12344d;
-        margin-top: 15px;
-        margin-bottom: 12px;
-    }
+/* SECTION HEADINGS */
+.section-title {
+    color: #12344d !important;
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: 15px;
+    margin-bottom: 12px;
+}
 
-    .workflow-card {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        border: 1px solid #dce6ee;
-        min-height: 135px;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.05);
-    }
+/* WORKFLOW */
+.workflow-card {
+    background-color: white;
+    padding: 18px;
+    border-radius: 15px;
+    border: 1px solid #d9e5ed;
+    min-height: 125px;
+}
 
-    .workflow-number {
-        font-size: 28px;
-        font-weight: 800;
-        color: #176b9c;
-    }
+.workflow-number {
+    color: #176b9c !important;
+    font-size: 26px;
+    font-weight: 800;
+}
 
-    .workflow-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #183b56;
-        margin-top: 5px;
-    }
+.workflow-title {
+    color: #183b56 !important;
+    font-size: 17px;
+    font-weight: 700;
+}
 
-    .workflow-text {
-        color: #617384;
-        font-size: 14px;
-    }
+.workflow-text {
+    color: #607080 !important;
+    font-size: 14px;
+}
 
-    .info-card {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        border: 1px solid #dce6ee;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.05);
-    }
+/* REPORT */
+.report-card {
+    background-color: #ffffff !important;
+    color: #172b3a !important;
+    padding: 22px;
+    border-radius: 16px;
+    border: 2px solid #d7e3eb;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    line-height: 1.8;
+}
 
-    .disclaimer {
-        background: #fff8e6;
-        padding: 18px;
-        border-radius: 14px;
-        border: 1px solid #f0d98c;
-        color: #5d4a16;
-    }
+.report-heading {
+    color: #0b4f71 !important;
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
 
-    .footer {
-        text-align: center;
-        color: #718096;
-        padding: 25px 0 10px 0;
-        font-size: 14px;
-    }
+.report-text {
+    color: #172b3a !important;
+    font-size: 16px;
+}
+
+/* DISCLAIMER */
+.disclaimer {
+    background-color: #fff8e6 !important;
+    color: #4d3d16 !important;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid #efd98d;
+    line-height: 1.6;
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    color: #718096 !important;
+    padding: 20px;
+    font-size: 13px;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HERO HEADER ----------------
+
+# ---------------- HEADER ----------------
 st.markdown("""
 <div class="hero">
     <div class="hero-title">🦷 AMRs Dental X-ray AI</div>
@@ -112,11 +128,12 @@ st.markdown("""
         AI-Assisted Dental Radiographic Assessment
     </div>
     <div class="hero-text">
-        A research-oriented digital platform designed to support
-        preliminary assessment of dental radiographs using artificial intelligence.
+        A research-oriented platform for preliminary assessment
+        of dental radiographs using artificial intelligence.
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 # ---------------- WORKFLOW ----------------
 st.markdown(
@@ -124,66 +141,70 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-col1, col2, col3 = st.columns(3)
+c1, c2, c3 = st.columns(3)
 
-with col1:
+with c1:
     st.markdown("""
     <div class="workflow-card">
         <div class="workflow-number">01</div>
         <div class="workflow-title">👤 Patient Information</div>
         <div class="workflow-text">
-            Enter basic patient and examination details.
+        Enter basic patient details.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-with col2:
+with c2:
     st.markdown("""
     <div class="workflow-card">
         <div class="workflow-number">02</div>
         <div class="workflow-title">🩻 Upload Radiograph</div>
         <div class="workflow-text">
-            Upload a dental X-ray image for assessment.
+        Upload the dental X-ray image.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-with col3:
+with c3:
     st.markdown("""
     <div class="workflow-card">
         <div class="workflow-number">03</div>
         <div class="workflow-title">🤖 AI Assessment</div>
         <div class="workflow-text">
-            Generate an AI-assisted provisional radiographic assessment.
+        Generate an AI-assisted assessment.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 st.divider()
 
-# ---------------- PATIENT DETAILS ----------------
+
+# ---------------- PATIENT INFORMATION ----------------
 st.markdown(
     '<div class="section-title">👤 Patient Information</div>',
     unsafe_allow_html=True
 )
 
-col1, col2 = st.columns(2)
+c1, c2 = st.columns(2)
 
-with col1:
+with c1:
     name = st.text_input("Patient Name")
+
     age = st.number_input(
         "Age",
         min_value=0,
         max_value=120,
         step=1
     )
+
     sex = st.selectbox(
         "Sex",
         ["Select", "Male", "Female", "Other"]
     )
 
-with col2:
+with c2:
     op_no = st.text_input("OP Number")
+
     examination_date = st.date_input(
         "Examination Date",
         value=date.today()
@@ -191,50 +212,45 @@ with col2:
 
 st.divider()
 
-# ---------------- RADIOGRAPH ----------------
+
+# ---------------- X-RAY ----------------
 st.markdown(
     '<div class="section-title">🩻 Dental Radiograph</div>',
     unsafe_allow_html=True
 )
 
-st.write(
-    "Upload the patient's dental radiograph for AI-assisted assessment."
-)
+st.write("Upload the patient's dental radiograph.")
 
 xray = st.file_uploader(
     "Choose X-ray image",
-    type=["jpg", "jpeg", "png"],
-    help="Supported formats: JPG, JPEG and PNG"
+    type=["jpg", "jpeg", "png"]
 )
 
+
+# ---------------- AFTER UPLOAD ----------------
 if xray is not None:
 
-    st.success("✅ Radiograph uploaded successfully.")
+    st.success("✅ Dental radiograph uploaded successfully.")
 
-    col1, col2 = st.columns([2, 1])
+    c1, c2 = st.columns([2, 1])
 
-    with col1:
+    with c1:
         st.image(
             xray,
             caption="Uploaded Dental Radiograph",
             use_container_width=True
         )
 
-    with col2:
+    with c2:
         st.markdown("### 📋 Image Information")
-
         st.write("**File:**", xray.name)
         st.write("**Format:**", xray.type)
 
-        st.markdown("### 🔍 Status")
+        st.success("🟢 Image received")
 
-        st.success("Radiograph received.")
-
-        st.caption(
-            "The image is ready for the AI assessment module."
-        )
 
     st.divider()
+
 
     # ---------------- AI ASSESSMENT ----------------
     st.markdown(
@@ -242,61 +258,121 @@ if xray is not None:
         unsafe_allow_html=True
     )
 
-    st.info(
-        "The AI radiographic analysis module is currently under development. "
-        "This section will analyse the actual uploaded radiograph once the "
-        "validated AI model is integrated."
-    )
-
     st.markdown("""
-    **Planned assessment areas**
+    <div class="report-card">
 
-    🦷 **Dental caries**  
-    🦴 **Alveolar bone loss**  
-    🔬 **Periapical radiolucency / lesions**  
-    📍 **Location and radiographic description**  
-    📊 **Extent / severity where appropriate**  
-    📄 **AI-assisted provisional radiographic report**
-    """)
+    <div class="report-heading">
+    🔍 Radiographic Assessment
+    </div>
+
+    <div class="report-text">
+
+    <b>Current status:</b><br>
+    AI radiographic analysis module is currently under development.
+
+    <br><br>
+
+    The final system will analyse the <b>actual uploaded dental radiograph</b>
+    and identify selected radiographic findings.
+
+    <br><br>
+
+    <b>Planned assessment areas:</b>
+
+    <ul>
+        <li>🦷 Dental caries</li>
+        <li>🦴 Alveolar bone loss</li>
+        <li>🔬 Periapical radiolucency / lesions</li>
+        <li>📍 Location of radiographic findings</li>
+        <li>📊 Extent and severity where appropriate</li>
+        <li>📄 AI-assisted provisional radiographic report</li>
+    </ul>
+
+    </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 
     st.divider()
 
-    # ---------------- REPORT ----------------
+
+    # ---------------- PROVISIONAL REPORT ----------------
     st.markdown(
-        '<div class="section-title">📄 Provisional Report</div>',
+        '<div class="section-title">📄 Provisional Radiographic Report</div>',
         unsafe_allow_html=True
     )
 
+    patient_name = name if name else "Not entered"
+    patient_op = op_no if op_no else "Not entered"
+
     st.markdown(f"""
-    <div class="info-card">
-        <b>Patient:</b> {name if name else "Not entered"}<br><br>
-        <b>OP Number:</b> {op_no if op_no else "Not entered"}<br><br>
-        <b>Examination Date:</b> {examination_date}<br><br>
-        <b>Radiograph:</b> Uploaded successfully<br><br>
-        <b>Radiographic findings:</b> AI analysis pending<br><br>
-        <b>Provisional interpretation:</b> AI model integration pending
+    <div class="report-card">
+
+    <div class="report-heading">
+    🦷 AMRs Dental X-ray AI — Provisional Report
+    </div>
+
+    <div class="report-text">
+
+    <b>Patient Name:</b> {patient_name}<br>
+    <b>Age:</b> {age}<br>
+    <b>Sex:</b> {sex}<br>
+    <b>OP Number:</b> {patient_op}<br>
+    <b>Examination Date:</b> {examination_date}
+
+    <hr>
+
+    <b>Radiograph:</b> Uploaded successfully.
+
+    <br><br>
+
+    <b>Radiographic Findings:</b><br>
+    AI analysis pending.
+
+    <br><br>
+
+    <b>Provisional Interpretation:</b><br>
+    The AI analysis module will provide findings after integration
+    of a validated radiographic AI model.
+
+    <br><br>
+
+    <b>Recommendation:</b><br>
+    Radiographic findings should be correlated with clinical examination
+    and other appropriate diagnostic information by a qualified dentist.
+
+    </div>
     </div>
     """, unsafe_allow_html=True)
+
 
 # ---------------- DISCLAIMER ----------------
 st.divider()
 
 st.markdown("""
 <div class="disclaimer">
-    <b>⚠️ Clinical Disclaimer</b><br><br>
-    This platform is intended for AI-assisted radiographic assessment
-    and educational/research purposes. It does not provide a definitive
-    clinical diagnosis. Radiographic findings must be interpreted together
-    with clinical examination and other appropriate diagnostic information
-    by a qualified dental professional.
+
+<b>⚠️ Clinical Disclaimer</b>
+
+<br><br>
+
+This platform is intended for AI-assisted radiographic assessment
+and educational/research purposes. It does not provide a definitive
+clinical diagnosis.
+
+Radiographic findings should be interpreted together with clinical
+examination and other appropriate diagnostic information by a
+qualified dental professional.
+
 </div>
 """, unsafe_allow_html=True)
+
 
 # ---------------- FOOTER ----------------
 st.markdown("""
 <div class="footer">
-    🦷 AMRs Dental X-ray AI &nbsp;•&nbsp; AI-Assisted Dental Radiographic Assessment
-    <br>
-    Research & Educational Prototype
+🦷 AMRs Dental X-ray AI
+<br>
+AI-Assisted Dental Radiographic Assessment • Research & Educational Platform
 </div>
 """, unsafe_allow_html=True)
