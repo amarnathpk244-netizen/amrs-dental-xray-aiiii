@@ -11,8 +11,33 @@ st.set_page_config(
 # ---------------- STYLE ----------------
 st.markdown("""
 <style>
+
+/* MAIN BACKGROUND */
 .stApp {
     background-color: #f5f8fb;
+}
+
+/* MAKE ALL INPUT LABELS CLEAR */
+.stTextInput label,
+.stNumberInput label,
+.stSelectbox label,
+.stDateInput label,
+.stFileUploader label {
+    color: #12344d !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+
+/* INPUT BOX */
+.stTextInput input,
+.stNumberInput input {
+    color: #172b3a !important;
+    background-color: white !important;
+}
+
+/* SELECT BOX */
+.stSelectbox div[data-baseweb="select"] {
+    background-color: white !important;
 }
 
 /* HEADER */
@@ -41,7 +66,7 @@ st.markdown("""
     margin-top: 12px;
 }
 
-/* SECTION HEADINGS */
+/* SECTION TITLES */
 .section-title {
     color: #12344d !important;
     font-size: 26px;
@@ -50,7 +75,7 @@ st.markdown("""
     margin-bottom: 12px;
 }
 
-/* WORKFLOW */
+/* WORKFLOW CARDS */
 .workflow-card {
     background-color: white;
     padding: 18px;
@@ -76,9 +101,9 @@ st.markdown("""
     font-size: 14px;
 }
 
-/* REPORT */
+/* REPORT CARD */
 .report-card {
-    background-color: #ffffff !important;
+    background-color: white !important;
     color: #172b3a !important;
     padding: 22px;
     border-radius: 16px;
@@ -116,6 +141,7 @@ st.markdown("""
     padding: 20px;
     font-size: 13px;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -124,9 +150,11 @@ st.markdown("""
 st.markdown("""
 <div class="hero">
     <div class="hero-title">🦷 AMRs Dental X-ray AI</div>
+
     <div class="hero-subtitle">
         AI-Assisted Dental Radiographic Assessment
     </div>
+
     <div class="hero-text">
         A research-oriented platform for preliminary assessment
         of dental radiographs using artificial intelligence.
@@ -188,27 +216,65 @@ st.markdown(
 c1, c2 = st.columns(2)
 
 with c1:
-    name = st.text_input("Patient Name")
+
+    st.markdown(
+        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Patient Name</div>',
+        unsafe_allow_html=True
+    )
+
+    name = st.text_input(
+        "Patient Name",
+        label_visibility="collapsed"
+    )
+
+    st.markdown(
+        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Age</div>',
+        unsafe_allow_html=True
+    )
 
     age = st.number_input(
         "Age",
         min_value=0,
         max_value=120,
-        step=1
+        step=1,
+        label_visibility="collapsed"
+    )
+
+    st.markdown(
+        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Sex</div>',
+        unsafe_allow_html=True
     )
 
     sex = st.selectbox(
         "Sex",
-        ["Select", "Male", "Female", "Other"]
+        ["Select", "Male", "Female", "Other"],
+        label_visibility="collapsed"
     )
 
+
 with c2:
-    op_no = st.text_input("OP Number")
+
+    st.markdown(
+        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">OP Number</div>',
+        unsafe_allow_html=True
+    )
+
+    op_no = st.text_input(
+        "OP Number",
+        label_visibility="collapsed"
+    )
+
+    st.markdown(
+        '<div style="color:#12344d;font-weight:700;font-size:16px;margin-bottom:5px;">Examination Date</div>',
+        unsafe_allow_html=True
+    )
 
     examination_date = st.date_input(
         "Examination Date",
-        value=date.today()
+        value=date.today(),
+        label_visibility="collapsed"
     )
+
 
 st.divider()
 
@@ -235,6 +301,7 @@ if xray is not None:
     c1, c2 = st.columns([2, 1])
 
     with c1:
+
         st.image(
             xray,
             caption="Uploaded Dental Radiograph",
@@ -242,8 +309,11 @@ if xray is not None:
         )
 
     with c2:
+
         st.markdown("### 📋 Image Information")
+
         st.write("**File:**", xray.name)
+
         st.write("**Format:**", xray.type)
 
         st.success("🟢 Image received")
@@ -272,7 +342,8 @@ if xray is not None:
 
     <br><br>
 
-    The final system will analyse the <b>actual uploaded dental radiograph</b>
+    The final system will analyse the
+    <b>actual uploaded dental radiograph</b>
     and identify selected radiographic findings.
 
     <br><br>
