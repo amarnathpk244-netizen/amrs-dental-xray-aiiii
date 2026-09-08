@@ -177,6 +177,11 @@ STRICT ACCURACY RULES:
 1. NEVER invent or hallucinate caries or any other finding.
 
 2. TOOTH IDENTIFICATION – FDI SYSTEM:
+Before assigning an FDI number, first determine:
+1. Whether the radiograph is maxillary or mandibular.
+2. Which side is right or left using radiographic orientation and anatomical landmarks.
+3. Whether the tooth is an incisor, canine, premolar, or molar.
+4. Its position within that quadrant.
 
 Use the FDI two-digit tooth numbering system.
 
