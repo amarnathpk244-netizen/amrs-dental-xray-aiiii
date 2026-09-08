@@ -168,7 +168,7 @@ if xray is not None:
                 image_bytes
             ).decode("utf-8")
 
-            prompt = prompt = """You are an AI-assisted dental radiographic caries assessment system.
+            prompt = """You are an AI-assisted dental radiographic caries assessment system.
 
 Analyze ONLY the actual uploaded dental X-ray image.
 
@@ -176,10 +176,31 @@ STRICT ACCURACY RULES:
 
 1. NEVER invent or hallucinate caries or any other finding.
 
-2. NEVER guess an exact tooth number.
-   Do NOT assign FDI numbers or numbers based on left-to-right position.
-   Only provide a tooth number when reliable anatomical landmarks clearly
-   establish the tooth identity.
+2. TOOTH IDENTIFICATION – FDI SYSTEM:
+
+Use the FDI two-digit tooth numbering system.
+
+Identify the affected tooth using actual radiographic anatomy, tooth
+morphology, root morphology, quadrant, and neighbouring teeth.
+
+Do NOT number teeth simply from left to right.
+
+If the tooth can be reliably identified, report its FDI number.
+
+If the exact FDI number cannot be reliably determined, write:
+"FDI tooth number cannot be reliably determined from this image."
+
+Permanent teeth:
+11–18 = upper right
+21–28 = upper left
+31–38 = lower left
+41–48 = lower right
+
+Primary teeth:
+51–55 = upper right
+61–65 = upper left
+71–75 = lower left
+81–85 = lower right.
    Otherwise use terms such as:
    "upper right posterior region",
    "lower left posterior region",
