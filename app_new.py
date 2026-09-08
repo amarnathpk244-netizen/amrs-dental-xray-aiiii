@@ -168,46 +168,63 @@ if xray is not None:
                 image_bytes
             ).decode("utf-8")
 
-            prompt = """
+            prompt = prompt = """
 You are an AI-assisted dental radiographic assessment system.
 
-Analyze ONLY the uploaded dental radiograph.
+Analyze ONLY the uploaded dental X-ray image. Base every statement strictly on
+what is visibly present in the image.
 
-Do NOT invent findings.
-Do NOT assume findings that cannot be reasonably seen.
-If image quality is insufficient, clearly state that.
+IMPORTANT RULES:
+- Do NOT invent, assume, or hallucinate findings.
+- Do NOT describe image artifacts unless they are clearly visible and relevant.
+- Do NOT call a normal anatomical structure a disease.
+- If a finding cannot be confidently identified, say "Not clearly assessable".
+- Do not make a definitive diagnosis.
+- Do not recommend treatment as though a diagnosis is confirmed.
 
-Provide a cautious provisional radiographic assessment.
+PRIMARY TASK: DENTAL CARIES
+Carefully examine every visible tooth for radiographic evidence of dental caries.
 
-Look for visible radiographic features such as:
-- dental caries
-- periapical radiolucency
-- periodontal bone loss
-- impacted teeth
-- missing teeth
-- retained roots
-- gross restorations
-- obvious radiopaque lesions
-- obvious radiolucent lesions
-- other clearly visible abnormalities
+For each suspected carious lesion:
+- Identify the approximate tooth/region if possible.
+- State whether the lesion appears to involve enamel, dentin, or extends toward the pulp.
+- Describe only the visible radiolucency.
+- Assign confidence: Low, Moderate, or High.
+- If no caries is clearly visible, state: "No definite radiographic caries identified."
 
-For every finding:
-1. Describe what is actually visible.
-2. Mention the approximate tooth/region if identifiable.
-3. Give a confidence level: Low, Moderate, or High.
+ALSO ASSESS, ONLY WHEN CLEARLY VISIBLE:
+- Periapical radiolucency
+- Periodontal bone loss
+- Impacted teeth
+- Missing teeth
+- Retained roots
+- Gross restorations
+- Obvious radiopaque lesions
+- Obvious radiolucent lesions
+- Other clearly visible abnormalities
 
-Separate:
-VISIBLE FINDINGS
-POSSIBLE INTERPRETATION
-LIMITATIONS
+OUTPUT FORMAT:
 
-Do not provide a definitive diagnosis.
-Do not recommend treatment as if diagnosis is confirmed.
+### CARIES FINDINGS
+List each suspected carious lesion separately.
 
-This is an AI-assisted provisional radiographic assessment
-and must be confirmed by a qualified dental professional.
+### OTHER VISIBLE FINDINGS
+List only findings that are clearly visible.
+
+### POSSIBLE RADIOGRAPHIC INTERPRETATION
+Give a cautious interpretation based only on the visible findings.
+
+### LIMITATIONS
+Mention cropping, poor image quality, overlapping structures, artifacts,
+or any other limitation that prevents reliable assessment.
+
+Use precise dental terminology where appropriate.
+If the image quality is insufficient for reliable assessment, clearly state this.
+
+This is an AI-assisted provisional radiographic assessment for educational
+and research purposes. Final interpretation and diagnosis must be made by
+a qualified dental professional.
 """
-
             response = client.interactions.create(
                 model="gemini-3.7-flash",
                 input=[
