@@ -1,5 +1,7 @@
 import streamlit as st
 from datetime import date
+from google import genai
+import base64
 
 st.set_page_config(
     page_title="AMRs Dental X-ray AI",
@@ -10,50 +12,47 @@ st.set_page_config(
 # ---------- MOBILE UI ----------
 st.markdown("""
 <style>
-    .main {
-        padding-top: 1rem;
-    }
+.main { padding-top: 1rem; }
 
-    .app-title {
-        text-align: center;
-        font-size: 30px;
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
+.app-title {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
 
-    .subtitle {
-        text-align: center;
-        color: #666;
-        font-size: 15px;
-        margin-bottom: 25px;
-    }
+.subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 15px;
+    margin-bottom: 25px;
+}
 
-    .section {
-        font-size: 21px;
-        font-weight: 650;
-        margin-top: 20px;
-        margin-bottom: 10px;
-    }
+.section {
+    font-size: 21px;
+    font-weight: 650;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
 
-    .info-box {
-        padding: 15px;
-        border-radius: 12px;
-        background: #f5f7fa;
-        margin-top: 10px;
-        margin-bottom: 15px;
-    }
+.info-box {
+    padding: 15px;
+    border-radius: 12px;
+    background: #f5f7fa;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
 
-    .disclaimer {
-        font-size: 12px;
-        color: #666;
-        padding: 12px;
-        border-radius: 10px;
-        background: #f7f7f7;
-        margin-top: 20px;
-    }
+.disclaimer {
+    font-size: 12px;
+    color: #666;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f7f7f7;
+    margin-top: 20px;
+}
 </style>
 """, unsafe_allow_html=True)
-
 
 # ---------- HEADER ----------
 st.markdown(
@@ -65,7 +64,6 @@ st.markdown(
     '<div class="subtitle">AI-Assisted Dental Radiographic Assessment</div>',
     unsafe_allow_html=True
 )
-
 
 # ---------- PATIENT INFORMATION ----------
 st.markdown(
@@ -105,7 +103,6 @@ examination_date = st.date_input(
     value=date.today()
 )
 
-
 # ---------- X-RAY UPLOAD ----------
 st.markdown(
     '<div class="section">📤 Upload Dental Radiograph</div>',
@@ -119,7 +116,6 @@ xray = st.file_uploader(
     type=["jpg", "jpeg", "png"],
     accept_multiple_files=False
 )
-
 
 # ---------- IMAGE PREVIEW ----------
 if xray is not None:
@@ -148,7 +144,7 @@ if xray is not None:
         unsafe_allow_html=True
     )
 
-    # ---------- ANALYZE ----------
+    # ---------- AI ANALYSIS ----------
     st.markdown(
         '<div class="section">🤖 AI Assessment</div>',
         unsafe_allow_html=True
@@ -160,70 +156,126 @@ if xray is not None:
     )
 
     if analyze:
-        st.warning(
-            "AI analysis is not connected yet. "
-            "The uploaded image has been received successfully. "
-            "No artificial or random findings are generated."
-        )
+
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+
+            client = genai.Client(api_key=api_key)
+
+            image_bytes = xray.getvalue()
+
+            image_base64 = base64.b64encode(
+                image_bytes
+            ).decode("utf-8")
+
+            prompt = """
+You are an AI-assisted dental radiographic assessment system.
+
+Analyze ONLY the uploaded dental radiograph.
+
+Do NOT invent findings.
+Do NOT assume findings that cannot be reasonably seen.
+If image quality is insufficient, clearly state that.
+
+Provide a cautious provisional radiographic assessment.
+
+Look for visible radiographic features such as:
+- dental caries
+- periapical radiolucency
+- periodontal bone loss
+- impacted teeth
+- missing teeth
+- retained roots
+- gross restorations
+- obvious radiopaque lesions
+- obvious radiolucent lesions
+- other clearly visible abnormalities
+
+For every finding:
+1. Describe what is actually visible.
+2. Mention the approximate tooth/region if identifiable.
+3. Give a confidence level: Low, Moderate, or High.
+
+Separate:
+VISIBLE FINDINGS
+POSSIBLE INTERPRETATION
+LIMITATIONS
+
+Do not provide a definitive diagnosis.
+Do not recommend treatment as if diagnosis is confirmed.
+
+This is an AI-assisted provisional radiographic assessment
+and must be confirmed by a qualified dental professional.
+"""
+
+            response = client.interactions.create(
+                model="gemini-3.7-flash",
+                input=[
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image",
+                        "data": image_base64,
+                        "mime_type": xray.type
+                    }
+                ]
+            )
+
+            result = response.output_text
+
+            st.success("✅ AI analysis completed.")
+
+            st.markdown("### 📋 Provisional Radiographic Report")
+
+            st.markdown(
+                f"""
+**Patient:** {patient_name if patient_name else "Not provided"}
+
+**Age:** {age if age else "Not provided"}
+
+**Sex:** {sex if sex != "Select" else "Not provided"}
+
+**OP Number:** {op_number if op_number else "Not provided"}
+
+**Examination Date:** {examination_date}
+"""
+            )
+
+            st.markdown("### 🦷 AI Radiographic Assessment")
+
+            st.write(result)
+
+        except Exception as e:
+
+            st.error(
+                "AI analysis could not be completed."
+            )
+
+            st.warning(
+                "Please check the Gemini API configuration "
+                "and try again."
+            )
+
+            st.caption(f"Technical error: {e}")
 
 else:
+
     st.caption("No X-ray uploaded yet.")
-
-
-# ---------- REPORT ----------
-st.markdown(
-    '<div class="section">📋 Provisional Radiographic Report</div>',
-    unsafe_allow_html=True
-)
-
-if xray is None:
-    st.info("Upload an X-ray to begin the assessment.")
-
-else:
-    st.markdown(
-        """
-        **Patient:** {}
-        
-        **Age:** {}
-        
-        **Sex:** {}
-        
-        **OP Number:** {}
-        
-        **Examination Date:** {}
-        """.format(
-            patient_name if patient_name else "Not provided",
-            age if age else "Not provided",
-            sex if sex != "Select" else "Not provided",
-            op_number if op_number else "Not provided",
-            examination_date
-        )
-    )
-
-    st.markdown(
-        """
-        ### AI Findings
-
-        **Status:** Awaiting AI image-analysis connection.
-
-        The system will only report findings after the uploaded
-        radiograph has been processed by the AI model.
-        """
-    )
-
 
 # ---------- DISCLAIMER ----------
 st.markdown(
     """
     <div class="disclaimer">
     ⚠️ <b>Clinical Disclaimer:</b><br>
-    This application is intended for AI-assisted radiographic
-    assessment, educational and research purposes. It is not a
-    substitute for examination by a qualified dental professional.
-    Final diagnosis and treatment decisions must be made by a
-    qualified clinician using appropriate clinical and radiographic
-    information.
+    This application provides AI-assisted provisional
+    radiographic assessment for educational and research
+    purposes. It is not a substitute for clinical examination,
+    professional radiographic interpretation, or definitive
+    diagnosis. Final diagnosis and treatment decisions must be
+    made by a qualified dental professional.
     </div>
     """,
     unsafe_allow_html=True
-)
+            )
