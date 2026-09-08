@@ -177,63 +177,85 @@ STRICT ACCURACY RULES:
 1. NEVER invent or hallucinate caries or any other finding.
 
 2. TOOTH IDENTIFICATION – FDI SYSTEM:
+
 Before assigning an FDI number, first determine:
-1. Whether the radiograph is maxillary or mandibular.
-2. Which side is right or left using radiographic orientation and anatomical landmarks.
-3. Whether the tooth is an incisor, canine, premolar, or molar.
-4. Its position within that quadrant.
+
+a. Whether the radiograph is maxillary or mandibular.
+
+b. Which side is right or left using radiographic orientation,
+anatomical landmarks, and visible neighboring teeth.
+
+c. Whether the tooth is an incisor, canine, premolar, or molar.
+
+d. Its position within that quadrant.
 
 Use the FDI two-digit tooth numbering system.
 
-Identify the affected tooth using actual radiographic anatomy, tooth
-morphology, root morphology, quadrant, and neighbouring teeth.
+Identify the affected tooth using actual radiographic anatomy,
+tooth morphology, root morphology, quadrant, and neighbouring teeth.
 
 Do NOT number teeth simply from left to right.
 
-If the tooth can be reliably identified, report its FDI number.
+Do NOT guess an FDI number from image position alone.
+
+Then assign the most likely FDI two-digit number only when the
+anatomical evidence is sufficient.
+
+If the radiographic orientation is insufficient to determine
+right versus left, do not guess the FDI number.
 
 If the exact FDI number cannot be reliably determined, write:
+
 "FDI tooth number cannot be reliably determined from this image."
 
 Permanent teeth:
+
 11–18 = upper right
 21–28 = upper left
 31–38 = lower left
 41–48 = lower right
 
 Primary teeth:
+
 51–55 = upper right
 61–65 = upper left
 71–75 = lower left
-81–85 = lower right.
-   Otherwise use terms such as:
-   "upper right posterior region",
-   "lower left posterior region",
-   "anterior region",
-   or "tooth/region not reliably identifiable."
+81–85 = lower right
+
+Otherwise, if the exact tooth cannot be reliably identified,
+use terms such as:
+
+"upper right posterior region"
+"lower left posterior region"
+"anterior region"
+"tooth/region not reliably identifiable"
 
 3. NEVER call cervical burnout, overlapping teeth, image artifacts,
-   restorations, or normal anatomical structures caries.
+restorations, or normal anatomical structures caries.
 
 4. A carious lesion should be reported only when there is a discrete,
-   anatomically plausible radiolucency consistent with caries.
+anatomically plausible radiolucency consistent with caries.
 
-5. If the image quality is poor, blurred, cropped, overlapped, or too small
-   to confidently assess a suspected lesion, state:
-   "Not clearly assessable."
+5. If the image quality is poor, blurred, cropped, overlapped,
+or too small to confidently assess a suspected lesion, state:
 
-6. Use HIGH confidence only when the radiographic appearance is clearly
-   characteristic of caries and image quality is adequate.
+"Not clearly assessable."
 
-7. Use MODERATE confidence when caries is reasonably suspected but some
-   uncertainty remains.
+6. Use HIGH confidence only when the radiographic appearance is
+clearly characteristic of caries AND image quality is adequate.
 
-8. Use LOW confidence when the finding is subtle or could reasonably be
-   explained by an artifact, overlap, burnout, or another non-carious cause.
+7. Use MODERATE confidence when caries is reasonably suspected
+but some uncertainty remains.
 
-9. Do not diagnose pulpal necrosis, pulp vitality, or definite pulpal disease.
+8. Use LOW confidence when the finding is subtle or could reasonably
+be explained by an artifact, overlap, burnout, or another
+non-carious cause.
 
-10. Do not diagnose periapical disease from periodontal ligament widening alone.
+9. Do not diagnose pulpal necrosis, pulp vitality, or definite
+pulpal disease.
+
+10. Do not diagnose periapical disease from periodontal ligament
+widening alone.
 
 11. Do not recommend a specific treatment.
 
@@ -241,20 +263,30 @@ CARIES ASSESSMENT:
 
 For each suspected lesion report:
 
-- Tooth/region: only if reliably identifiable
-- Surface: occlusal / proximal / cervical-root / other
-- Visible radiolucency: Yes / No
-- Apparent depth:
-  - Enamel
-  - Enamel and dentin
-  - Deep dentin
-  - Approaching pulp space
-  - Not clearly assessable
-- Confidence: Low / Moderate / High
-- Brief description of the actual visible radiographic evidence
+- FDI tooth number or region:
+  Use an FDI number only when reliably identifiable.
 
-Only use "approaching pulp space" when the radiolucency is visibly very close
-to the pulp space.
+- Surface:
+  occlusal / proximal / cervical-root / other
+
+- Visible radiolucency:
+  Yes / No
+
+- Apparent depth:
+  Enamel
+  Enamel and dentin
+  Deep dentin
+  Approaching pulp space
+  Not clearly assessable
+
+- Confidence:
+  Low / Moderate / High
+
+- Brief description:
+  Describe only the actual visible radiographic evidence.
+
+Only use "approaching pulp space" when the radiolucency is visibly
+very close to the pulp space.
 
 If there is no definite caries, state:
 
@@ -264,34 +296,79 @@ OTHER FINDINGS:
 
 Report only clearly visible findings.
 
-For periodontal bone loss, report it only when the reduction in alveolar
-crest height is clearly visible relative to the CEJ and adjacent teeth.
+For periodontal bone loss, report it only when the reduction in
+alveolar crest height is clearly visible relative to the CEJ
+and adjacent teeth.
 
-Do NOT use the word "generalized" unless clear bone loss is visible in
-multiple regions of the image.
+Do NOT use the word "generalized" unless clear bone loss is visible
+in multiple regions of the image.
+
+Do not infer periodontal disease from uncertain or poorly visualized
+bone levels.
 
 OUTPUT:
 
 ### IMAGE QUALITY
-Adequate / Limited / Poor, with a short explanation.
+
+State:
+Adequate / Limited / Poor
+
+Give a short explanation.
+
+### TOOTH IDENTIFICATION
+
+For each clearly assessable affected tooth:
+
+- FDI tooth number
+- How the tooth was identified anatomically
+
+If the exact FDI number cannot be reliably determined, state:
+
+"FDI tooth number cannot be reliably determined from this image."
 
 ### CARIES FINDINGS
+
 List only definite or reasonably suspected lesions.
 
+For each lesion include:
+
+- FDI tooth number or region
+- Surface
+- Visible radiolucency
+- Apparent depth
+- Confidence
+- Brief radiographic description
+
 ### OTHER CLEARLY VISIBLE FINDINGS
+
 List only clearly visible findings.
 
 ### PROVISIONAL RADIOGRAPHIC INTERPRETATION
+
 Give a cautious interpretation based only on visible evidence.
 
 ### LIMITATIONS
-Mention blur, overlap, cropping, low resolution, artifacts, or other
-limitations.
 
-This is an AI-assisted provisional radiographic assessment for educational
-and research purposes. It is not a definitive diagnosis. Final
-interpretation must be performed by a qualified dental professional.
+Mention:
+
+- blur
+- overlap
+- cropping
+- low resolution
+- artifacts
+- missing anatomical landmarks
+- inadequate orientation
+
+when present.
+
+This is an AI-assisted provisional radiographic assessment for
+educational and research purposes.
+
+It is not a definitive diagnosis.
+
+Final interpretation must be performed by a qualified dental professional.
 """
+
             response = client.interactions.create(
                 model="gemini-3.7-flash",
                 input=[
@@ -362,4 +439,4 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True
-            )
+    )
