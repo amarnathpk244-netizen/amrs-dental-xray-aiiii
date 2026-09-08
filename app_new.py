@@ -410,14 +410,27 @@ Final interpretation must be performed by a qualified dental professional.
 
         except Exception as e:
 
-            st.error(
-                "AI analysis could not be completed."
-            )
+            # ---------- QUOTA ERROR ----------
+            if "429" in str(e) or "quota" in str(e).lower():
 
-            st.warning(
-                "Please check the Gemini API configuration "
-                "and try again."
-            )
+                st.error("⏳ Gemini AI quota temporarily exceeded.")
+
+                st.warning(
+                    "The Gemini free-tier request limit has been reached. "
+                    "Please wait and try again later."
+                )
+
+            # ---------- OTHER ERRORS ----------
+            else:
+
+                st.error(
+                    "AI analysis could not be completed."
+                )
+
+                st.warning(
+                    "Please check the Gemini API configuration "
+                    "and try again."
+                )
 
             st.caption(f"Technical error: {e}")
 
@@ -439,4 +452,4 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True
-    )
+)
