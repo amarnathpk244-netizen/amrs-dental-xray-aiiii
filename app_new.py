@@ -9,6 +9,20 @@ st.set_page_config(
     layout="centered"
 )
 
+# ---------- DAILY USAGE LIMIT ----------
+DAILY_ANALYSIS_LIMIT = 3
+
+if "analysis_count" not in st.session_state:
+    st.session_state.analysis_count = 0
+
+if "usage_date" not in st.session_state:
+    st.session_state.usage_date = date.today()
+
+# Reset count automatically on a new day
+if st.session_state.usage_date != date.today():
+    st.session_state.analysis_count = 0
+    st.session_state.usage_date = date.today()
+
 # ---------- MOBILE UI ----------
 st.markdown("""
 <style>
@@ -65,6 +79,19 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# ---------- USAGE STATUS ----------
+remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
+
+if remaining > 0:
+    st.info(
+        f"🧪 AI analyses remaining today: {remaining} / {DAILY_ANALYSIS_LIMIT}"
+    )
+else:
+    st.warning(
+        "⏳ Your 3 AI analyses for today have been used. "
+        "Please try again tomorrow."
+    )
+
 # ---------- PATIENT INFORMATION ----------
 st.markdown(
     '<div class="section">👤 Patient Information</div>',
@@ -113,7 +140,6 @@ st.info(
     "Upload a dental X-ray image in JPG, JPEG or PNG format."
 )
 
-# FIXED MOBILE FILE UPLOADER
 xray = st.file_uploader(
     "📷 Choose X-ray image",
     type=["jpg", "jpeg", "png"],
@@ -155,29 +181,41 @@ if xray is not None:
         unsafe_allow_html=True
     )
 
+    # Disable analysis button when daily limit is reached
     analyze = st.button(
         "🔍 Analyze X-ray",
-        use_container_width=True
+        use_container_width=True,
+        disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)
     )
 
     if analyze:
 
-        try:
+        # Safety check
+        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
 
-            api_key = st.secrets["GEMINI_API_KEY"]
-
-            client = genai.Client(
-                api_key=api_key
+            st.warning(
+                "⏳ Daily AI analysis limit reached. "
+                "Please try again tomorrow."
             )
 
-            image_bytes = xray.getvalue()
+        else:
 
-            image_base64 = base64.b64encode(
-                image_bytes
-            ).decode("utf-8")
+            try:
 
-            # ---------- AI PROMPT ----------
-            prompt = """
+                api_key = st.secrets["GEMINI_API_KEY"]
+
+                client = genai.Client(
+                    api_key=api_key
+                )
+
+                image_bytes = xray.getvalue()
+
+                image_base64 = base64.b64encode(
+                    image_bytes
+                ).decode("utf-8")
+
+                # ---------- AI PROMPT ----------
+                prompt = """
 You are an AI-assisted dental radiographic caries assessment system.
 
 Analyze ONLY the actual uploaded dental X-ray image.
@@ -379,35 +417,44 @@ It is not a definitive diagnosis.
 Final interpretation must be performed by a qualified dental professional.
 """
 
-            # ---------- SEND IMAGE TO GEMINI ----------
-            response = client.interactions.create(
-                model="gemini-3.7-flash",
-                input=[
-                    {
-                        "type": "text",
-                        "text": prompt
-                    },
-                    {
-                        "type": "image",
-                        "data": image_base64,
-                        "mime_type": xray.type
-                    }
-                ]
-            )
+                # ---------- SEND IMAGE TO GEMINI ----------
+                response = client.interactions.create(
+                    model="gemini-3.7-flash",
+                    input=[
+                        {
+                            "type": "text",
+                            "text": prompt
+                        },
+                        {
+                            "type": "image",
+                            "data": image_base64,
+                            "mime_type": xray.type
+                        }
+                    ]
+                )
 
-            result = response.output_text
+                result = response.output_text
 
-            # ---------- REPORT ----------
-            st.success(
-                "✅ AI analysis completed."
-            )
+                # Count ONLY successful AI analyses
+                st.session_state.analysis_count += 1
 
-            st.markdown(
-                "### 📋 Provisional Radiographic Report"
-            )
+                # ---------- REPORT ----------
+                st.success(
+                    "✅ AI analysis completed."
+                )
 
-            st.markdown(
-                f"""
+                st.info(
+                    f"🧪 Analyses remaining today: "
+                    f"{DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count} / "
+                    f"{DAILY_ANALYSIS_LIMIT}"
+                )
+
+                st.markdown(
+                    "### 📋 Provisional Radiographic Report"
+                )
+
+                st.markdown(
+                    f"""
 **Patient:** {patient_name if patient_name else "Not provided"}
 
 **Age:** {age if age else "Not provided"}
@@ -418,43 +465,43 @@ Final interpretation must be performed by a qualified dental professional.
 
 **Examination Date:** {examination_date}
 """
-            )
-
-            st.markdown(
-                "### 🦷 AI Radiographic Assessment"
-            )
-
-            st.write(result)
-
-        except Exception as e:
-
-            # ---------- QUOTA ERROR ----------
-            if "429" in str(e) or "quota" in str(e).lower():
-
-                st.error(
-                    "⏳ Gemini AI quota temporarily exceeded."
                 )
 
-                st.warning(
-                    "The Gemini free-tier request limit has been reached. "
-                    "Please wait and try again later."
+                st.markdown(
+                    "### 🦷 AI Radiographic Assessment"
                 )
 
-            # ---------- OTHER ERRORS ----------
-            else:
+                st.write(result)
 
-                st.error(
-                    "AI analysis could not be completed."
+            except Exception as e:
+
+                # ---------- QUOTA ERROR ----------
+                if "429" in str(e) or "quota" in str(e).lower():
+
+                    st.error(
+                        "⏳ Gemini AI quota temporarily exceeded."
+                    )
+
+                    st.warning(
+                        "The Gemini free-tier request limit has been reached. "
+                        "Please wait and try again later."
+                    )
+
+                # ---------- OTHER ERRORS ----------
+                else:
+
+                    st.error(
+                        "AI analysis could not be completed."
+                    )
+
+                    st.warning(
+                        "Please check the Gemini API configuration "
+                        "and try again."
+                    )
+
+                st.caption(
+                    f"Technical error: {e}"
                 )
-
-                st.warning(
-                    "Please check the Gemini API configuration "
-                    "and try again."
-                )
-
-            st.caption(
-                f"Technical error: {e}"
-            )
 
 else:
 
@@ -476,4 +523,4 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True
-)
+                )
