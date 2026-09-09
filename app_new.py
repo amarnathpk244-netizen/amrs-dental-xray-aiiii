@@ -109,12 +109,17 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
+st.info(
+    "Upload a dental X-ray image in JPG, JPEG or PNG format."
+)
 
+# FIXED MOBILE FILE UPLOADER
 xray = st.file_uploader(
-    "Choose X-ray image",
+    "📷 Choose X-ray image",
     type=["jpg", "jpeg", "png"],
-    accept_multiple_files=False
+    accept_multiple_files=False,
+    key="dental_xray_upload",
+    label_visibility="visible"
 )
 
 # ---------- IMAGE PREVIEW ----------
@@ -158,9 +163,12 @@ if xray is not None:
     if analyze:
 
         try:
+
             api_key = st.secrets["GEMINI_API_KEY"]
 
-            client = genai.Client(api_key=api_key)
+            client = genai.Client(
+                api_key=api_key
+            )
 
             image_bytes = xray.getvalue()
 
@@ -168,7 +176,9 @@ if xray is not None:
                 image_bytes
             ).decode("utf-8")
 
-            prompt = """You are an AI-assisted dental radiographic caries assessment system.
+            # ---------- AI PROMPT ----------
+            prompt = """
+You are an AI-assisted dental radiographic caries assessment system.
 
 Analyze ONLY the actual uploaded dental X-ray image.
 
@@ -369,6 +379,7 @@ It is not a definitive diagnosis.
 Final interpretation must be performed by a qualified dental professional.
 """
 
+            # ---------- SEND IMAGE TO GEMINI ----------
             response = client.interactions.create(
                 model="gemini-3.7-flash",
                 input=[
@@ -386,9 +397,14 @@ Final interpretation must be performed by a qualified dental professional.
 
             result = response.output_text
 
-            st.success("✅ AI analysis completed.")
+            # ---------- REPORT ----------
+            st.success(
+                "✅ AI analysis completed."
+            )
 
-            st.markdown("### 📋 Provisional Radiographic Report")
+            st.markdown(
+                "### 📋 Provisional Radiographic Report"
+            )
 
             st.markdown(
                 f"""
@@ -404,7 +420,9 @@ Final interpretation must be performed by a qualified dental professional.
 """
             )
 
-            st.markdown("### 🦷 AI Radiographic Assessment")
+            st.markdown(
+                "### 🦷 AI Radiographic Assessment"
+            )
 
             st.write(result)
 
@@ -413,7 +431,9 @@ Final interpretation must be performed by a qualified dental professional.
             # ---------- QUOTA ERROR ----------
             if "429" in str(e) or "quota" in str(e).lower():
 
-                st.error("⏳ Gemini AI quota temporarily exceeded.")
+                st.error(
+                    "⏳ Gemini AI quota temporarily exceeded."
+                )
 
                 st.warning(
                     "The Gemini free-tier request limit has been reached. "
@@ -432,11 +452,15 @@ Final interpretation must be performed by a qualified dental professional.
                     "and try again."
                 )
 
-            st.caption(f"Technical error: {e}")
+            st.caption(
+                f"Technical error: {e}"
+            )
 
 else:
 
-    st.caption("No X-ray uploaded yet.")
+    st.caption(
+        "No X-ray uploaded yet."
+    )
 
 # ---------- DISCLAIMER ----------
 st.markdown(
