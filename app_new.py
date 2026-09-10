@@ -687,7 +687,7 @@ if xray is not None:
     analyze = st.button(
         "🔍 Analyze X-ray",
         use_container_width=True,
-        disabled=(
-            st.session_state.analysis_count
-            >= DAILY_ANALYSIS_LIMIT
-    
+       analyze = st.button(
+    "🔍 Analyze X-ray",
+    use_container_width=True,
+) 
