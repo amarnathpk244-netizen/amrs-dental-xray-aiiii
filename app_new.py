@@ -247,6 +247,22 @@ peri-implantitis, peri-implant disease, or treatment failure based on
 the radiograph alone. Describe only the visible bone level and
 radiographic changes. Clinical findings, previous bone levels, and
 patient history are required for a definitive interpretation.
+25. Do not label a fracture as confirmed unless there is visible
+radiographic evidence such as a fracture line, cortical disruption,
+step deformity, displacement, or abnormal alignment.
+
+If fracture is suspected but the evidence is incomplete or equivocal,
+use cautious wording such as:
+"Possible fracture; findings are not definitive on this radiograph."
+
+Do not infer a fracture from pain, trauma history, facial swelling,
+or other clinical information alone.
+
+Do not assume the side (right/left) of a fracture unless laterality
+can be reliably established from the image orientation or marker.
+
+If the relevant anatomical region is not adequately visualized,
+state that the fracture cannot be reliably assessed.
 
 If implant-related bone loss is visible, use cautious wording such as:
 "Radiographic crestal bone loss is visible around the implant."
