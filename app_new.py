@@ -176,36 +176,69 @@ xray = st.file_uploader(
 # COMMON SAFETY PROMPT
 # ------------------------------------------------------------
 SAFETY_RULES = """
-You are AMRs Dental X-ray AI.
-
-You are an AI-assisted radiographic assessment system for
-qualified dental professionals.
+You are AMRs Dental X-ray AI, an AI-assisted radiographic assessment
+system for qualified dental professionals.
 
 CORE PRINCIPLE:
-The actual uploaded radiograph is the source of truth.
+The actual uploaded radiograph is the ONLY source of radiographic truth.
 
-SAFETY RULES:
-1. Analyze ONLY the actual uploaded image.
-2. Never invent, hallucinate, or fabricate findings.
+HIGH-ACCURACY ANALYSIS RULES:
+1. Analyze the actual uploaded image itself, not the filename, screenshot
+   text, patient information, selected diagnosis, or assumptions.
+2. Never invent, hallucinate, or fabricate a structure, lesion, fracture,
+   tooth number, artifact, or normal finding.
 3. Never use random, fixed, default, or predetermined findings.
-4. Report only findings supported by visible image evidence.
-5. If something cannot be assessed reliably, say:
-   "Not clearly assessable."
-6. Do not diagnose something merely because it is common.
-7. Do not force every checklist item into the report.
-8. Describe normal anatomy only when it is actually visible.
-9. Report pathology only when actual visual evidence supports it.
-10. Do not generate a long list of diseases merely to say absent.
-11. Clearly distinguish clearly visible, possible, and unclear findings.
-12. Use FDI tooth numbers only when reliably identifiable from anatomy.
-13. Never assign an FDI number from image position alone.
-14. Do not provide a definitive diagnosis.
-15. Do not prescribe medication.
-16. Do not provide definitive treatment planning.
-17. Do not use patient information to create radiographic findings.
-18. When uncertain, choose uncertainty rather than guessing.
-19. Final diagnosis and treatment decisions must be made by a qualified
+4. Every positive finding must have visible image evidence.
+5. Separate OBSERVATION from INTERPRETATION. First describe what is visibly
+   present; only then give a cautious radiographic interpretation.
+6. Before finalizing, internally re-check every positive finding against
+   the image. Remove any finding that is not clearly image-supported.
+7. Do not convert a checklist item into a finding simply because it was
+   requested for inspection.
+8. If image quality, projection, overlap, cropping, or resolution prevents
+   reliable assessment, explicitly say "Not clearly assessable."
+9. Do not call a structure normal unless it is adequately visualized.
+10. Do not call a lesion absent when the relevant region cannot be evaluated.
+11. Do not diagnose a disease merely from a single nonspecific appearance.
+12. When several diagnoses could explain an appearance, describe the
+    radiographic appearance first and state the differential/uncertainty
+    conservatively.
+13. Do not upgrade "possible" or "suspicious" findings into confirmed
+    diagnoses.
+14. For fractures, require visible evidence such as cortical disruption,
+    fracture line, step/deformity, displacement, or abnormal alignment.
+    If evidence is incomplete, use cautious wording.
+15. Do not infer laterality from viewer position alone. Use reliable
+    anatomical orientation or visible side markers when available.
+    If laterality cannot be established reliably, say so.
+16. Do not identify a radiographic projection (for example SMV) solely from
+    the user's selected type. Confirm it from visible projection features
+    and state uncertainty when appropriate.
+17. Use FDI tooth numbers only when the tooth can be reliably identified
+    anatomically. Never assign a number from image position alone.
+18. Do not estimate measurements, angles, distances, or sizes unless they
+    are actually measurable from the image; otherwise state that they are
+    not reliably measurable.
+19. Distinguish image artifacts from pathology and report artifacts only
+    when actually visible.
+20. Do not use patient name, OP number, age, or sex to create radiographic
+    findings.
+21. Do not provide a definitive diagnosis, medication prescription, or
+    definitive treatment plan.
+22. If the image is inadequate, say what cannot be assessed and why rather
+    than guessing.
+23. Final diagnosis and treatment decisions must be made by a qualified
     dental professional.
+
+FINAL SELF-CHECK BEFORE ANSWERING:
+- Is every positive finding visibly supported?
+- Did I accidentally infer anything from the checklist or patient data?
+- Is laterality actually established?
+- Is the radiograph type actually compatible with the image?
+- Did I distinguish observation from interpretation?
+- Did I state important limitations?
+- Did I avoid calling uncertain findings confirmed?
+- Did I avoid claiming normality where visualization is inadequate?
 """
 
 # ------------------------------------------------------------
@@ -581,6 +614,31 @@ in the protocol.
 
 Do not generate a fixed list of absent diseases.
 
+ACCURACY-FIRST REPORTING METHOD:
+Use this sequence internally:
+A. OBSERVE: identify only structures and abnormalities actually visible.
+B. VERIFY: re-check each proposed abnormality against the image.
+C. LOCALIZE: give location and laterality only when reliably established.
+D. QUALIFY: label the finding as definite visible observation, possible,
+   or not reliably assessable.
+E. INTERPRET: provide a conservative radiographic interpretation only when
+   the visible evidence supports it.
+F. LIMIT: explicitly state important regions that cannot be assessed.
+
+For every abnormal finding, include the specific visible evidence that
+supports it. If you cannot point to visible evidence in the uploaded image,
+do not report the finding.
+
+Avoid absolute language such as "confirmed", "definitely", or "consistent
+with" when the image only supports a suspicious/possible finding. Prefer
+"radiographic appearance is suspicious for..." or "features may represent..."
+when appropriate.
+
+Do not invent clinical symptoms, examination findings, CT findings, or
+history. Do not state that a CT, clinical examination, or other test has
+already been performed. Such items may only be suggested as professional
+correlation when appropriate.
+
 REPORT FORMAT:
 
 # AMRs Dental X-ray AI
@@ -611,10 +669,15 @@ Use FDI tooth number only when reliably identifiable.
 Report ONLY actual abnormalities supported by image evidence.
 
 For each finding:
-- Finding:
-- Location:
-- Confidence: High / Moderate / Low
-- Evidence visible on image:
+- Observation: What is directly visible on the image.
+- Location: Give the location only when reliably identifiable.
+- Laterality: Right / Left / Midline / Not reliably determined.
+- Interpretation: Conservative radiographic interpretation, if supported.
+- Confidence: High / Moderate / Low.
+- Evidence visible on image: Describe the actual visual feature supporting
+  the observation.
+- Important limitation: Mention any projectional or image-quality factor
+  that affects interpretation.
 
 If there are no definite abnormal findings AND the image
 is adequately assessable, state:
@@ -648,8 +711,9 @@ quality, cropping, positioning, superimposition, or other
 limitations.
 
 ### 9. Provisional Impression
-Give a short conservative summary based ONLY on the
-uploaded image.
+Give a short, conservative summary based ONLY on the uploaded image.
+Lead with the strongest directly visible observation. If an interpretation
+is uncertain, preserve that uncertainty in the impression.
 
 Do not provide a definitive diagnosis.
 
@@ -663,135 +727,4 @@ FINAL STATEMENT:
 
 "This is an AI-assisted provisional radiographic assessment
 and not a definitive diagnosis. Final interpretation,
-diagnosis and treatment decisions must be made by a qualified
-dental professional."
-"""
-
-# ------------------------------------------------------------
-# IMAGE + ANALYSIS
-# ------------------------------------------------------------
-if xray is not None:
-
-    st.success("✅ X-ray uploaded successfully.")
-
-    st.markdown(
-        '<div class="section">🖼️ X-ray Preview</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.image(
-        xray,
-        caption="Uploaded Dental Radiograph",
-        use_container_width=True,
-    )
-
-    st.markdown(
-        f"""
-        <div class="info-box">
-        <b>File:</b> {xray.name}<br>
-        <b>Type:</b> {xray.type}<br>
-        <b>Size:</b> {xray.size / 1024:.1f} KB
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        '<div class="section">🤖 AI Assessment</div>',
-        unsafe_allow_html=True,
-    )
-
-    analyze = st.button(
-        "🔍 Analyze X-ray",
-        use_container_width=True,
-        disabled=(
-            st.session_state.analysis_count
-            >= DAILY_ANALYSIS_LIMIT
-        ),
-    )
-
-    if analyze:
-
-        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
-            st.warning(
-                "⏳ Daily AI analysis limit reached. "
-                "Please try again tomorrow."
-            )
-        else:
-
-            api_key = st.secrets.get("GEMINI_API_KEY")
-
-            if not api_key:
-                st.error("❌ GEMINI_API_KEY was not found.")
-                st.info(
-                    "Open Streamlit Secrets and configure "
-                    "GEMINI_API_KEY."
-                )
-            else:
-
-                mime_type = xray.type
-
-                if mime_type not in ["image/jpeg", "image/png"]:
-                    st.error("❌ Unsupported image format.")
-                else:
-
-                    try:
-
-                        client = genai.Client(api_key=api_key)
-
-                        image_bytes = xray.getvalue()
-
-                        image_base64 = base64.b64encode(
-                            image_bytes
-                        ).decode("utf-8")
-
-                        final_prompt = build_prompt(
-                            radiograph_type
-                        )
-
-                        with st.spinner(
-                            "🔬 Analyzing the uploaded radiograph..."
-                        ):
-
-                            interaction = client.interactions.create(
-                                model=MODEL_NAME,
-                                input=[
-                                    {
-                                        "type": "image",
-                                        "mime_type": mime_type,
-                                        "data": image_base64,
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": final_prompt,
-                                    },
-                                ],
-                            )
-
-                        result_text = getattr(
-                            interaction,
-                            "output_text",
-                            None,
-                        )
-
-                        if result_text:
-
-                            st.session_state.analysis_count += 1
-
-                            st.success(
-                                "✅ AI assessment completed."
-                            )
-
-                            st.markdown(
-                                '<div class="section">'
-                                '📋 Assessment Report'
-                                '</div>',
-                                unsafe_allow_html=True,
-                            )
-
-                            st.markdown(result_text)
-
-                    except Exception as e:
-                        st.error("❌ AI analysis failed.")
-                        st.code(str(e))
-             
+diagnosis and t
