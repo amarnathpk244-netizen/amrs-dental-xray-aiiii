@@ -1,4 +1,4 @@
-  import streamlit as st
+import streamlit as st
 from datetime import date
 from google import genai
 import base64
