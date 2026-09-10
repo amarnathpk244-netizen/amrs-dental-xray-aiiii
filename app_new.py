@@ -20,8 +20,6 @@ st.set_page_config(
 # ============================================================
 
 DAILY_ANALYSIS_LIMIT = 3
-
-# UPDATED GEMINI MODEL
 MODEL_NAME = "gemini-3.6-flash"
 
 
@@ -47,7 +45,6 @@ if st.session_state.usage_date != date.today():
 st.markdown(
     """
     <style>
-
     .main {
         padding-top: 1rem;
     }
@@ -89,7 +86,6 @@ st.markdown(
         background: #f7f7f7;
         margin-top: 20px;
     }
-
     </style>
     """,
     unsafe_allow_html=True
@@ -123,14 +119,11 @@ remaining = (
 )
 
 if remaining > 0:
-
     st.info(
         f"🧪 AI analyses remaining today: "
         f"{remaining} / {DAILY_ANALYSIS_LIMIT}"
     )
-
 else:
-
     st.warning(
         "⏳ Your 3 AI analyses for today have been used. "
         "Please try again tomorrow."
@@ -154,7 +147,6 @@ patient_name = st.text_input(
 col1, col2 = st.columns(2)
 
 with col1:
-
     age = st.number_input(
         "Age",
         min_value=0,
@@ -164,7 +156,6 @@ with col1:
     )
 
 with col2:
-
     sex = st.selectbox(
         "Sex",
         [
@@ -326,7 +317,6 @@ if xray is not None:
                 # ====================================================
 
                 image_bytes = xray.getvalue()
-
                 mime_type = xray.type
 
                 if mime_type not in [
@@ -342,7 +332,7 @@ if xray is not None:
 
 
                 # ====================================================
-                # CONVERT IMAGE TO BASE64
+                # BASE64 IMAGE
                 # ====================================================
 
                 image_base64 = base64.b64encode(
@@ -369,24 +359,24 @@ IMPORTANT SAFETY RULES:
 3. NEVER use random or fixed findings.
 
 4. If a finding is not clearly visible, say:
-   "Not clearly assessable."
+"Not clearly assessable."
 
 5. If image quality is poor, blurred, cropped,
-   distorted, overexposed, underexposed, or otherwise
-   inadequate, clearly state this.
+distorted, overexposed, underexposed, or inadequate,
+clearly state this.
 
 6. Do not diagnose something simply because it is common.
 
 7. Do not assign an FDI tooth number unless the tooth
-   can be reliably identified from the visible anatomy.
+can be reliably identified from visible anatomy.
 
 8. Never assign a tooth number merely based on image
-   position.
+position.
 
 9. Clearly distinguish:
-   - Clearly visible
-   - Possible
-   - Unclear
+- Clearly visible
+- Possible
+- Unclear
 
 10. Do not provide a definitive diagnosis.
 
@@ -397,20 +387,20 @@ IMPORTANT SAFETY RULES:
 13. Do not use patient information to invent findings.
 
 14. If the image does not provide enough information,
-    say so.
+say so.
 
 15. When uncertain, choose uncertainty rather than guessing.
 
-16. The final diagnosis and treatment decision must be
-    made by a qualified dental professional.
+16. Final diagnosis and treatment decisions must be made
+by a qualified dental professional.
 
 17. Only report findings that have actual visual evidence
-    in the uploaded image.
+in the uploaded image.
 """
 
 
                 # ====================================================
-                # RADIOGRAPH-SPECIFIC PROMPT
+                # RADIOGRAPH-SPECIFIC INSTRUCTIONS
                 # ====================================================
 
                 if radiograph_type == "IOPA":
@@ -446,57 +436,55 @@ Perform a systematic panoramic assessment.
 
 Assess ONLY what is actually visible.
 
-Evaluate, where adequately visualized:
+1. Image quality:
+- Positioning
+- Rotation
+- Magnification/distortion
+- Ghost images
+- Motion blur
+- Exposure
+- Cropping
 
-1. Image quality
-   - Positioning
-   - Rotation
-   - Magnification/distortion
-   - Ghost images
-   - Motion blur
-   - Exposure
-   - Cropping
+2. Dentition:
+- Present teeth
+- Missing teeth when clearly visible
+- Unerupted teeth
+- Impacted teeth
+- Gross developmental abnormalities
 
-2. Dentition
-   - Present teeth
-   - Missing teeth when clearly visible
-   - Unerupted teeth
-   - Impacted teeth
-   - Gross developmental abnormalities
+3. Dental structures:
+- Obvious caries
+- Obvious restorations
+- Root morphology when visible
+- Gross root abnormalities
+- Obvious periapical radiolucency/radiopacity
 
-3. Dental structures
-   - Obvious caries
-   - Obvious restorations
-   - Root morphology when visible
-   - Gross root abnormalities
-   - Obvious periapical radiolucency/radiopacity
+4. Periodontal structures:
+- Alveolar bone level
+- Gross horizontal bone loss
+- Gross vertical bone loss
+- Other clearly visible periodontal changes
 
-4. Periodontal structures
-   - Alveolar bone level
-   - Gross horizontal bone loss
-   - Gross vertical bone loss
-   - Other clearly visible periodontal changes
+5. Maxilla:
+- Maxillary sinus regions when visible
+- Maxillary bone
+- Other obvious abnormalities
 
-5. Maxilla
-   - Maxillary sinus regions when visible
-   - Maxillary bone
-   - Other obvious abnormalities
+6. Mandible:
+- Mandibular body
+- Inferior border
+- Ramus
+- Angle
+- Other obvious abnormalities
 
-6. Mandible
-   - Mandibular body
-   - Inferior border
-   - Ramus
-   - Angle
-   - Other obvious abnormalities
+7. TMJ / condyles:
+- Condylar regions when adequately visualized
+- Obvious asymmetry or gross abnormality
 
-7. TMJ / condyles
-   - Condylar regions when adequately visualized
-   - Obvious asymmetry or gross abnormality
-
-8. Other structures
-   - Obvious radiopaque lesions
-   - Obvious radiolucent lesions
-   - Other clearly visible abnormalities
+8. Other structures:
+- Obvious radiopaque lesions
+- Obvious radiolucent lesions
+- Other clearly visible abnormalities
 
 IMPORTANT:
 
@@ -505,8 +493,8 @@ superimposition and ghost images.
 
 Do NOT interpret an artifact as pathology.
 
-Do NOT diagnose subtle pathology unless there is
-sufficient visual evidence.
+Do NOT diagnose subtle pathology unless sufficient
+visual evidence exists.
 
 Do NOT invent missing teeth or impacted teeth.
 
@@ -569,8 +557,7 @@ The radiograph type may not be reliably classifiable.
 First determine whether the uploaded image is actually
 a dental radiograph.
 
-If the type cannot be confidently determined,
-state:
+If the type cannot be confidently determined, state:
 
 "Radiograph type cannot be reliably classified."
 
@@ -579,7 +566,7 @@ Then describe only clearly visible findings.
 
 
                 # ====================================================
-                # FINAL AI PROMPT
+                # FINAL PROMPT
                 # ====================================================
 
                 final_prompt = f"""
@@ -689,7 +676,7 @@ be made by a qualified dental professional."
 
 
                 # ====================================================
-                # SEND IMAGE + PROMPT USING INTERACTIONS API
+                # SEND IMAGE + PROMPT
                 # ====================================================
 
                 with st.spinner(
@@ -713,7 +700,7 @@ be made by a qualified dental professional."
 
 
                 # ====================================================
-                # GET AI RESPONSE
+                # GET RESPONSE
                 # ====================================================
 
                 result_text = getattr(
@@ -721,7 +708,6 @@ be made by a qualified dental professional."
                     "output_text",
                     None
                 )
-
 
                 if result_text:
 
@@ -755,8 +741,7 @@ be made by a qualified dental professional."
                     )
 
                     st.write(
-                        f"**Radiograph:** "
-                        f"{radiograph_type}"
+                        f"**Radiograph:** {radiograph_type}"
                     )
 
                     st.write(
@@ -765,13 +750,11 @@ be made by a qualified dental professional."
                     )
 
                     if age > 0:
-
                         st.write(
                             f"**Age:** {age}"
                         )
 
                     if sex != "Select":
-
                         st.write(
                             f"**Sex:** {sex}"
                         )
@@ -784,8 +767,7 @@ be made by a qualified dental professional."
                     )
 
                     st.info(
-                        "Please try again with a clearer "
-                        "radiograph."
+                        "Please try again with a clearer radiograph."
                     )
 
 
@@ -863,7 +845,8 @@ st.markdown(
         color:#888;
         font-size:12px;
     ">
-    AMRs Dental X-ray AI
+        AMRs Dental X-ray AI
     </div>
     """,
-                    
+    unsafe_allow_html=True
+)
