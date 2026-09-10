@@ -727,4 +727,6 @@ FINAL STATEMENT:
 
 "This is an AI-assisted provisional radiographic assessment
 and not a definitive diagnosis. Final interpretation,
-diagnosis and t
+diagnosis and treatment decisions must be made by a
+qualified dental professional."
+"""
