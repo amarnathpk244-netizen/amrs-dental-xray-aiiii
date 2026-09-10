@@ -731,15 +731,94 @@ diagnosis and treatment decisions must be made by a
 qualified dental professional."
 """
 if xray is not None:
-    st.image(xray, caption="Uploaded X-ray", use_container_width=True)
+    st.image(
+        xray,
+        caption="Uploaded X-ray",
+        use_container_width=True,
+    )
+
     st.markdown(
         '<div class="section">🤖 AI Assessment</div>',
         unsafe_allow_html=True,
     )
 
-        analyze = st.button("🔍 Analyze X-ray")
- if analyze: 
-    if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
-        st.warning("⏳ Daily AI analysis limit reached. Please try again tomorrow.")
-    else:
-        st.info("Analysis section is active.")
+    analyze = st.button("🔍 Analyze X-ray")
+
+    if analyze:
+        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
+            st.warning(
+                "⏳ Daily AI analysis limit reached. "
+                "Please try again tomorrow."
+            )
+        else:
+            api_key = st.secrets.get("GEMINI_API_KEY")
+
+            if not api_key:
+                st.error("❌ GEMINI_API_KEY was not found.")
+            else:
+                mime_type = xray.type
+
+                if mime_type not in ["image/jpeg", "image/png"]:
+                    st.error("❌ Unsupported image format.")
+                else:
+                    try:
+                        client = genai.Client(api_key=api_key)
+
+                        image_bytes = xray.getvalue()
+
+                        image_base64 = base64.b64encode(
+                            image_bytes
+                        ).decode("utf-8")
+
+                        final_prompt = build_prompt(
+                            radiograph_type
+                        )
+
+                        with st.spinner(
+                            "🔬 Analyzing the uploaded radiograph..."
+                        ):
+                            interaction = client.interactions.create(
+                                model=MODEL_NAME,
+                                input=[
+                                    {
+                                        "type": "image",
+                                        "mime_type": mime_type,
+                                        "data": image_base64,
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": final_prompt,
+                                    },
+                                ],
+                            )
+
+                        result_text = getattr(
+                            interaction,
+                            "output_text",
+                            None,
+                        )
+
+                        if result_text:
+                            st.session_state.analysis_count += 1
+
+                            st.success(
+                                "✅ AI assessment completed."
+                            )
+
+                            st.markdown(
+                                '<div class="section">'
+                                '📋 Assessment Report'
+                                '</div>',
+                                unsafe_allow_html=True,
+                            )
+
+                            st.markdown(result_text)
+
+                        else:
+                            st.error(
+                                "❌ The AI did not return a readable assessment."
+                            )
+
+                    except Exception as e:
+                        st.error("❌ AI analysis failed.")
+                        st.code(str(e))
