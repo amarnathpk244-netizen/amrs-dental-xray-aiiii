@@ -684,9 +684,8 @@ if xray is not None:
         unsafe_allow_html=True,
     )
 
-    analyze = st.button("🔍 Analyze X-ray")
-
-if analyze:
+        analyze = st.button("🔍 Analyze X-ray")
+  if analyze:
         use_container_width=True,
        analyze = st.button(
     "🔍 Analyze X-ray",
