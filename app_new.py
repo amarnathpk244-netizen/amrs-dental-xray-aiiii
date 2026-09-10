@@ -737,10 +737,8 @@ if xray is not None:
         unsafe_allow_html=True,
     )
 
-    analyze = st.button("🔍 Analyze X-ray")
-
-
-if analyze:
+        analyze = st.button("🔍 Analyze X-ray")
+ if analyze: 
     if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
         st.warning("⏳ Daily AI analysis limit reached. Please try again tomorrow.")
     else:
