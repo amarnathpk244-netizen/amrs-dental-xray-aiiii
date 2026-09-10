@@ -1,7 +1,8 @@
 import streamlit as st
 from datetime import date
 from google import genai
-from google.genai import types
+import base64
+
 
 # ============================================================
 # PAGE CONFIG
@@ -13,12 +14,16 @@ st.set_page_config(
     layout="centered"
 )
 
+
 # ============================================================
 # SETTINGS
 # ============================================================
 
 DAILY_ANALYSIS_LIMIT = 3
-MODEL_NAME = "gemini-2.5-flash"
+
+# UPDATED GEMINI MODEL
+MODEL_NAME = "gemini-3.6-flash"
+
 
 # ============================================================
 # DAILY USAGE
@@ -34,6 +39,7 @@ if st.session_state.usage_date != date.today():
     st.session_state.analysis_count = 0
     st.session_state.usage_date = date.today()
 
+
 # ============================================================
 # MOBILE UI
 # ============================================================
@@ -41,6 +47,7 @@ if st.session_state.usage_date != date.today():
 st.markdown(
     """
     <style>
+
     .main {
         padding-top: 1rem;
     }
@@ -82,10 +89,12 @@ st.markdown(
         background: #f7f7f7;
         margin-top: 20px;
     }
+
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 # ============================================================
 # HEADER
@@ -97,9 +106,12 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="subtitle">AI-Assisted Dental Radiographic Assessment</div>',
+    '<div class="subtitle">'
+    'AI-Assisted Dental Radiographic Assessment'
+    '</div>',
     unsafe_allow_html=True
 )
+
 
 # ============================================================
 # USAGE STATUS
@@ -111,15 +123,19 @@ remaining = (
 )
 
 if remaining > 0:
+
     st.info(
         f"🧪 AI analyses remaining today: "
         f"{remaining} / {DAILY_ANALYSIS_LIMIT}"
     )
+
 else:
+
     st.warning(
         "⏳ Your 3 AI analyses for today have been used. "
         "Please try again tomorrow."
     )
+
 
 # ============================================================
 # PATIENT INFORMATION
@@ -138,6 +154,7 @@ patient_name = st.text_input(
 col1, col2 = st.columns(2)
 
 with col1:
+
     age = st.number_input(
         "Age",
         min_value=0,
@@ -147,6 +164,7 @@ with col1:
     )
 
 with col2:
+
     sex = st.selectbox(
         "Sex",
         [
@@ -166,6 +184,7 @@ examination_date = st.date_input(
     "Examination Date",
     value=date.today()
 )
+
 
 # ============================================================
 # RADIOGRAPH TYPE
@@ -192,6 +211,7 @@ st.info(
     f"🩻 Selected radiograph: {radiograph_type}"
 )
 
+
 # ============================================================
 # X-RAY UPLOAD
 # ============================================================
@@ -216,6 +236,7 @@ xray = st.file_uploader(
     key="dental_xray_upload",
     label_visibility="visible"
 )
+
 
 # ============================================================
 # IMAGE PREVIEW
@@ -249,6 +270,7 @@ if xray is not None:
         unsafe_allow_html=True
     )
 
+
     # ========================================================
     # AI ANALYSIS
     # ========================================================
@@ -266,6 +288,11 @@ if xray is not None:
             >= DAILY_ANALYSIS_LIMIT
         )
     )
+
+
+    # ========================================================
+    # ANALYZE
+    # ========================================================
 
     if analyze:
 
@@ -293,6 +320,7 @@ if xray is not None:
                     api_key=api_key
                 )
 
+
                 # ====================================================
                 # IMAGE DATA
                 # ====================================================
@@ -311,6 +339,16 @@ if xray is not None:
                     )
 
                     st.stop()
+
+
+                # ====================================================
+                # CONVERT IMAGE TO BASE64
+                # ====================================================
+
+                image_base64 = base64.b64encode(
+                    image_bytes
+                ).decode("utf-8")
+
 
                 # ====================================================
                 # SAFETY INSTRUCTIONS
@@ -370,6 +408,7 @@ IMPORTANT SAFETY RULES:
     in the uploaded image.
 """
 
+
                 # ====================================================
                 # RADIOGRAPH-SPECIFIC PROMPT
                 # ====================================================
@@ -397,27 +436,83 @@ Assess only visible structures such as:
 Do not diagnose subtle changes without adequate evidence.
 """
 
+
                 elif radiograph_type == "OPG":
 
                     radiograph_instructions = """
 The selected radiograph is OPG.
 
-Assess only visible structures such as:
+Perform a systematic panoramic assessment.
 
-- Overall dentition
-- Missing teeth when clearly visible
-- Impacted/unerupted teeth
-- Obvious caries
-- Obvious periapical abnormalities
-- Alveolar bone
-- Gross periodontal bone loss when assessable
-- Condyles when adequately visible
-- Maxillary structures
-- Mandibular structures
-- Other obvious abnormalities
+Assess ONLY what is actually visible.
 
-Be cautious about panoramic distortion and superimposition.
+Evaluate, where adequately visualized:
+
+1. Image quality
+   - Positioning
+   - Rotation
+   - Magnification/distortion
+   - Ghost images
+   - Motion blur
+   - Exposure
+   - Cropping
+
+2. Dentition
+   - Present teeth
+   - Missing teeth when clearly visible
+   - Unerupted teeth
+   - Impacted teeth
+   - Gross developmental abnormalities
+
+3. Dental structures
+   - Obvious caries
+   - Obvious restorations
+   - Root morphology when visible
+   - Gross root abnormalities
+   - Obvious periapical radiolucency/radiopacity
+
+4. Periodontal structures
+   - Alveolar bone level
+   - Gross horizontal bone loss
+   - Gross vertical bone loss
+   - Other clearly visible periodontal changes
+
+5. Maxilla
+   - Maxillary sinus regions when visible
+   - Maxillary bone
+   - Other obvious abnormalities
+
+6. Mandible
+   - Mandibular body
+   - Inferior border
+   - Ramus
+   - Angle
+   - Other obvious abnormalities
+
+7. TMJ / condyles
+   - Condylar regions when adequately visualized
+   - Obvious asymmetry or gross abnormality
+
+8. Other structures
+   - Obvious radiopaque lesions
+   - Obvious radiolucent lesions
+   - Other clearly visible abnormalities
+
+IMPORTANT:
+
+Panoramic radiographs contain distortion,
+superimposition and ghost images.
+
+Do NOT interpret an artifact as pathology.
+
+Do NOT diagnose subtle pathology unless there is
+sufficient visual evidence.
+
+Do NOT invent missing teeth or impacted teeth.
+
+Use FDI tooth numbers only when reliably identifiable.
 """
+
 
                 elif radiograph_type == "Bitewing":
 
@@ -436,6 +531,7 @@ Assess only visible findings such as:
 Do not label subtle changes as caries without evidence.
 """
 
+
                 elif radiograph_type == "Occlusal":
 
                     radiograph_instructions = """
@@ -452,6 +548,7 @@ Assess only visible:
 - Other clearly visible abnormalities
 """
 
+
                 elif radiograph_type == "Facial radiograph":
 
                     radiograph_instructions = """
@@ -462,6 +559,7 @@ Assess only structures that are actually visible.
 Do not provide definitive orthodontic,
 skeletal, maxillofacial, or medical diagnosis.
 """
+
 
                 else:
 
@@ -478,6 +576,7 @@ state:
 
 Then describe only clearly visible findings.
 """
+
 
                 # ====================================================
                 # FINAL AI PROMPT
@@ -588,36 +687,41 @@ interpretation, diagnosis and treatment decisions must
 be made by a qualified dental professional."
 """
 
+
                 # ====================================================
-                # SEND IMAGE TO GEMINI
+                # SEND IMAGE + PROMPT USING INTERACTIONS API
                 # ====================================================
 
                 with st.spinner(
                     "🔬 Analyzing the uploaded radiograph..."
                 ):
 
-                    image_part = types.Part.from_bytes(
-                        data=image_bytes,
-                        mime_type=mime_type
-                    )
-
-                    response = client.models.generate_content(
+                    interaction = client.interactions.create(
                         model=MODEL_NAME,
-                        contents=[
-                            image_part,
-                            final_prompt
+                        input=[
+                            {
+                                "type": "image",
+                                "mime_type": mime_type,
+                                "data": image_base64
+                            },
+                            {
+                                "type": "text",
+                                "text": final_prompt
+                            }
                         ]
                     )
 
+
                 # ====================================================
-                # RESPONSE
+                # GET AI RESPONSE
                 # ====================================================
 
                 result_text = getattr(
-                    response,
-                    "text",
+                    interaction,
+                    "output_text",
                     None
                 )
+
 
                 if result_text:
 
@@ -638,6 +742,7 @@ be made by a qualified dental professional."
                         result_text
                     )
 
+
                     # =================================================
                     # EXAMINATION INFORMATION
                     # =================================================
@@ -650,7 +755,8 @@ be made by a qualified dental professional."
                     )
 
                     st.write(
-                        f"**Radiograph:** {radiograph_type}"
+                        f"**Radiograph:** "
+                        f"{radiograph_type}"
                     )
 
                     st.write(
@@ -659,14 +765,17 @@ be made by a qualified dental professional."
                     )
 
                     if age > 0:
+
                         st.write(
                             f"**Age:** {age}"
                         )
 
                     if sex != "Select":
+
                         st.write(
                             f"**Sex:** {sex}"
                         )
+
 
                 else:
 
@@ -678,6 +787,7 @@ be made by a qualified dental professional."
                         "Please try again with a clearer "
                         "radiograph."
                     )
+
 
             # ========================================================
             # ERROR HANDLING
@@ -694,6 +804,7 @@ be made by a qualified dental professional."
                     "GEMINI_API_KEY is configured."
                 )
 
+
             except Exception as e:
 
                 st.error(
@@ -707,6 +818,7 @@ be made by a qualified dental professional."
                     st.code(
                         str(e)
                     )
+
 
 # ============================================================
 # DISCLAIMER
@@ -737,6 +849,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # ============================================================
 # FOOTER
 # ============================================================
@@ -753,5 +866,4 @@ st.markdown(
     AMRs Dental X-ray AI
     </div>
     """,
-    unsafe_allow_html=True
-)
+                    
