@@ -730,3 +730,13 @@ and not a definitive diagnosis. Final interpretation,
 diagnosis and treatment decisions must be made by a
 qualified dental professional."
 """
+if xray is not None:
+    st.image(xray, caption="Uploaded X-ray", use_container_width=True)
+
+analyze = st.button("🔍 Analyze X-ray")
+
+if analyze:
+    if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
+        st.warning("⏳ Daily AI analysis limit reached. Please try again tomorrow.")
+    else:
+        st.info("Analysis section is active.")
