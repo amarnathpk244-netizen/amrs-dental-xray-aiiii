@@ -130,6 +130,28 @@ examination_date = st.date_input(
     value=date.today()
 )
 
+# ---------- RADIOGRAPH TYPE ----------
+st.markdown(
+    '<div class="section">🩻 Radiograph Type</div>',
+    unsafe_allow_html=True
+)
+
+radiograph_type = st.selectbox(
+    "Select radiograph type",
+    [
+        "IOPA",
+        "OPG",
+        "Bitewing",
+        "Occlusal",
+        "Facial radiograph",
+        "Other / Not reliably classifiable"
+    ]
+)
+
+st.info(
+    f"🩻 Selected radiograph: {radiograph_type}"
+)
+
 # ---------- X-RAY UPLOAD ----------
 st.markdown(
     '<div class="section">📤 Upload Dental Radiograph</div>',
@@ -464,6 +486,8 @@ Final interpretation must be performed by a qualified dental professional.
 **OP Number:** {op_number if op_number else "Not provided"}
 
 **Examination Date:** {examination_date}
+
+**Radiograph Type:** {radiograph_type}
 """
                 )
 
@@ -523,4 +547,4 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True
-                )
+)
