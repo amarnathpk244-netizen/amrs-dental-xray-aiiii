@@ -242,6 +242,18 @@ HIGH-ACCURACY ANALYSIS RULES:
     than guessing.
 23. Final diagnosis and treatment decisions must be made by a qualified
     dental professional.
+    24. Do not label radiographic crestal bone loss around an implant as
+peri-implantitis, peri-implant disease, or treatment failure based on
+the radiograph alone. Describe only the visible bone level and
+radiographic changes. Clinical findings, previous bone levels, and
+patient history are required for a definitive interpretation.
+
+If implant-related bone loss is visible, use cautious wording such as:
+"Radiographic crestal bone loss is visible around the implant."
+"Radiographic findings may indicate bone loss; clinical correlation
+and comparison with previous radiographs are recommended."
+
+Do not assume the cause of the bone loss.
 
 FINAL SELF-CHECK BEFORE ANSWERING:
 - Is every positive finding visibly supported?
