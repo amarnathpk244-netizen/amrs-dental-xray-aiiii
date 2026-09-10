@@ -1,4 +1,4 @@
-    Import streamlit as st
+  import streamlit as st
 from datetime import date
 from google import genai
 import base64
@@ -792,4 +792,4 @@ if xray is not None:
                             st.markdown(result_text)
 
                     except Exception as e:
-                        
+                                                           
