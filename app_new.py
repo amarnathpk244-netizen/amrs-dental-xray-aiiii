@@ -3,27 +3,18 @@ from datetime import date
 from google import genai
 import base64
 
-# ============================================================
-# PAGE CONFIG
-# ============================================================
-
 st.set_page_config(
     page_title="AMRs Dental X-ray AI",
     page_icon="🦷",
-    layout="centered"
+    layout="centered",
 )
-
-# ============================================================
-# SETTINGS
-# ============================================================
 
 DAILY_ANALYSIS_LIMIT = 3
 MODEL_NAME = "gemini-3.6-flash"
 
-# ============================================================
-# DAILY USAGE
-# ============================================================
-
+# ------------------------------------------------------------
+# SESSION USAGE
+# ------------------------------------------------------------
 if "analysis_count" not in st.session_state:
     st.session_state.analysis_count = 0
 
@@ -34,38 +25,31 @@ if st.session_state.usage_date != date.today():
     st.session_state.analysis_count = 0
     st.session_state.usage_date = date.today()
 
-# ============================================================
-# MOBILE UI
-# ============================================================
-
+# ------------------------------------------------------------
+# UI
+# ------------------------------------------------------------
 st.markdown(
     """
     <style>
-    .main {
-        padding-top: 1rem;
-    }
-
+    .main { padding-top: 1rem; }
     .app-title {
         text-align: center;
         font-size: 30px;
         font-weight: 700;
         margin-bottom: 4px;
     }
-
     .subtitle {
         text-align: center;
         color: #666;
         font-size: 15px;
         margin-bottom: 25px;
     }
-
     .section {
         font-size: 21px;
         font-weight: 650;
         margin-top: 20px;
         margin-bottom: 10px;
     }
-
     .info-box {
         padding: 15px;
         border-radius: 12px;
@@ -73,7 +57,6 @@ st.markdown(
         margin-top: 10px;
         margin-bottom: 15px;
     }
-
     .disclaimer {
         font-size: 12px;
         color: #666;
@@ -84,28 +67,18 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
-
-# ============================================================
-# HEADER
-# ============================================================
 
 st.markdown(
     '<div class="app-title">🦷 AMRs Dental X-ray AI</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.markdown(
-    '<div class="subtitle">'
-    'AI-Assisted Dental Radiographic Assessment'
-    '</div>',
-    unsafe_allow_html=True
+    '<div class="subtitle">AI-Assisted Dental Radiographic Assessment</div>',
+    unsafe_allow_html=True,
 )
-
-# ============================================================
-# USAGE STATUS
-# ============================================================
 
 remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
 
@@ -120,18 +93,17 @@ else:
         "Please try again tomorrow."
     )
 
-# ============================================================
+# ------------------------------------------------------------
 # PATIENT INFORMATION
-# ============================================================
-
+# ------------------------------------------------------------
 st.markdown(
     '<div class="section">👤 Patient Information</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 patient_name = st.text_input(
     "Patient Name",
-    placeholder="Enter patient name"
+    placeholder="Enter patient name",
 )
 
 col1, col2 = st.columns(2)
@@ -142,37 +114,31 @@ with col1:
         min_value=0,
         max_value=120,
         value=0,
-        step=1
+        step=1,
     )
 
 with col2:
     sex = st.selectbox(
         "Sex",
-        [
-            "Select",
-            "Male",
-            "Female",
-            "Other"
-        ]
+        ["Select", "Male", "Female", "Other"],
     )
 
 op_number = st.text_input(
     "OP Number",
-    placeholder="Enter OP number"
+    placeholder="Enter OP number",
 )
 
 examination_date = st.date_input(
     "Examination Date",
-    value=date.today()
+    value=date.today(),
 )
 
-# ============================================================
+# ------------------------------------------------------------
 # RADIOGRAPH TYPE
-# ============================================================
-
+# ------------------------------------------------------------
 st.markdown(
     '<div class="section">🩻 Radiograph Type</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 radiograph_type = st.selectbox(
@@ -183,209 +149,69 @@ radiograph_type = st.selectbox(
         "Bitewing",
         "Occlusal",
         "Facial radiograph",
-        "Other / Not reliably classifiable"
-    ]
+        "Other / Not reliably classifiable",
+    ],
 )
 
-st.info(
-    f"🩻 Selected radiograph: {radiograph_type}"
-)
+st.info(f"🩻 Selected radiograph: {radiograph_type}")
 
-# ============================================================
-# X-RAY UPLOAD
-# ============================================================
-
+# ------------------------------------------------------------
+# UPLOAD
+# ------------------------------------------------------------
 st.markdown(
     '<div class="section">📤 Upload Dental Radiograph</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
-st.info(
-    "Upload a dental X-ray image in JPG, JPEG or PNG format."
-)
+st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
 
 xray = st.file_uploader(
     "📷 Choose X-ray image",
     type=["jpg", "jpeg", "png"],
     accept_multiple_files=False,
-    key="dental_xray_upload"
+    key="dental_xray_upload",
 )
 
-# ============================================================
-# IMAGE PREVIEW
-# ============================================================
-
-if xray is not None:
-
-    st.success(
-        "✅ X-ray uploaded successfully."
-    )
-
-    st.markdown(
-        '<div class="section">🖼️ X-ray Preview</div>',
-        unsafe_allow_html=True
-    )
-
-    st.image(
-        xray,
-        caption="Uploaded Dental Radiograph",
-        use_container_width=True
-    )
-
-    st.markdown(
-        f"""
-        <div class="info-box">
-        <b>File:</b> {xray.name}<br>
-        <b>Type:</b> {xray.type}<br>
-        <b>Size:</b> {xray.size / 1024:.1f} KB
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # ========================================================
-    # AI ANALYSIS
-    # ========================================================
-
-    st.markdown(
-        '<div class="section">🤖 AI Assessment</div>',
-        unsafe_allow_html=True
-    )
-
-    analyze = st.button(
-        "🔍 Analyze X-ray",
-        use_container_width=True,
-        disabled=(
-            st.session_state.analysis_count
-            >= DAILY_ANALYSIS_LIMIT
-        )
-    )
-
-    # ========================================================
-    # ANALYZE
-    # ========================================================
-
-    if analyze:
-
-        if (
-            st.session_state.analysis_count
-            >= DAILY_ANALYSIS_LIMIT
-        ):
-
-            st.warning(
-                "⏳ Daily AI analysis limit reached. "
-                "Please try again tomorrow."
-            )
-
-        else:
-
-            try:
-
-                # ====================================================
-                # GEMINI API
-                # ====================================================
-
-                api_key = st.secrets["GEMINI_API_KEY"]
-
-                client = genai.Client(
-                    api_key=api_key
-                )
-
-                # ====================================================
-                # IMAGE DATA
-                # ====================================================
-
-                image_bytes = xray.getvalue()
-                mime_type = xray.type
-
-                if mime_type not in [
-                    "image/jpeg",
-                    "image/png"
-                ]:
-
-                    st.error(
-                        "❌ Unsupported image format."
-                    )
-
-                    st.stop()
-
-                image_base64 = base64.b64encode(
-                    image_bytes
-                ).decode("utf-8")
-
-                # ====================================================
-                # GLOBAL SAFETY RULES
-                # ====================================================
-
-                safety_rules = """
+# ------------------------------------------------------------
+# COMMON SAFETY PROMPT
+# ------------------------------------------------------------
+SAFETY_RULES = """
 You are AMRs Dental X-ray AI.
 
-You are an AI-assisted radiographic assessment system
-for qualified dental professionals.
+You are an AI-assisted radiographic assessment system for
+qualified dental professionals.
 
 CORE PRINCIPLE:
 The actual uploaded radiograph is the source of truth.
 
-Analyze only what is visually supported by the uploaded
-image.
-
 SAFETY RULES:
-
-1. Never invent or hallucinate findings.
-
-2. Never use random, fixed, default, or predetermined
-radiographic findings.
-
-3. Report only findings supported by actual image evidence.
-
-4. If something cannot be assessed reliably, say:
-"Not clearly assessable."
-
-5. Do not diagnose something merely because it is common.
-
-6. Do not force every item in a checklist into the report.
-
-7. Normal anatomy may be described only when it is actually
-visible and adequately assessable.
-
-8. Pathology should be reported only when actual visual
-evidence supports it.
-
-9. Do not create a list of diseases simply to say they are
-absent.
-
-10. Clearly distinguish:
-- Clearly visible
-- Possible
-- Unclear
-
-11. Use FDI tooth numbers only when the tooth can be
-reliably identified from anatomy.
-
-12. Never assign FDI numbers from image position alone.
-
-13. Do not provide definitive diagnosis.
-
-14. Do not prescribe medication.
-
-15. Do not provide definitive treatment planning.
-
-16. Do not use patient information to create radiographic
-findings.
-
-17. When uncertain, choose uncertainty rather than guessing.
-
-18. Final diagnosis and treatment decisions must be made by
-a qualified dental professional.
+1. Analyze ONLY the actual uploaded image.
+2. Never invent, hallucinate, or fabricate findings.
+3. Never use random, fixed, default, or predetermined findings.
+4. Report only findings supported by visible image evidence.
+5. If something cannot be assessed reliably, say:
+   "Not clearly assessable."
+6. Do not diagnose something merely because it is common.
+7. Do not force every checklist item into the report.
+8. Describe normal anatomy only when it is actually visible.
+9. Report pathology only when actual visual evidence supports it.
+10. Do not generate a long list of diseases merely to say absent.
+11. Clearly distinguish clearly visible, possible, and unclear findings.
+12. Use FDI tooth numbers only when reliably identifiable from anatomy.
+13. Never assign an FDI number from image position alone.
+14. Do not provide a definitive diagnosis.
+15. Do not prescribe medication.
+16. Do not provide definitive treatment planning.
+17. Do not use patient information to create radiographic findings.
+18. When uncertain, choose uncertainty rather than guessing.
+19. Final diagnosis and treatment decisions must be made by a qualified
+    dental professional.
 """
 
-                # ====================================================
-                # IOPA PROTOCOL
-                # ====================================================
-
-                if radiograph_type == "IOPA":
-
-                    radiograph_instructions = """
+# ------------------------------------------------------------
+# RADIOGRAPH PROMPTS
+# ------------------------------------------------------------
+IOPA_PROTOCOL = """
 IOPA SYSTEMATIC ASSESSMENT
 
 Assess the actual uploaded IOPA systematically.
@@ -410,8 +236,8 @@ DENTAL STRUCTURES:
 - Root morphology when visible
 
 PERIODONTAL STRUCTURES:
-- Lamina dura
-- Periodontal ligament space
+- Lamina dura when visible
+- Periodontal ligament space when visible
 - Alveolar crest
 - Obvious periodontal bone loss
 
@@ -426,35 +252,22 @@ OTHER:
 - Other obvious abnormalities
 
 Do not automatically label a periapical lesion as abscess,
-granuloma, or cyst unless the image provides sufficient
-evidence. Describe the radiographic appearance when exact
-diagnosis is uncertain.
+granuloma, or cyst when the image does not support that distinction.
+Describe the radiographic appearance and uncertainty.
 """
 
-                # ====================================================
-                # OPG PROTOCOL
-                # ====================================================
-
-                elif radiograph_type == "OPG":
-
-                    radiograph_instructions = """
+OPG_PROTOCOL = """
 OPG SYSTEMATIC PANORAMIC ASSESSMENT
 
-Perform a systematic panoramic assessment from one side
-to the other and then review the whole image.
+Perform a systematic panoramic assessment from one side to the
+other and then review the entire image.
 
-IMPORTANT:
-The following are TARGETS TO INSPECT, not findings that
-must appear in the report.
+The following are TARGETS TO INSPECT, not findings that must
+appear in the report.
 
-Report only what is actually visible.
-
---------------------------------------------------
 1. IMAGE QUALITY AND ARTIFACTS
---------------------------------------------------
-
-Assess:
-- Patient positioning
+Inspect:
+- Positioning
 - Rotation
 - Head tilt
 - Anteroposterior positioning
@@ -466,16 +279,11 @@ Assess:
 - Superimposition
 - Ghost images
 
-Ghost images are artifacts, not pathology.
+Ghost images are artifacts, not pathology. Report them only
+when an actual artifact is visible.
 
-Report a ghost image only when an actual artifact is visible.
-
---------------------------------------------------
 2. ANATOMICAL LANDMARKS
---------------------------------------------------
-
 When actually visible, inspect:
-
 - Incisive foramen
 - Median palatal suture
 - Nasal fossa
@@ -499,15 +307,11 @@ When actually visible, inspect:
 - Glossopalatal air space
 - Nasopharyngeal air space
 
-Do not force identification of a landmark that is not
-adequately visualized.
+Do not force identification of a landmark that is not adequately
+visualized.
 
---------------------------------------------------
 3. DENTITION
---------------------------------------------------
-
 Inspect:
-
 - Present teeth
 - Missing teeth when reliably evident
 - Unerupted teeth
@@ -524,12 +328,8 @@ Inspect:
 
 Use FDI numbering only when anatomically reliable.
 
---------------------------------------------------
 4. PERIODONTAL STRUCTURES
---------------------------------------------------
-
 Inspect:
-
 - Alveolar crest
 - General alveolar bone level
 - Obvious horizontal bone loss
@@ -538,32 +338,19 @@ Inspect:
 
 Do not overcall subtle bone-level changes.
 
---------------------------------------------------
 5. PERIAPICAL / DENTOALVEOLAR FINDINGS
---------------------------------------------------
-
-Look for actual visual evidence of:
-
+Look for actual evidence of:
 - Periapical radiolucency
 - Periapical radiopacity
 - Inflammatory-looking periapical changes
 - Root abnormalities
 - Other dentoalveolar abnormalities
 
-Do not automatically call a lesion:
-- Abscess
-- Granuloma
-- Radicular cyst
+Do not automatically call a lesion an abscess, granuloma,
+or radicular cyst unless the image supports that conclusion.
 
-If exact diagnosis is uncertain, describe the radiographic
-appearance and location conservatively.
-
---------------------------------------------------
 6. ODONTOGENIC CYSTS / TUMORS / LESIONS
---------------------------------------------------
-
 Inspect for actual image-supported evidence of:
-
 - Dentigerous cyst
 - Radicular cyst
 - Odontogenic keratocyst (OKC)
@@ -571,42 +358,32 @@ Inspect for actual image-supported evidence of:
 - Odontome
 - Other odontogenic lesions
 
-These are screening targets only.
+These are screening targets only. Do not report them merely
+because they are listed here.
 
-Do not report them merely because they are listed here.
-
-If a lesion is visible but exact diagnosis is uncertain,
+If a lesion is visible but its exact diagnosis is uncertain,
 describe:
-
 - Radiolucent / radiopaque / mixed appearance
 - Location
 - Relationship to teeth
-- Borders
-- Effect on surrounding structures
+- Borders if visible
+- Effect on surrounding structures if visible
 - Confidence
 
---------------------------------------------------
 7. MAXILLA AND MAXILLARY SINUSES
---------------------------------------------------
-
 When visible, inspect:
-
 - Maxillary bone
 - Maxillary sinus
 - Sinus outline
 - Obvious opacification
 - Air-fluid level
-- Gross mucosal thickening
+- Gross mucosal thickening when clearly visible
 - Other obvious abnormalities
 
 Do not provide a definitive medical sinus diagnosis.
 
---------------------------------------------------
 8. MANDIBLE
---------------------------------------------------
-
-Inspect when visible:
-
+When visible, inspect:
 - Body
 - Inferior border
 - Ramus
@@ -617,12 +394,8 @@ Inspect when visible:
 - Mental foramina
 - Other obvious abnormalities
 
---------------------------------------------------
 9. TMJ / CONDYLES
---------------------------------------------------
-
 When adequately visualized, inspect:
-
 - Condylar size
 - Condylar shape
 - Gross asymmetry
@@ -630,15 +403,11 @@ When adequately visualized, inspect:
 - Obvious enlargement
 - Obvious reduction in size
 
-Do not definitively diagnose condylar hyperplasia or
-hypoplasia from an OPG alone.
+Do not definitively diagnose condylar hyperplasia or hypoplasia
+from an OPG alone.
 
---------------------------------------------------
 10. BONY ABNORMALITIES
---------------------------------------------------
-
-Inspect for actual visual evidence of:
-
+Inspect for actual evidence of:
 - Osteomyelitis-related changes
 - Fibrous-dysplasia-like changes
 - Other radiolucent lesions
@@ -649,34 +418,16 @@ Inspect for actual visual evidence of:
 
 Do not diagnose from vague density changes alone.
 
---------------------------------------------------
-OPG REPORTING RULE
---------------------------------------------------
-
-Do NOT output a huge checklist of diseases with "absent".
-
-Instead:
-
-1. Describe relevant normal anatomy that is actually visible.
-2. Report abnormalities only when visually supported.
-3. Do not invent missing teeth.
-4. Do not invent impacted teeth.
-5. Do not invent lesions.
-6. If a region cannot be evaluated, state the limitation.
-7. Choose uncertainty instead of guessing.
+OPG REPORTING RULE:
+Do not output a huge checklist of diseases with "absent".
+Describe relevant anatomy actually visualized and report only
+actual abnormalities supported by the image.
 """
 
-                # ====================================================
-                # BITEWING PROTOCOL
-                # ====================================================
-
-                elif radiograph_type == "Bitewing":
-
-                    radiograph_instructions = """
+BITEWING_PROTOCOL = """
 BITEWING SYSTEMATIC ASSESSMENT
 
 Inspect:
-
 - Interproximal surfaces
 - Obvious interproximal caries
 - Occlusal surfaces when visible
@@ -686,21 +437,13 @@ Inspect:
 - Obvious calculus when visible
 - Other clearly visible findings
 
-Do not label subtle radiolucencies as caries without
-adequate visual evidence.
+Do not label subtle radiolucencies as caries without evidence.
 """
 
-                # ====================================================
-                # OCCLUSAL PROTOCOL
-                # ====================================================
-
-                elif radiograph_type == "Occlusal":
-
-                    radiograph_instructions = """
+OCCLUSAL_PROTOCOL = """
 OCCLUSAL RADIOGRAPH SYSTEMATIC ASSESSMENT
 
 Inspect:
-
 - Teeth
 - Unerupted/developing teeth
 - Jaw structures
@@ -714,24 +457,14 @@ Inspect:
 Report only actual image-supported findings.
 """
 
-                # ====================================================
-                # FACIAL BONE / FRACTURE PROTOCOL
-                # ====================================================
-
-                elif radiograph_type == "Facial radiograph":
-
-                    radiograph_instructions = """
+FACIAL_PROTOCOL = """
 FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT
 
-The main purpose is conservative assessment of facial
+The main purpose is conservative assessment of visible facial
 bones and screening for obvious traumatic bony abnormalities.
 
---------------------------------------------------
 1. IMAGE QUALITY
---------------------------------------------------
-
 Assess:
-
 - Positioning
 - Rotation
 - Exposure
@@ -739,16 +472,10 @@ Assess:
 - Motion
 - Cropping
 - Superimposition
+- Whether relevant facial bones are adequately included
 
-State whether the relevant facial bones are adequately
-visualized.
-
---------------------------------------------------
 2. FACIAL BONES
---------------------------------------------------
-
 When included and visible, inspect:
-
 - Nasal bones
 - Nasal septum
 - Orbital margins
@@ -762,12 +489,8 @@ When included and visible, inspect:
 - Alveolar processes
 - Mandible if included
 
---------------------------------------------------
 3. FRACTURE SCREENING
---------------------------------------------------
-
 Look for actual evidence of:
-
 - Fracture line
 - Cortical discontinuity
 - Step deformity
@@ -777,25 +500,19 @@ Look for actual evidence of:
 - Other obvious traumatic bony abnormalities
 
 If convincing evidence is present, describe:
-
 - Location
 - Visible fracture features
 - Displacement if visible
 - Confidence
 
 If suspicious but insufficient:
-
-"Possible fracture — requires professional radiographic
-and clinical correlation."
+"Possible fracture — requires professional radiographic and
+clinical correlation."
 
 Never call an uncertain fracture confirmed.
 
---------------------------------------------------
 4. ASSOCIATED FINDINGS
---------------------------------------------------
-
 When actually visible, inspect for:
-
 - Maxillary sinus opacification
 - Air-fluid level
 - Radiographically visible soft-tissue swelling
@@ -803,46 +520,276 @@ When actually visible, inspect for:
 
 Do not automatically attribute these findings to trauma.
 
---------------------------------------------------
 5. LIMITATIONS
---------------------------------------------------
-
 If a facial region is not adequately visualized, state:
-
 "Not reliably assessable on this radiograph."
 
-Do not assume that a fracture is absent merely because
-the region cannot be evaluated.
-
+Do not assume a fracture is absent merely because the region
+cannot be evaluated.
 Do not provide definitive fracture treatment or management.
 """
 
-                # ====================================================
-                # OTHER PROTOCOL
-                # ====================================================
-
-                else:
-
-                    radiograph_instructions = """
+OTHER_PROTOCOL = """
 OTHER / UNCLASSIFIED RADIOGRAPH
 
-First determine whether the uploaded image appears to be
-a dental or maxillofacial radiograph.
+First determine whether the uploaded image appears to be a
+dental or maxillofacial radiograph.
 
 State whether the selected type appears compatible.
 
 If uncertain, state:
-
 "Radiograph type cannot be reliably classified."
 
 Then describe only:
-
 - Clearly visible structures
 - Actual image-supported findings
 - Important limitations
 
-Do not force a diagnosis.
-Do not invent missing structures.
+Do not force a diagnosis or invent missing structures.
 """
 
-         
+def get_protocol(selected_type):
+    if selected_type == "IOPA":
+        return IOPA_PROTOCOL
+    if selected_type == "OPG":
+        return OPG_PROTOCOL
+    if selected_type == "Bitewing":
+        return BITEWING_PROTOCOL
+    if selected_type == "Occlusal":
+        return OCCLUSAL_PROTOCOL
+    if selected_type == "Facial radiograph":
+        return FACIAL_PROTOCOL
+    return OTHER_PROTOCOL
+
+def build_prompt(selected_type):
+    protocol = get_protocol(selected_type)
+
+    return SAFETY_RULES + "\n\n" + protocol + f"""
+
+SELECTED RADIOGRAPH TYPE:
+{selected_type}
+
+Analyze the actual uploaded image.
+
+The uploaded image is the ONLY source of radiographic truth.
+
+Do not use patient name, OP number, age, or sex to create
+radiographic findings.
+
+Do not assume a pathology exists because it is included
+in the protocol.
+
+Do not generate a fixed list of absent diseases.
+
+REPORT FORMAT:
+
+# AMRs Dental X-ray AI
+
+## Provisional Radiographic Assessment
+
+### 1. Image Quality
+State:
+- Adequate / Limited / Poor
+- Reason
+- Important technical limitations
+
+### 2. Radiograph Type
+State:
+- Selected type
+- Whether the image appears compatible
+- Any uncertainty
+
+### 3. Anatomical Structures Actually Visualized
+Describe relevant structures that are genuinely visible
+and assessable.
+
+### 4. Teeth / Dentition
+Describe actual visible dental findings.
+Use FDI tooth number only when reliably identifiable.
+
+### 5. Radiographic Findings
+Report ONLY actual abnormalities supported by image evidence.
+
+For each finding:
+- Finding:
+- Location:
+- Confidence: High / Moderate / Low
+- Evidence visible on image:
+
+If there are no definite abnormal findings AND the image
+is adequately assessable, state:
+"No definite abnormal radiographic finding is identified
+from the uploaded image."
+
+Do not use that statement if important regions are
+inadequately assessable.
+
+### 6. Possible / Uncertain Findings
+Include this section only when genuine image-supported
+uncertainty exists.
+
+For suspected fracture use:
+"Possible fracture — requires professional radiographic
+and clinical correlation."
+
+### 7. Image Artifacts / Limitations
+Mention only actual:
+- Ghost images
+- Motion
+- Distortion
+- Superimposition
+- Cropping
+- Positioning problems
+- Exposure problems
+
+### 8. Areas Not Reliably Assessable
+State regions that cannot be evaluated because of image
+quality, cropping, positioning, superimposition, or other
+limitations.
+
+### 9. Provisional Impression
+Give a short conservative summary based ONLY on the
+uploaded image.
+
+Do not provide a definitive diagnosis.
+
+### 10. Suggested Professional Review
+Mention relevant areas that should be reviewed by a qualified
+dental professional or radiologist.
+
+Do not provide definitive treatment.
+
+FINAL STATEMENT:
+
+"This is an AI-assisted provisional radiographic assessment
+and not a definitive diagnosis. Final interpretation,
+diagnosis and treatment decisions must be made by a qualified
+dental professional."
+"""
+
+# ------------------------------------------------------------
+# IMAGE + ANALYSIS
+# ------------------------------------------------------------
+if xray is not None:
+
+    st.success("✅ X-ray uploaded successfully.")
+
+    st.markdown(
+        '<div class="section">🖼️ X-ray Preview</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.image(
+        xray,
+        caption="Uploaded Dental Radiograph",
+        use_container_width=True,
+    )
+
+    st.markdown(
+        f"""
+        <div class="info-box">
+        <b>File:</b> {xray.name}<br>
+        <b>Type:</b> {xray.type}<br>
+        <b>Size:</b> {xray.size / 1024:.1f} KB
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div class="section">🤖 AI Assessment</div>',
+        unsafe_allow_html=True,
+    )
+
+    analyze = st.button(
+        "🔍 Analyze X-ray",
+        use_container_width=True,
+        disabled=(
+            st.session_state.analysis_count
+            >= DAILY_ANALYSIS_LIMIT
+        ),
+    )
+
+    if analyze:
+
+        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
+            st.warning(
+                "⏳ Daily AI analysis limit reached. "
+                "Please try again tomorrow."
+            )
+        else:
+
+            api_key = st.secrets.get("GEMINI_API_KEY")
+
+            if not api_key:
+                st.error("❌ GEMINI_API_KEY was not found.")
+                st.info(
+                    "Open Streamlit Secrets and configure "
+                    "GEMINI_API_KEY."
+                )
+            else:
+
+                mime_type = xray.type
+
+                if mime_type not in ["image/jpeg", "image/png"]:
+                    st.error("❌ Unsupported image format.")
+                else:
+
+                    try:
+
+                        client = genai.Client(api_key=api_key)
+
+                        image_bytes = xray.getvalue()
+
+                        image_base64 = base64.b64encode(
+                            image_bytes
+                        ).decode("utf-8")
+
+                        final_prompt = build_prompt(
+                            radiograph_type
+                        )
+
+                        with st.spinner(
+                            "🔬 Analyzing the uploaded radiograph..."
+                        ):
+
+                            interaction = client.interactions.create(
+                                model=MODEL_NAME,
+                                input=[
+                                    {
+                                        "type": "image",
+                                        "mime_type": mime_type,
+                                        "data": image_base64,
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": final_prompt,
+                                    },
+                                ],
+                            )
+
+                        result_text = getattr(
+                            interaction,
+                            "output_text",
+                            None,
+                        )
+
+                        if result_text:
+
+                            st.session_state.analysis_count += 1
+
+                            st.success(
+                                "✅ AI assessment completed."
+                            )
+
+                            st.markdown(
+                                '<div class="section">'
+                                '📋 Assessment Report'
+                                '</div>',
+                                unsafe_allow_html=True,
+                            )
+
+                            st.markdown(result_text)
+
+                            st.markdown(
+               
