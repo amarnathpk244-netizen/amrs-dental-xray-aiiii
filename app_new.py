@@ -597,97 +597,134 @@ def get_protocol(selected_type):
 def build_prompt(selected_type):
     protocol = get_protocol(selected_type)
 
-    report_instructions = (
-        "\n\nSELECTED RADIOGRAPH TYPE:\n" + selected_type +
-        "\n\nAnalyze the actual uploaded image. The uploaded image is the ONLY "
-        "source of radiographic truth.\n\n"
-        "Do not use patient information, filename, selected diagnosis, or "
-        "assumptions to create findings. Never invent or hallucinate findings. "
-        "Every positive finding must have visible image evidence.\n\n"
-        "Separate OBSERVATION from INTERPRETATION. Re-check every positive "
-        "finding against the image before reporting it. If image quality, "
-        "projection, overlap, cropping, or resolution prevents assessment, "
-        "say Not clearly assessable. Do not call an inadequately visualized "
-        "structure normal.\n\n"
-        "Use FDI tooth numbers only when anatomically reliable. Do not infer "
-        "laterality from viewer position alone. Do not confirm a fracture "
-        "unless visible evidence such as a fracture line, cortical "
-        "discontinuity, step deformity, displacement, or abnormal alignment "
-        "supports it.\n\n"
-        "REPORT FORMAT:\n"
-        "# AMRs Dental X-ray AI\n\n"
-        "## Provisional Radiographic Assessment\n\n"
-        "### 1. Image Quality\n"
-        "State Adequate / Limited / Poor, reason, and technical limitations.\n\n"
-        "### 2. Radiograph Type\n"
-        "State selected type, whether compatible with the image, and uncertainty.\n\n"
-        "### 3. Anatomical Structures Actually Visualized\n"
-        "Describe only structures genuinely visible and assessable.\n\n"
-        "### 4. Teeth / Dentition\n"
-        "Describe actual visible dental findings. Use FDI only when reliable.\n\n"
-        "### 5. Radiographic Findings\n"
-        "Report ONLY abnormalities supported by image evidence. For each finding "
-        "state Observation, Location, Laterality, Interpretation, Confidence, "
-        "Evidence visible on image, and Important limitation.\n\n"
-        "### 6. Possible / Uncertain Findings\n"
-        "Include only genuine image-supported uncertainty. For a suspected "
-        "fracture say: Possible fracture — requires professional radiographic "
-        "and clinical correlation.\n\n"
-        "### 7. Image Artifacts / Limitations\n"
-        "Mention only actual artifacts or technical limitations.\n\n"
-        "### 8. Areas Not Reliably Assessable\n"
-        "State regions that cannot be evaluated and why.\n\n"
-        "### 9. Provisional Impression\n"
-        "Give a short, conservative summary based ONLY on the uploaded image. "
-        "Do not provide a definitive diagnosis.\n\n"
-        "### 10. Suggested Professional Review\n"
-        "Mention relevant areas for review by a qualified dental professional "
-        "or radiologist. Do not provide definitive treatment.\n\n"
-        "FINAL STATEMENT:\n"
-        "This is an AI-assisted provisional radiographic assessment and not a "
-        "definitive diagnosis. Final interpretation, diagnosis and treatment "
-        "decisions must be made by a qualified dental professional."
-    )
-    return SAFETY_RULES + "\n\n" + protocol + report_instructions
+    return SAFETY_RULES + "\n\n" + protocol + f"""
 
-# ------------------------------------------------------------
-# IMAGE + ANALYSIS
-# ------------------------------------------------------------
-if xray is not None:
+SELECTED RADIOGRAPH TYPE:
+{selected_type}
 
-    st.success("✅ X-ray uploaded successfully.")
+Analyze the actual uploaded image.
 
-    st.markdown(
-        '<div class="section">🖼️ X-ray Preview</div>',
-        unsafe_allow_html=True,
-    )
+The uploaded image is the ONLY source of radiographic truth.
 
-    st.image(
-        xray,
-        caption="Uploaded Dental Radiograph",
-        use_container_width=True,
-    )
+Do not use patient name, OP number, age, or sex to create
+radiographic findings.
 
-    st.markdown(
-        f"""
-        <div class="info-box">
-        <b>File:</b> {xray.name}<br>
-        <b>Type:</b> {xray.type}<br>
-        <b>Size:</b> {xray.size / 1024:.1f} KB
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+Do not assume a pathology exists because it is included
+in the protocol.
 
-    st.markdown(
-        '<div class="section">🤖 AI Assessment</div>',
-        unsafe_allow_html=True,
-    )
+Do not generate a fixed list of absent diseases.
 
-        analyze = st.button("🔍 Analyze X-ray")
-  if analyze:
-        use_container_width=True,
-       analyze = st.button(
-    "🔍 Analyze X-ray",
-    use_container_width=True,
-) 
+ACCURACY-FIRST REPORTING METHOD:
+Use this sequence internally:
+A. OBSERVE: identify only structures and abnormalities actually visible.
+B. VERIFY: re-check each proposed abnormality against the image.
+C. LOCALIZE: give location and laterality only when reliably established.
+D. QUALIFY: label the finding as definite visible observation, possible,
+   or not reliably assessable.
+E. INTERPRET: provide a conservative radiographic interpretation only when
+   the visible evidence supports it.
+F. LIMIT: explicitly state important regions that cannot be assessed.
+
+For every abnormal finding, include the specific visible evidence that
+supports it. If you cannot point to visible evidence in the uploaded image,
+do not report the finding.
+
+Avoid absolute language such as "confirmed", "definitely", or "consistent
+with" when the image only supports a suspicious/possible finding. Prefer
+"radiographic appearance is suspicious for..." or "features may represent..."
+when appropriate.
+
+Do not invent clinical symptoms, examination findings, CT findings, or
+history. Do not state that a CT, clinical examination, or other test has
+already been performed. Such items may only be suggested as professional
+correlation when appropriate.
+
+REPORT FORMAT:
+
+# AMRs Dental X-ray AI
+
+## Provisional Radiographic Assessment
+
+### 1. Image Quality
+State:
+- Adequate / Limited / Poor
+- Reason
+- Important technical limitations
+
+### 2. Radiograph Type
+State:
+- Selected type
+- Whether the image appears compatible
+- Any uncertainty
+
+### 3. Anatomical Structures Actually Visualized
+Describe relevant structures that are genuinely visible
+and assessable.
+
+### 4. Teeth / Dentition
+Describe actual visible dental findings.
+Use FDI tooth number only when reliably identifiable.
+
+### 5. Radiographic Findings
+Report ONLY actual abnormalities supported by image evidence.
+
+For each finding:
+- Observation: What is directly visible on the image.
+- Location: Give the location only when reliably identifiable.
+- Laterality: Right / Left / Midline / Not reliably determined.
+- Interpretation: Conservative radiographic interpretation, if supported.
+- Confidence: High / Moderate / Low.
+- Evidence visible on image: Describe the actual visual feature supporting
+  the observation.
+- Important limitation: Mention any projectional or image-quality factor
+  that affects interpretation.
+
+If there are no definite abnormal findings AND the image
+is adequately assessable, state:
+"No definite abnormal radiographic finding is identified
+from the uploaded image."
+
+Do not use that statement if important regions are
+inadequately assessable.
+
+### 6. Possible / Uncertain Findings
+Include this section only when genuine image-supported
+uncertainty exists.
+
+For suspected fracture use:
+"Possible fracture — requires professional radiographic
+and clinical correlation."
+
+### 7. Image Artifacts / Limitations
+Mention only actual:
+- Ghost images
+- Motion
+- Distortion
+- Superimposition
+- Cropping
+- Positioning problems
+- Exposure problems
+
+### 8. Areas Not Reliably Assessable
+State regions that cannot be evaluated because of image
+quality, cropping, positioning, superimposition, or other
+limitations.
+
+### 9. Provisional Impression
+Give a short, conservative summary based ONLY on the uploaded image.
+Lead with the strongest directly visible observation. If an interpretation
+is uncertain, preserve that uncertainty in the impression.
+
+Do not provide a definitive diagnosis.
+
+### 10. Suggested Professional Review
+Mention relevant areas that should be reviewed by a qualified
+dental professional or radiologist.
+
+Do not provide definitive treatment.
+
+FINAL STATEMENT:
+
+"This is an AI-assisted provisional radiographic assessment
+and not a definitive diagnosis. Final interpretation,
+diagnosis and t
