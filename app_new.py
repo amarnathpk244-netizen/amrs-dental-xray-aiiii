@@ -360,7 +360,9 @@ Inspect:
 - Actual periapical abnormalities
 
 Use FDI numbering only when anatomically reliable.
-
+Never provide alternative FDI numbers such as "46 or 47".
+If the tooth cannot be reliably identified, write:
+"FDI tooth number not reliably determined."
 4. PERIODONTAL STRUCTURES
 Inspect:
 - Alveolar crest
