@@ -732,8 +732,13 @@ qualified dental professional."
 """
 if xray is not None:
     st.image(xray, caption="Uploaded X-ray", use_container_width=True)
+    st.markdown(
+        '<div class="section">🤖 AI Assessment</div>',
+        unsafe_allow_html=True,
+    )
 
-analyze = st.button("🔍 Analyze X-ray")
+    analyze = st.button("🔍 Analyze X-ray")
+
 
 if analyze:
     if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
