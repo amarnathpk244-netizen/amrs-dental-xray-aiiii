@@ -3,7 +3,6 @@ from datetime import date
 from google import genai
 import base64
 
-
 # ============================================================
 # PAGE CONFIG
 # ============================================================
@@ -14,14 +13,12 @@ st.set_page_config(
     layout="centered"
 )
 
-
 # ============================================================
 # SETTINGS
 # ============================================================
 
 DAILY_ANALYSIS_LIMIT = 3
 MODEL_NAME = "gemini-3.6-flash"
-
 
 # ============================================================
 # DAILY USAGE
@@ -36,7 +33,6 @@ if "usage_date" not in st.session_state:
 if st.session_state.usage_date != date.today():
     st.session_state.analysis_count = 0
     st.session_state.usage_date = date.today()
-
 
 # ============================================================
 # MOBILE UI
@@ -91,7 +87,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 # ============================================================
 # HEADER
 # ============================================================
@@ -108,15 +103,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 # ============================================================
 # USAGE STATUS
 # ============================================================
 
-remaining = (
-    DAILY_ANALYSIS_LIMIT
-    - st.session_state.analysis_count
-)
+remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
 
 if remaining > 0:
     st.info(
@@ -128,7 +119,6 @@ else:
         "⏳ Your 3 AI analyses for today have been used. "
         "Please try again tomorrow."
     )
-
 
 # ============================================================
 # PATIENT INFORMATION
@@ -176,7 +166,6 @@ examination_date = st.date_input(
     value=date.today()
 )
 
-
 # ============================================================
 # RADIOGRAPH TYPE
 # ============================================================
@@ -202,7 +191,6 @@ st.info(
     f"🩻 Selected radiograph: {radiograph_type}"
 )
 
-
 # ============================================================
 # X-RAY UPLOAD
 # ============================================================
@@ -218,16 +206,10 @@ st.info(
 
 xray = st.file_uploader(
     "📷 Choose X-ray image",
-    type=[
-        "jpg",
-        "jpeg",
-        "png"
-    ],
+    type=["jpg", "jpeg", "png"],
     accept_multiple_files=False,
-    key="dental_xray_upload",
-    label_visibility="visible"
+    key="dental_xray_upload"
 )
-
 
 # ============================================================
 # IMAGE PREVIEW
@@ -261,7 +243,6 @@ if xray is not None:
         unsafe_allow_html=True
     )
 
-
     # ========================================================
     # AI ANALYSIS
     # ========================================================
@@ -279,7 +260,6 @@ if xray is not None:
             >= DAILY_ANALYSIS_LIMIT
         )
     )
-
 
     # ========================================================
     # ANALYZE
@@ -311,7 +291,6 @@ if xray is not None:
                     api_key=api_key
                 )
 
-
                 # ====================================================
                 # IMAGE DATA
                 # ====================================================
@@ -330,18 +309,12 @@ if xray is not None:
 
                     st.stop()
 
-
-                # ====================================================
-                # BASE64 IMAGE
-                # ====================================================
-
                 image_base64 = base64.b64encode(
                     image_bytes
                 ).decode("utf-8")
 
-
                 # ====================================================
-                # GLOBAL SAFETY INSTRUCTIONS
+                # GLOBAL SAFETY RULES
                 # ====================================================
 
                 safety_rules = """
@@ -351,92 +324,73 @@ You are an AI-assisted radiographic assessment system
 for qualified dental professionals.
 
 CORE PRINCIPLE:
+The actual uploaded radiograph is the source of truth.
 
-Analyze the actual uploaded radiograph carefully and
-systematically, but report ONLY findings supported by
-visual evidence in the uploaded image.
+Analyze only what is visually supported by the uploaded
+image.
 
-IMPORTANT SAFETY RULES:
+SAFETY RULES:
 
-1. Analyze ONLY the actual uploaded X-ray image.
+1. Never invent or hallucinate findings.
 
-2. NEVER invent or hallucinate radiographic findings.
+2. Never use random, fixed, default, or predetermined
+radiographic findings.
 
-3. NEVER use random, fixed, default, or predetermined
-findings.
+3. Report only findings supported by actual image evidence.
 
-4. The image is the source of truth.
-
-5. Do not use patient name, OP number, age, sex, or
-other patient information to create radiographic findings.
-
-6. If a structure or finding is not visible or cannot
-be assessed reliably, say:
+4. If something cannot be assessed reliably, say:
 "Not clearly assessable."
 
-7. If image quality is poor, blurred, cropped, distorted,
-overexposed, underexposed, or otherwise inadequate,
-clearly state the limitation.
+5. Do not diagnose something merely because it is common.
 
-8. Do not diagnose something simply because it is common.
+6. Do not force every item in a checklist into the report.
 
-9. Do not force every item in a checklist into the report.
+7. Normal anatomy may be described only when it is actually
+visible and adequately assessable.
 
-10. A normal anatomical structure may be described only
-when it is actually visible and adequately assessable.
+8. Pathology should be reported only when actual visual
+evidence supports it.
 
-11. A pathology should be reported ONLY when there is
-actual visual evidence supporting that finding.
+9. Do not create a list of diseases simply to say they are
+absent.
 
-12. Do NOT create a list of absent pathologies simply
-because they were included in the assessment protocol.
-
-13. If no convincing evidence of a particular pathology
-is present, do not invent or imply that pathology.
-
-14. Clearly distinguish:
+10. Clearly distinguish:
 - Clearly visible
 - Possible
-- Unclear / Not reliably assessable
+- Unclear
 
-15. Do not assign an FDI tooth number unless the tooth
-can be reliably identified from visible anatomy.
+11. Use FDI tooth numbers only when the tooth can be
+reliably identified from anatomy.
 
-16. Never assign an FDI tooth number merely from the
-position of a tooth in the image.
+12. Never assign FDI numbers from image position alone.
 
-17. Do not provide a definitive diagnosis.
+13. Do not provide definitive diagnosis.
 
-18. Do not prescribe medication.
+14. Do not prescribe medication.
 
-19. Do not provide definitive treatment planning.
+15. Do not provide definitive treatment planning.
 
-20. When uncertain, choose uncertainty rather than guessing.
+16. Do not use patient information to create radiographic
+findings.
 
-21. Final diagnosis and treatment decisions must be made
-by a qualified dental professional.
+17. When uncertain, choose uncertainty rather than guessing.
 
-22. Only report findings that have actual visual evidence
-in the uploaded image.
+18. Final diagnosis and treatment decisions must be made by
+a qualified dental professional.
 """
 
-
                 # ====================================================
-                # RADIOGRAPH-SPECIFIC PROTOCOLS
+                # IOPA PROTOCOL
                 # ====================================================
 
                 if radiograph_type == "IOPA":
 
                     radiograph_instructions = """
-IOPA SYSTEMATIC PROTOCOL
+IOPA SYSTEMATIC ASSESSMENT
 
-The selected radiograph is IOPA.
+Assess the actual uploaded IOPA systematically.
 
-Systematically inspect the actual image.
-
-Assess, when visible and adequately assessable:
-
-1. Image quality
+IMAGE QUALITY:
 - Exposure
 - Contrast
 - Sharpness
@@ -446,131 +400,113 @@ Assess, when visible and adequately assessable:
 - Distortion
 - Other technical limitations
 
-2. Teeth
-- Crown
-- Root
-- Number of visible teeth
+DENTAL STRUCTURES:
+- Crowns
+- Roots
+- Visible teeth
 - Obvious caries
 - Obvious restorations
 - Gross tooth abnormalities
+- Root morphology when visible
 
-3. Periodontal structures
-- Lamina dura when visible
-- Periodontal ligament space when visible
+PERIODONTAL STRUCTURES:
+- Lamina dura
+- Periodontal ligament space
 - Alveolar crest
 - Obvious periodontal bone loss
 
-4. Periapical region
+PERIAPICAL REGION:
 - Periapical radiolucency
 - Periapical radiopacity
 - Root abnormalities
-- Other clearly visible periapical findings
+- Other visible periapical findings
 
-5. Other structures
+OTHER:
 - Impacted or unerupted teeth when clearly visible
-- Other obvious radiographic abnormalities
+- Other obvious abnormalities
 
-IMPORTANT:
-
-Report only findings actually demonstrated by the image.
-
-If a finding is uncertain, clearly label it as possible
-or not clearly assessable.
-
-Use FDI tooth numbers only when reliably identifiable.
+Do not automatically label a periapical lesion as abscess,
+granuloma, or cyst unless the image provides sufficient
+evidence. Describe the radiographic appearance when exact
+diagnosis is uncertain.
 """
 
+                # ====================================================
+                # OPG PROTOCOL
+                # ====================================================
 
                 elif radiograph_type == "OPG":
 
                     radiograph_instructions = """
-OPG SYSTEMATIC PANORAMIC PROTOCOL
+OPG SYSTEMATIC PANORAMIC ASSESSMENT
 
-The selected radiograph is an OPG.
-
-Perform a systematic assessment from one side of the
-image to the other, while also reviewing the image as
-a whole.
+Perform a systematic panoramic assessment from one side
+to the other and then review the whole image.
 
 IMPORTANT:
+The following are TARGETS TO INSPECT, not findings that
+must appear in the report.
 
-The following are TARGET STRUCTURES and TARGET
-ABNORMALITIES to inspect for.
+Report only what is actually visible.
 
-They are NOT a list of findings that must be reported.
-
-Report a structure only when actually visible.
-
-Report a pathology only when actual visual evidence
-supports it.
-
-Do NOT write a long list saying every pathology is absent.
-
-------------------------------------------------------------
-A. IMAGE QUALITY AND PANORAMIC ARTIFACTS
-------------------------------------------------------------
+--------------------------------------------------
+1. IMAGE QUALITY AND ARTIFACTS
+--------------------------------------------------
 
 Assess:
-
 - Patient positioning
-- Midline alignment
 - Rotation
 - Head tilt
 - Anteroposterior positioning
-- Magnification
-- Geometric distortion
-- Motion blur
 - Exposure
+- Motion blur
 - Cropping
-- Ghost images
-- Other panoramic artifacts
+- Magnification
+- Distortion
 - Superimposition
+- Ghost images
 
-Ghost images are ARTIFACTS, not diagnoses.
+Ghost images are artifacts, not pathology.
 
-Report a ghost image only if an actual ghost image or
-panoramic artifact is visible.
+Report a ghost image only when an actual artifact is visible.
 
-------------------------------------------------------------
-B. MAXILLOFACIAL ANATOMICAL STRUCTURES
-------------------------------------------------------------
+--------------------------------------------------
+2. ANATOMICAL LANDMARKS
+--------------------------------------------------
 
-Inspect the following structures when visible:
+When actually visible, inspect:
 
 - Incisive foramen
 - Median palatal suture
 - Nasal fossa
 - Nasal septum
-- Maxillary sinuses
+- Maxillary sinus
 - Zygomatic process of maxilla
-- Zygomatic arches
+- Zygomatic arch
 - Pterygoid plates
-- Pterygoid hamulus / hamulus
-- Coronoid processes
-- Mandibular condyles
+- Pterygoid hamulus
+- Coronoid process
+- Condyles
 - Mandibular ramus
 - Mandibular angle
-- Inferior border of mandible
-- Mental foramina
+- Lingual foramen
+- Genial tubercles
+- Mental foramen
 - Inferior alveolar canal
 - Mylohyoid ridge
 - External oblique ridge
-- Lingual foramen when visible
-- Genial tubercles when visible
+- Inferior border of mandible
 - Glossopalatal air space
 - Nasopharyngeal air space
 
-Do NOT force identification of a structure if it is not
+Do not force identification of a landmark that is not
 adequately visualized.
 
-If a structure is visible and relevant, describe its
-appearance conservatively.
+--------------------------------------------------
+3. DENTITION
+--------------------------------------------------
 
-------------------------------------------------------------
-C. DENTITION
-------------------------------------------------------------
-
-Systematically inspect:
+Inspect:
 
 - Present teeth
 - Missing teeth when reliably evident
@@ -584,16 +520,13 @@ Systematically inspect:
 - Obvious caries
 - Obvious restorations
 - Gross root abnormalities
-- Obvious periapical abnormalities
+- Actual periapical abnormalities
 
-Use FDI numbering ONLY when the tooth can be reliably
-identified anatomically.
+Use FDI numbering only when anatomically reliable.
 
-Never infer an FDI number only from image position.
-
-------------------------------------------------------------
-D. PERIODONTAL STRUCTURES
-------------------------------------------------------------
+--------------------------------------------------
+4. PERIODONTAL STRUCTURES
+--------------------------------------------------
 
 Inspect:
 
@@ -603,111 +536,76 @@ Inspect:
 - Obvious vertical/angular bone loss
 - Other clearly visible periodontal changes
 
-Do not overcall mild or subtle bone-level changes.
+Do not overcall subtle bone-level changes.
 
-------------------------------------------------------------
-E. PERIAPICAL AND DENTOALVEOLAR ABNORMALITIES
-------------------------------------------------------------
+--------------------------------------------------
+5. PERIAPICAL / DENTOALVEOLAR FINDINGS
+--------------------------------------------------
 
 Look for actual visual evidence of:
 
 - Periapical radiolucency
 - Periapical radiopacity
-- Obvious inflammatory-looking periapical changes
+- Inflammatory-looking periapical changes
 - Root abnormalities
 - Other dentoalveolar abnormalities
 
-Do NOT automatically label a radiolucency as:
+Do not automatically call a lesion:
 - Abscess
 - Granuloma
 - Radicular cyst
 
-If the image does not allow reliable differentiation,
-describe the radiographic appearance and uncertainty.
+If exact diagnosis is uncertain, describe the radiographic
+appearance and location conservatively.
 
-------------------------------------------------------------
-F. ODONTOGENIC CYSTS / TUMORS / LESIONS
-------------------------------------------------------------
+--------------------------------------------------
+6. ODONTOGENIC CYSTS / TUMORS / LESIONS
+--------------------------------------------------
 
-Inspect for actual visual evidence of:
+Inspect for actual image-supported evidence of:
 
 - Dentigerous cyst
 - Radicular cyst
 - Odontogenic keratocyst (OKC)
 - Ameloblastoma
-- Odontomes
+- Odontome
 - Other odontogenic lesions
 
-These diagnoses must NOT be generated merely because
-they are listed here.
+These are screening targets only.
 
-If an actual lesion is visible but its exact diagnosis
-cannot be established from the image, describe:
+Do not report them merely because they are listed here.
+
+If a lesion is visible but exact diagnosis is uncertain,
+describe:
 
 - Radiolucent / radiopaque / mixed appearance
 - Location
-- Approximate relationship to teeth or anatomical structures
-- Borders if visible
-- Effect on surrounding structures if visible
+- Relationship to teeth
+- Borders
+- Effect on surrounding structures
 - Confidence
 
-Use conservative language.
+--------------------------------------------------
+7. MAXILLA AND MAXILLARY SINUSES
+--------------------------------------------------
 
-------------------------------------------------------------
-G. JAW AND OTHER BONY ABNORMALITIES
-------------------------------------------------------------
+When visible, inspect:
 
-Inspect for actual visual evidence of:
-
-- Osteomyelitis-related changes
-- Fibrous dysplasia-like osseous changes
-- Other obvious radiopaque lesions
-- Other obvious radiolucent lesions
-- Cortical expansion or destruction when clearly visible
-- Gross bone abnormalities
-
-Do NOT diagnose these conditions solely from vague
-or nonspecific density changes.
-
-------------------------------------------------------------
-H. TMJ / CONDYLES
-------------------------------------------------------------
-
-When adequately visualized, inspect:
-
-- Condylar shape
-- Condylar size
-- Gross asymmetry
-- Gross deformity
-- Obvious hyperplasia-like enlargement
-- Obvious hypoplasia-like reduction
-
-Do not definitively diagnose condylar hyperplasia or
-hypoplasia from OPG appearance alone.
-
-If asymmetry is visible, describe the observed asymmetry
-and recommend professional correlation.
-
-------------------------------------------------------------
-I. MAXILLARY SINUSES
-------------------------------------------------------------
-
-When adequately visualized, inspect:
-
-- General aeration
+- Maxillary bone
+- Maxillary sinus
+- Sinus outline
 - Obvious opacification
-- Obvious air-fluid level
-- Gross mucosal thickening when clearly visible
-- Cortical outline
+- Air-fluid level
+- Gross mucosal thickening
 - Other obvious abnormalities
 
 Do not provide a definitive medical sinus diagnosis.
 
-------------------------------------------------------------
-J. MANDIBLE
-------------------------------------------------------------
+--------------------------------------------------
+8. MANDIBLE
+--------------------------------------------------
 
-Inspect:
+Inspect when visible:
 
 - Body
 - Inferior border
@@ -717,35 +615,65 @@ Inspect:
 - Cortical outline
 - Inferior alveolar canal
 - Mental foramina
-- Other visible structures
+- Other obvious abnormalities
 
-Report only actual visible abnormalities.
+--------------------------------------------------
+9. TMJ / CONDYLES
+--------------------------------------------------
 
-------------------------------------------------------------
+When adequately visualized, inspect:
+
+- Condylar size
+- Condylar shape
+- Gross asymmetry
+- Gross deformity
+- Obvious enlargement
+- Obvious reduction in size
+
+Do not definitively diagnose condylar hyperplasia or
+hypoplasia from an OPG alone.
+
+--------------------------------------------------
+10. BONY ABNORMALITIES
+--------------------------------------------------
+
+Inspect for actual visual evidence of:
+
+- Osteomyelitis-related changes
+- Fibrous-dysplasia-like changes
+- Other radiolucent lesions
+- Other radiopaque lesions
+- Cortical expansion
+- Cortical destruction
+- Other gross bony abnormalities
+
+Do not diagnose from vague density changes alone.
+
+--------------------------------------------------
 OPG REPORTING RULE
+--------------------------------------------------
 
-DO NOT produce a checklist containing every possible
-disease with "absent" beside it.
+Do NOT output a huge checklist of diseases with "absent".
 
 Instead:
 
-1. Identify what is actually visible.
-2. Identify genuine abnormalities supported by the image.
-3. Describe normal anatomical landmarks only when useful
-   and actually visible.
-4. If no definite abnormality is visible and the image is
-   adequately assessable, say so.
-5. If an area cannot be reliably assessed, state the limitation.
-6. Never guess.
+1. Describe relevant normal anatomy that is actually visible.
+2. Report abnormalities only when visually supported.
+3. Do not invent missing teeth.
+4. Do not invent impacted teeth.
+5. Do not invent lesions.
+6. If a region cannot be evaluated, state the limitation.
+7. Choose uncertainty instead of guessing.
 """
 
+                # ====================================================
+                # BITEWING PROTOCOL
+                # ====================================================
 
                 elif radiograph_type == "Bitewing":
 
                     radiograph_instructions = """
-BITEWING SYSTEMATIC PROTOCOL
-
-Assess only structures actually visible.
+BITEWING SYSTEMATIC ASSESSMENT
 
 Inspect:
 
@@ -762,13 +690,14 @@ Do not label subtle radiolucencies as caries without
 adequate visual evidence.
 """
 
+                # ====================================================
+                # OCCLUSAL PROTOCOL
+                # ====================================================
 
                 elif radiograph_type == "Occlusal":
 
                     radiograph_instructions = """
-OCCLUSAL RADIOGRAPH SYSTEMATIC PROTOCOL
-
-Assess only visible structures.
+OCCLUSAL RADIOGRAPH SYSTEMATIC ASSESSMENT
 
 Inspect:
 
@@ -782,33 +711,24 @@ Inspect:
 - Supernumerary teeth when clearly visible
 - Other clearly visible abnormalities
 
-Do not provide a definitive diagnosis from nonspecific
-radiographic appearances.
+Report only actual image-supported findings.
 """
 
+                # ====================================================
+                # FACIAL BONE / FRACTURE PROTOCOL
+                # ====================================================
 
                 elif radiograph_type == "Facial radiograph":
 
                     radiograph_instructions = """
-FACIAL BONE / TRAUMA SYSTEMATIC PROTOCOL
+FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT
 
-The selected radiograph is a facial radiograph.
+The main purpose is conservative assessment of facial
+bones and screening for obvious traumatic bony abnormalities.
 
-The primary purpose of this protocol is conservative
-radiographic assessment of visible facial bones and
-possible traumatic bony abnormalities.
-
-IMPORTANT:
-
-This is a screening/assessment protocol.
-
-A suspected fracture must NOT be presented as a confirmed
-fracture unless the radiographic evidence is sufficiently
-clear.
-
-------------------------------------------------------------
-A. IMAGE QUALITY
-------------------------------------------------------------
+--------------------------------------------------
+1. IMAGE QUALITY
+--------------------------------------------------
 
 Assess:
 
@@ -819,25 +739,110 @@ Assess:
 - Motion
 - Cropping
 - Superimposition
-- Whether the relevant facial bones are adequately included
 
-------------------------------------------------------------
-B. FACIAL BONY STRUCTURES
-------------------------------------------------------------
+State whether the relevant facial bones are adequately
+visualized.
 
-Inspect only where adequately visualized:
+--------------------------------------------------
+2. FACIAL BONES
+--------------------------------------------------
+
+When included and visible, inspect:
 
 - Nasal bones
 - Nasal septum
 - Orbital margins
-- Orbital walls when visible
+- Orbital walls
 - Zygomatic bones
 - Zygomatic arches
 - Zygomaticomaxillary region
 - Maxillary bones
 - Maxillary sinus walls
-- Frontal facial bone regions when included
-- Alveolar processes when included
-- Mandible when included
+- Frontal facial bone regions
+- Alveolar processes
+- Mandible if included
 
-----------------------------------------------
+--------------------------------------------------
+3. FRACTURE SCREENING
+--------------------------------------------------
+
+Look for actual evidence of:
+
+- Fracture line
+- Cortical discontinuity
+- Step deformity
+- Displacement
+- Abnormal alignment
+- Gross traumatic asymmetry
+- Other obvious traumatic bony abnormalities
+
+If convincing evidence is present, describe:
+
+- Location
+- Visible fracture features
+- Displacement if visible
+- Confidence
+
+If suspicious but insufficient:
+
+"Possible fracture — requires professional radiographic
+and clinical correlation."
+
+Never call an uncertain fracture confirmed.
+
+--------------------------------------------------
+4. ASSOCIATED FINDINGS
+--------------------------------------------------
+
+When actually visible, inspect for:
+
+- Maxillary sinus opacification
+- Air-fluid level
+- Radiographically visible soft-tissue swelling
+- Other associated abnormalities
+
+Do not automatically attribute these findings to trauma.
+
+--------------------------------------------------
+5. LIMITATIONS
+--------------------------------------------------
+
+If a facial region is not adequately visualized, state:
+
+"Not reliably assessable on this radiograph."
+
+Do not assume that a fracture is absent merely because
+the region cannot be evaluated.
+
+Do not provide definitive fracture treatment or management.
+"""
+
+                # ====================================================
+                # OTHER PROTOCOL
+                # ====================================================
+
+                else:
+
+                    radiograph_instructions = """
+OTHER / UNCLASSIFIED RADIOGRAPH
+
+First determine whether the uploaded image appears to be
+a dental or maxillofacial radiograph.
+
+State whether the selected type appears compatible.
+
+If uncertain, state:
+
+"Radiograph type cannot be reliably classified."
+
+Then describe only:
+
+- Clearly visible structures
+- Actual image-supported findings
+- Important limitations
+
+Do not force a diagnosis.
+Do not invent missing structures.
+"""
+
+         
