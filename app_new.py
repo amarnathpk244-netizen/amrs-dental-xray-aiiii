@@ -200,6 +200,19 @@ HIGH-ACCURACY ANALYSIS RULES:
 9. Do not call a structure normal unless it is adequately visualized.
 10. Do not call a lesion absent when the relevant region cannot be evaluated.
 11. Do not diagnose a disease merely from a single nonspecific appearance.
+12. Do not diagnose the biological cause of a periapical radiolucency
+    from the radiograph alone. If a periapical radiolucency is visible,
+    describe the radiographic appearance first. Do not automatically
+    label it as abscess, granuloma, cyst, periodontitis, rarefying
+    osteitis, or any other specific disease.
+
+13. Use cautious wording such as:
+    "Periapical radiolucency is visible at the root apex."
+    "Radiographic appearance may represent a periapical inflammatory
+    change; exact etiology cannot be determined from this image alone."
+
+14. Keep confidence for the visible radiographic observation separate
+    from confidence in the interpretation.
 12. When several diagnoses could explain an appearance, describe the
     radiographic appearance first and state the differential/uncertainty
     conservatively.
