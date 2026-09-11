@@ -730,4 +730,4 @@ RULES:
 - Do not infer skeletal diagnosis from soft-tissue appearance alone.
 - Do not provide definitive orthodontic diagnosis or treatment planning.
 """
-REPORT th
+
