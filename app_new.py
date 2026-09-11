@@ -976,6 +976,26 @@ unless previous radiographs are available for comparison.
 Do not assign severity such as mild, moderate, or severe to periapical
 lesions unless the requested grading is explicitly supported by a
 validated radiographic criterion.
+Do not use the words "persistent", "developing", "progressing",
+"regressing", "healed", or "worsening" for a radiographic lesion
+unless a previous radiograph is available for direct comparison.
+
+Do not infer the cause or source of a radiographic lesion from the
+image alone. In particular, do not describe a periapical lesion as
+"secondary endodontic involvement" or assign a specific biological
+cause unless the evidence clearly supports it.
+
+For alveolar bone loss, describe the visible radiographic bone level
+and pattern without automatically assigning severity such as mild,
+moderate, or severe unless a validated grading system is explicitly
+being applied.
+
+Do not describe bone loss as extending to a specific root level unless
+that extent is clearly and reliably visible on the image.
+
+When comparison with previous radiographs is unavailable, state:
+"Comparison with previous radiographs is not available; temporal
+change cannot be assessed."
 """
 if xray is not None:
     st.image(
