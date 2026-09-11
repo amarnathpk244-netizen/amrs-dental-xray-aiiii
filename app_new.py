@@ -262,6 +262,18 @@ and of sufficient quality for assessment.
 could be caused by an image artifact, positioning error, projection,
 superimposition, exposure problem, motion blur, or other technical
 limitation.
+29. Do not use clinical history, symptoms, trauma history, previous
+diagnoses, treatment history, or patient complaints to create or
+strengthen a radiographic finding.
+
+Radiographic findings must be based on visible evidence in the
+uploaded image only.
+
+If clinical information is unavailable, do not assume it.
+
+If a radiographic appearance requires clinical correlation, explicitly
+state:
+"Clinical correlation is recommended."
 
 Do not report an artifact as pathology.
 
