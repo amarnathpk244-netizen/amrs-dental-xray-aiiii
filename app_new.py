@@ -253,9 +253,7 @@ step deformity, displacement, or abnormal alignment.
 26. Do not determine right or left laterality from image position alone.
 Use an orientation marker or clearly identifiable anatomical orientation
 only when it is reliable.
-26. Do not determine right or left laterality from image position alone.
-Use an orientation marker or clearly identifiable anatomical orientation
-only when it is reliable.
+
 27. Do not report a structure as normal unless it is adequately visualized
 and of sufficient quality for assessment.
 28. Before reporting any abnormality, consider whether the appearance
@@ -265,10 +263,6 @@ limitation.
 29. Do not use clinical history, symptoms, trauma history, previous
 diagnoses, treatment history, or patient complaints to create or
 strengthen a radiographic finding.
-29. Do not use clinical history, symptoms, trauma history, previous
-diagnoses, treatment history, or patient complaints to create or
-strengthen a radiographic finding. Radiographic findings must be based
-on visible evidence in the uploaded image only.
 
 30. Separate direct radiographic OBSERVATION from INTERPRETATION.
 Describe what is visibly present before explaining what it may represent.
