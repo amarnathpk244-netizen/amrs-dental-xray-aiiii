@@ -253,6 +253,17 @@ step deformity, displacement, or abnormal alignment.
 26. Do not determine right or left laterality from image position alone.
 Use an orientation marker or clearly identifiable anatomical orientation
 only when it is reliable.
+26. Do not determine right or left laterality from image position alone.
+Use an orientation marker or clearly identifiable anatomical orientation
+only when it is reliable.
+
+If laterality cannot be established reliably, state:
+"Laterality cannot be reliably determined from this radiograph."
+
+Do not interpret letters, markers, or labels as right/left unless their
+meaning and orientation are clearly supported by the image.
+
+Never infer laterality from the patient's reported symptoms or history.
 
 If laterality cannot be established reliably, state:
 "Laterality cannot be reliably determined from this radiograph."
