@@ -139,44 +139,51 @@ examination_date = st.date_input(
 st.markdown(
     '<div class="section">🩻 Radiograph Type</div>',
     unsafe_allow_html=True,
-)
 
+)
 radiograph_type = st.selectbox(
     "Select radiograph type",
     [
         "IOPA",
-        "Lateral Cephalogram (Ceph)",
         "OPG",
         "Bitewing",
         "Occlusal",
         "Facial radiograph",
+        "Lateral Cephalogram (Ceph)",
         "Other / Not reliably classifiable",
     ],
 )
 
 st.info(f"🩻 Selected radiograph: {radiograph_type}")
 
-ceph_analysis = "Combined / All Analyses"
+
+# ------------------------------------------------------------
+# CEPHALOMETRIC ANALYSIS
+# Show ONLY when Lateral Cephalogram is selected
+# ------------------------------------------------------------
+
+ceph_analysis = None
+
 if radiograph_type == "Lateral Cephalogram (Ceph)":
-    st.markdown("### 📐 Cephalometric Analysis")
-CEPH_ANALYSES = [
-    "Steiner",
-    "Downs",
-    "McNamara",
-    "Tweed",
-    "Wits Appraisal",
-    "Jarabak",
-    "Soft Tissue",
-    "Combined / All Analyses",
-]
 
-ceph_analysis = st.selectbox(
-    "Select the analysis you want to perform",
-    CEPH_ANALYSES,
-    key="ceph_analysis_selector",
-)
+    CEPH_ANALYSES = [
+        "Steiner",
+        "Downs",
+        "McNamara",
+        "Tweed",
+        "Wits Appraisal",
+        "Jarabak",
+        "Soft Tissue",
+        "Combined / All Analyses",
+    ]
 
-st.info(f"📊 Selected Ceph analysis: {ceph_analysis}") 
+    ceph_analysis = st.selectbox(
+        "Select the analysis you want to perform",
+        CEPH_ANALYSES,
+        key="ceph_analysis_selector",
+    )
+
+    st.info(f"📊 Selected Ceph analysis: {ceph_analysis}")
 
 
 # ------------------------------------------------------------
