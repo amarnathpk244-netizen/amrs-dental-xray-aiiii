@@ -920,6 +920,50 @@ FINAL STATEMENT:
 and not a definitive diagnosis. Final interpretation,
 diagnosis and treatment decisions must be made by a
 qualified dental professional."
+OUTPUT FORMAT — FOLLOW EXACTLY
+
+1. IMAGE QUALITY
+- Adequate / Limited / Poor
+- State important technical limitations.
+
+2. RADIOGRAPH TYPE / PROJECTION
+- Identify only when reliably supported by the image.
+
+3. RADIOGRAPHIC OBSERVATIONS
+- List only findings directly visible on the image.
+- Separate each finding.
+- Mention anatomical location.
+- Use FDI numbering only when reliably identifiable.
+
+4. INTERPRETATION
+- Provide cautious radiographic interpretation.
+- Do not convert a nonspecific appearance into a definitive disease
+  diagnosis.
+
+5. NOT RELIABLY ASSESSABLE
+- Clearly mention important regions or findings that cannot be
+  evaluated because of image limitations.
+
+6. PROVISIONAL RADIOGRAPHIC IMPRESSION
+- Summarize the important visible findings using cautious wording.
+- Do not provide a definitive diagnosis.
+
+7. SUGGESTED NEXT CLINICAL STEP
+- Recommend professional dental evaluation or appropriate clinical
+  correlation when indicated.
+- Treatment suggestions, if mentioned, must remain category-level only.
+
+8. AI CONFIDENCE / UNCERTAINTY
+- High / Moderate / Low
+- Confidence must refer to the visible radiographic observation,
+  not an unconfirmed diagnosis.
+
+9. DISCLAIMER
+"This is an AI-assisted provisional radiographic assessment based only
+on the uploaded radiograph. It is not a definitive diagnosis and does
+not replace clinical examination or professional dental judgment.
+Final diagnosis and treatment decisions must be made by a qualified
+dental professional."
 """
 if xray is not None:
     st.image(
