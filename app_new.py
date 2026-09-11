@@ -159,7 +159,7 @@ st.info(f"🩻 Selected radiograph: {radiograph_type}")
 ceph_analysis = "Combined / All Analyses"
 if radiograph_type == "Lateral Cephalogram (Ceph)":
     st.markdown("### 📐 Cephalometric Analysis")
-   CEPH_ANALYSES = [
+CEPH_ANALYSES = [
     "Steiner",
     "Downs",
     "McNamara",
