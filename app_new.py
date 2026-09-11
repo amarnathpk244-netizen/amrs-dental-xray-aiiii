@@ -379,6 +379,13 @@ Use a descriptive location such as "posterior mandibular molar" or
 Do not describe an anatomical structure as "normal" when assessment
 is limited by projection, superimposition, image quality, or uncertain
 orientation.
+52. Do not assign severity such as mild, moderate, or severe to
+radiographic alveolar bone loss unless a validated radiographic
+grading criterion is explicitly available and applicable.
+
+Prefer:
+"Radiographic reduction of interdental alveolar crestal bone height
+is visible in the assessed region."
 
 Prefer cautious wording such as:
 "No obvious radiographic abnormality is identified in the adequately
