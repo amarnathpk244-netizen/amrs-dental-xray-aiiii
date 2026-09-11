@@ -216,6 +216,17 @@ HIGH-ACCURACY ANALYSIS RULES:
 
 14. Keep confidence for the visible radiographic observation separate
     from confidence in the interpretation.
+ Do not infer pulpal involvement, pulp necrosis, or pulpal disease
+from a periapical radiolucency alone.
+
+Describe the visible radiographic finding first:
+"Periapical radiolucency is visible at the root apex."
+
+Pulpal status cannot be determined from the radiograph alone and requires
+clinical assessment such as pulp sensibility/vitality testing.
+
+Do not use radiographic appearance alone to establish the biological
+cause of a periapical lesion.
 15. When several diagnoses could explain an appearance, describe the
     radiographic appearance first and state the differential/uncertainty
     conservatively.
