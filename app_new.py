@@ -964,6 +964,18 @@ on the uploaded radiograph. It is not a definitive diagnosis and does
 not replace clinical examination or professional dental judgment.
 Final diagnosis and treatment decisions must be made by a qualified
 dental professional."
+Do not use the term "rarefying osteitis" as a diagnosis based on the
+radiograph alone.
+
+For a visible periapical radiolucency, describe the finding directly:
+"Periapical radiolucency is visible at the root apex."
+
+Do not describe a lesion as persistent, developing, healed, or worsening
+unless previous radiographs are available for comparison.
+
+Do not assign severity such as mild, moderate, or severe to periapical
+lesions unless the requested grading is explicitly supported by a
+validated radiographic criterion.
 """
 if xray is not None:
     st.image(
