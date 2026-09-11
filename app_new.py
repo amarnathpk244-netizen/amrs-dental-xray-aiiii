@@ -256,6 +256,17 @@ only when it is reliable.
 26. Do not determine right or left laterality from image position alone.
 Use an orientation marker or clearly identifiable anatomical orientation
 only when it is reliable.
+27. Do not report a structure as normal unless it is adequately visualized
+and of sufficient quality for assessment.
+
+If a relevant anatomical region is cropped, obscured, overlapped, blurred,
+underexposed, overexposed, or otherwise not adequately visible, explicitly
+state that the region is not reliably assessable.
+
+Do not interpret missing or poorly visualized anatomy as absence of disease.
+
+Image-quality limitations must reduce confidence in any finding that
+depends on the affected region.
 
 If laterality cannot be established reliably, state:
 "Laterality cannot be reliably determined from this radiograph."
