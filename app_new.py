@@ -206,10 +206,13 @@ HIGH-ACCURACY ANALYSIS RULES:
     label it as abscess, granuloma, cyst, periodontitis, rarefying
     osteitis, or any other specific disease.
 
-13. Use cautious wording such as:
+13. Use neutral and cautious wording such as:
     "Periapical radiolucency is visible at the root apex."
-    "Radiographic appearance may represent a periapical inflammatory
-    change; exact etiology cannot be determined from this image alone."
+    "The exact nature and etiology cannot be determined from this
+    radiograph alone."
+
+    Do not force an inflammatory diagnosis when the radiographic
+    appearance is nonspecific.
 
 14. Keep confidence for the visible radiographic observation separate
     from confidence in the interpretation.
