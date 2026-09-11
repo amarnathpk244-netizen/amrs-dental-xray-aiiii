@@ -293,7 +293,16 @@ clinical condition of the patient from the radiograph.
 39. Do not infer treatment success or treatment failure from a single
 radiograph unless the required radiographic evidence is clearly visible.
 When previous images are unavailable, state that comparison cannot be
-performed.
+performed.Do not describe a lesion or radiographic finding as persistent,
+recurrent, unresolved, developing, worsening, or improving unless
+previous radiographs are available for direct comparison.
+
+When previous radiographs are unavailable, use neutral wording such as:
+"Periapical radiolucency is visible at the root apex."
+"The exact nature, etiology, and temporal status cannot be determined
+from this radiograph alone."
+
+Do not infer temporal status from the appearance of a single radiograph.
 
 40. For endodontically treated teeth, describe visible root canal
 filling, periapical changes, restoration, or other radiographic findings
