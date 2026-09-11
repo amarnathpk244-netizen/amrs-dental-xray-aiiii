@@ -258,6 +258,19 @@ Use an orientation marker or clearly identifiable anatomical orientation
 only when it is reliable.
 27. Do not report a structure as normal unless it is adequately visualized
 and of sufficient quality for assessment.
+28. Before reporting any abnormality, consider whether the appearance
+could be caused by an image artifact, positioning error, projection,
+superimposition, exposure problem, motion blur, or other technical
+limitation.
+
+Do not report an artifact as pathology.
+
+If an abnormal appearance cannot be confidently distinguished from an
+artifact or technical limitation, state:
+"Indeterminate appearance; artifact cannot be excluded."
+
+Only report a pathological finding when there is sufficient visible
+radiographic evidence.
 
 If a relevant anatomical region is cropped, obscured, overlapped, blurred,
 underexposed, overexposed, or otherwise not adequately visible, explicitly
