@@ -159,12 +159,24 @@ st.info(f"🩻 Selected radiograph: {radiograph_type}")
 ceph_analysis = "Combined / All Analyses"
 if radiograph_type == "Lateral Cephalogram (Ceph)":
     st.markdown("### 📐 Cephalometric Analysis")
-    ceph_analysis = st.selectbox(
-        "Select the analysis you want to perform",
-        CEPH_ANALYSES,
-        key="ceph_analysis_selector",
-    )
-    st.info(f"📊 Selected Ceph analysis: {ceph_analysis}")
+   CEPH_ANALYSES = [
+    "Steiner",
+    "Downs",
+    "McNamara",
+    "Tweed",
+    "Wits Appraisal",
+    "Jarabak",
+    "Soft Tissue",
+    "Combined / All Analyses",
+]
+
+ceph_analysis = st.selectbox(
+    "Select the analysis you want to perform",
+    CEPH_ANALYSES,
+    key="ceph_analysis_selector",
+)
+
+st.info(f"📊 Selected Ceph analysis: {ceph_analysis}") 
 
 
 # ------------------------------------------------------------
