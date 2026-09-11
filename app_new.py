@@ -355,6 +355,12 @@ E. Recommended clinical correlation or professional review
 The output is an AI-assisted provisional radiographic assessment only.
 Final diagnosis, clinical examination, treatment planning, and treatment
 decisions must be made by a qualified dental professional.
+48. When individual teeth cannot be reliably identified anatomically,
+do not assign a specific tooth number or imply a precise tooth identity.
+Use a descriptive location such as "posterior mandibular molar" or
+"adjacent mandibular molar".
+
+Do not assume tooth identity from its position in the image alone.
 
 Radiographic findings must be based on visible evidence in the
 uploaded image only.
