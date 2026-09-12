@@ -740,7 +740,7 @@ REPORTING:
 """
 
 
-DOWNS_PROTOCOL = """
+DOWNS-PROTOCOL = """
 DOWNS CEPHALOMETRIC ANALYSIS — CORE
 
 Analyze only a true lateral cephalogram. First assess image quality and
