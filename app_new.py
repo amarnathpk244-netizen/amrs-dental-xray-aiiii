@@ -400,51 +400,50 @@ if xray is not None:
                             )
 
                             st.markdown(result_text)
-                                                        # --- EXPORT REPORT OPTIONS (Safe Session-State & Selectbox) ---
+
+                            # --- EXPORT REPORT OPTIONS (Mobile Friendly) ---
                             st.markdown("---")
                             st.markdown("### 📥 Export Assessment Report")
                             
-                            # Using selectbox instead of radio to prevent instant refresh issues on mobile
-                            export_choice = st.selectbox(
-                                "Select File Format",
-                                ["Text File (.txt)", "HTML Report (.html - Print/Save as PDF)"],
-                                key="export_format_selectbox"
-                            )
-
                             safe_patient_name = patient_name if patient_name else "Patient"
-
-                            if "HTML" in export_choice:
-                                html_content = f"""
-                                <html>
-                                <head><title>AMRs Dental Report - {safe_patient_name}</title></head>
-                                <body style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
-                                    <h2>AMRs Dental X-ray AI - Assessment Report</h2>
+                            
+                            # 1. Text File Download Button
+                            report_filename = f"Dental_Report_{safe_patient_name}.txt"
+                            st.download_button(
+                                label="📥 Download Report as Text File (.txt)",
+                                data=result_text,
+                                file_name=report_filename,
+                                mime="text/plain",
+                                use_container_width=True,
+                            )
+                            
+                            # 2. Printable HTML / PDF View Link (Bulletproof on Mobile)
+                            formatted_html = f"""
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>AMRs Dental Report - {safe_patient_name}</title>
+                                <style>
+                                    body {{ font-family: Arial, sans-serif; padding: 30px; color: #333; line-height: 1.6; }}
+                                    h2 {{ color: #1f77b4; border-bottom: 2px solid #ddd; padding-bottom: 10px; }}
+                                    .meta {{ background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
+                                    pre {{ white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }}
+                                </style>
+                            </head>
+                            <body>
+                                <h2>AMRs Dental X-ray AI - Assessment Report</h2>
+                                <div class="meta">
                                     <p><b>Patient Name:</b> {safe_patient_name}</p>
                                     <p><b>Date:</b> {date.today()}</p>
-                                    <hr>
-                                    <pre style="white-space: pre-wrap; font-family: Arial, sans-serif;">{result_text}</pre>
-                                </body>
-                                </html>
-                                """
-                                st.download_button(
-                                    label="📥 Download HTML Report (.html)",
-                                    data=html_content,
-                                    file_name=f"Dental_Report_{safe_patient_name}.html",
-                                    mime="text/html",
-                                    use_container_width=True,
-                                )
-                            else:
-                                report_filename = f"Dental_Report_{safe_patient_name}.txt"
-                                st.download_button(
-                                    label="📥 Download Report as Text File (.txt)",
-                                    data=result_text,
-                                    file_name=report_filename,
-                                    mime="text/plain",
-                                    use_container_width=True,
-                                )
-                                
-
+                                </div>
+                                <pre>{result_text}</pre>
+                            </body>
+                            </html>
+                            """
                             
+                            b64 = base64.b64encode(formatted_html.encode()).decode()
+                            href = f'<a href="data:text/html;base64,{b64}" download="Dental_Report_{safe_patient_name}.html" target="_blank" style="display: block; text-align: center; background: #ff4b4b; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px;">🌐 Open Printable Web Report / Save as PDF</a>'
+                            st.markdown(href, unsafe_allow_html=True)
 
                         else:
 
