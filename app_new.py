@@ -400,15 +400,15 @@ if xray is not None:
                             )
 
                             st.markdown(result_text)
-
-                            # --- EXPORT REPORT OPTIONS (HTML & Text Choice - No Package Needed) ---
+                                                        # --- EXPORT REPORT OPTIONS (Safe Session-State & Selectbox) ---
                             st.markdown("---")
                             st.markdown("### 📥 Export Assessment Report")
                             
-                            export_choice = st.radio(
+                            # Using selectbox instead of radio to prevent instant refresh issues on mobile
+                            export_choice = st.selectbox(
                                 "Select File Format",
                                 ["Text File (.txt)", "HTML Report (.html - Print/Save as PDF)"],
-                                horizontal=True
+                                key="export_format_selectbox"
                             )
 
                             safe_patient_name = patient_name if patient_name else "Patient"
@@ -442,6 +442,9 @@ if xray is not None:
                                     mime="text/plain",
                                     use_container_width=True,
                                 )
+                                
+
+                            
 
                         else:
 
