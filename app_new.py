@@ -318,8 +318,7 @@ if xray is not None:
                             "Technical error details"
                         ):
                             st.code(str(error))
-                        except Exception as error:
-
+                        
                         st.error(
                             "❌ AI analysis failed."
                         )
