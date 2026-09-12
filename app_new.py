@@ -190,9 +190,9 @@ if radiograph_type == "Lateral Cephalogram (Ceph)":
     if use_calibration:
         col_c1, col_c2 = st.columns(2)
         with col_c1:
-            known_mm = st.number_input("Known Ruler Length (mm)", min_value=1.0, value=10.0, step=1.0)
+            known_mm = st.number_input("Known Ruler Length (mm)", min_value=1.0, value=50.0, step=1.0)
         with col_c2:
-            measured_pixels = st.number_input("Measured Length in Image (pixels)", min_value=1.0, value=50.0, step=1.0)
+            measured_pixels = st.number_input("Measured Length in Image (pixels)", min_value=1.0, value=250.0, step=1.0)
         
         if measured_pixels > 0:
             scale_factor = known_mm / measured_pixels
@@ -401,18 +401,53 @@ if xray is not None:
 
                             st.markdown(result_text)
 
-                            # --- EXPORT REPORT OPTIONS ---
+                            # --- EXPORT REPORT OPTIONS (PDF & Text Selection) ---
                             st.markdown("---")
                             st.markdown("### 📥 Export Assessment Report")
                             
-                            report_filename = f"Dental_Report_{patient_name if patient_name else 'Patient'}.txt"
-                            st.download_button(
-                                label="📥 Download Report as Text File (.txt)",
-                                data=result_text,
-                                file_name=report_filename,
-                                mime="text/plain",
-                                use_container_width=True,
+                            export_format = st.radio(
+                                "Select Export Format:",
+                                ("PDF Document (.pdf)", "Text File (.txt)"),
+                                horizontal=True
                             )
+
+                            safe_patient_name = patient_name if patient_name else "Patient"
+
+                            if export_format == "PDF Document (.pdf)":
+                                try:
+                                    from fpdf import FPDF
+                                    
+                                    def generate_pdf(text, p_name):
+                                        pdf = FPDF()
+                                        pdf.add_page()
+                                        pdf.set_font("Arial", size=11)
+                                        pdf.cell(200, 10, txt="AMRs Dental X-ray AI - Assessment Report", ln=True, align="C")
+                                        pdf.cell(200, 8, txt=f"Patient Name: {p_name}", ln=True, align="L")
+                                        pdf.ln(5)
+                                        clean_text = text.replace("**", "").replace("#", "")
+                                        for line in clean_text.split('\n'):
+                                            pdf.multi_cell(0, 6, txt=line)
+                                        return pdf.output(dest='S').encode('latin1', 'replace')
+                                        
+                                    pdf_data = generate_pdf(result_text, safe_patient_name)
+                                    st.download_button(
+                                        label="📥 Download Report as PDF (.pdf)",
+                                        data=pdf_data,
+                                        file_name=f"Dental_Report_{safe_patient_name}.pdf",
+                                        mime="application/pdf",
+                                        use_container_width=True,
+                                    )
+                                except ImportError:
+                                    st.error("`fpdf2` package missing aanu. Terminal-il `pip install fpdf2` run cheyyuka.")
+                            else:
+                                report_filename = f"Dental_Report_{safe_patient_name}.txt"
+                                st.download_button(
+                                    label="📥 Download Report as Text File (.txt)",
+                                    data=result_text,
+                                    file_name=report_filename,
+                                    mime="text/plain",
+                                    use_container_width=True,
+                                )
 
                         else:
 
@@ -430,3 +465,4 @@ if xray is not None:
                             "Technical error details"
                         ):
                             st.write(str(error))
+        
