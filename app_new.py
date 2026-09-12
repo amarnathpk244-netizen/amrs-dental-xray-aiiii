@@ -670,8 +670,9 @@ If convincing evidence is present, describe:
 - Confidence
 
 If suspicious but insufficient:
-"Possible fracture — requires professional radiographic and
-clinical correlation."
+"Possible fracture — requires professional radiographic and clinical correlation."
+
+Never call an uncertain fracture confirmed.
 
 Never call an uncertain fracture confirmed.
 
