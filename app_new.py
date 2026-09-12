@@ -67,7 +67,6 @@ st.markdown(
         margin-bottom: 8px;
         color: #17b978;
     }
-    /* Modern Button Styling */
     .stButton>button {
         border-radius: 10px;
         font-weight: 600;
@@ -94,7 +93,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Metric card for quota
 remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
 col_m1, col_m2 = st.columns(2)
 with col_m1:
@@ -104,7 +102,7 @@ if remaining <= 0:
     st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
 
 # ------------------------------------------------------------
-# PATIENT INFORMATION (Collapsible Expander)
+# PATIENT INFORMATION
 # ------------------------------------------------------------
 with st.expander("👤 Patient Information & Record Details", expanded=True):
     patient_name = st.text_input("Patient Name", placeholder="Enter patient name")
@@ -161,7 +159,7 @@ if radiograph_type == "Lateral Cephalogram (Ceph)":
 
 
 # ------------------------------------------------------------
-# PROMPTS & SAFETY RULES
+# PROMPTS & SAFETY RULES WITH TREATMENT CONSIDERATIONS
 # ------------------------------------------------------------
 SAFETY_RULES = """
 You are AMRs Dental X-ray AI.
@@ -171,9 +169,9 @@ CORE PRINCIPLE: The actual uploaded radiograph is the source of truth.
 ENHANCED REPORTING REQUIREMENTS:
 1. Include Confidence Flagging (High / Medium / Low) for each reported parameter value in tables.
 2. Provide a dedicated Growth, Biotype & Growth Tendency Summary section based on visible morphology.
-3. If "Combined / All Analyses" is selected, synthesize Steiner, Downs, McNamara, Tweed, Wits, Jarabak, and Soft Tissue assessments into one comprehensive structured report.
-4. Analyze ONLY the actual uploaded image. Never invent or fabricate findings. If unclear, state "Not reliably assessable."
-5. Do not provide a definitive diagnosis or definitive treatment plan.
+3. Include a dedicated **Treatment Considerations** section covering biomechanical, skeletal anchorage, or growth-modification options suited to the findings (avoiding definitive prescriptive diagnoses).
+4. If "Combined / All Analyses" is selected, synthesize Steiner, Downs, McNamara, Tweed, Wits, Jarabak, and Soft Tissue assessments into one comprehensive structured report.
+5. Analyze ONLY the actual uploaded image. Never invent or fabricate findings. If unclear, state "Not reliably assessable."
 """
 
 IOPA_PROTOCOL = "IOPA SYSTEMATIC ASSESSMENT: Assess image quality, dental, periodontal, and periapical structures systematically."
@@ -294,7 +292,6 @@ if xray is not None:
                                 st.markdown("### Export Assessment Report")
                                 safe_patient_name = patient_name if patient_name else "Patient"
                                 
-                                # 1. Text Download
                                 report_filename = f"Dental_Report_{safe_patient_name}.txt"
                                 st.download_button(
                                     label="📥 Download Report as Text (.txt)",
@@ -304,7 +301,6 @@ if xray is not None:
                                     use_container_width=True,
                                 )
                                 
-                                # 2. Mobile Friendly Print/PDF Link
                                 formatted_html = f"""
                                 <!DOCTYPE html>
                                 <html>
