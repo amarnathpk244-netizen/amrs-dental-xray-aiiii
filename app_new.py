@@ -734,7 +734,7 @@ TARGETS TO ASSESS (not findings that must be present):
 - Lip prominence and lip position relative to the facial reference line
 - Nasolabial angle when landmarks are reliably visible
 - Mentolabial sulcus when reliably visible
-
+"""
 RULES:
 - Do not invent landmark positions or numeric measurements.
 - Do not estimate measurements from an unclear profile.
