@@ -200,23 +200,6 @@ if radiograph_type == "Lateral Cephalogram (Ceph)":
 
 
 # ------------------------------------------------------------
-# UPLOAD
-# ------------------------------------------------------------
-st.markdown(
-    '<div class="section">📤 Upload Dental Radiograph</div>',
-    unsafe_allow_html=True,
-)
-
-st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
-
-xray = st.file_uploader(
-    "📷 Choose X-ray image",
-    type=["jpg", "jpeg", "png"],
-    accept_multiple_files=False,
-    key="dental_xray_upload",
-)
-
-# ------------------------------------------------------------
 # COMMON SAFETY PROMPT
 # ------------------------------------------------------------
 SAFETY_RULES = """
@@ -740,6 +723,7 @@ Assess Wits appraisal only on a true lateral cephalogram when A point, B point a
 - Identify the functional occlusal plane used for Wits appraisal.
 - Project perpendiculars from A and B to the occlusal plane to obtain AO and BO.
 - Do not invent landmark locations or measurements.
+
 2. MEASUREMENT
 - Determine the AO–BO linear relationship along the occlusal plane.
 - Report the relationship and direction only when reliably measurable.
@@ -831,7 +815,7 @@ def build_prompt(rad_type, ceph_an, scale_fac):
     return protocol
 
 # ------------------------------------------------------------
-# UPLOAD & ANALYZE
+# UPLOAD & ANALYZE (SINGLE INSTANCE)
 # ------------------------------------------------------------
 st.markdown('<div class="section">📤 Upload Dental Radiograph</div>', unsafe_allow_html=True)
 st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
