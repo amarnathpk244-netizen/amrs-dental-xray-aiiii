@@ -192,7 +192,11 @@ st.markdown(
 st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
 
 xray = st.file_uploader(
-    # ------------------------------------------------------------
+    "📷 Choose X-ray image",
+    type=["jpg", "jpeg", "png"],
+    accept_multiple_files=False,
+    key="dental_xray_upload",
+)
 # ANALYZE BUTTON
 # ------------------------------------------------------------
 
