@@ -741,7 +741,8 @@ REPORTING:
 
 
 DOWNS-PROTOCOL = """
-DOWNS CEPHALOMETRIC ANALYSIS — CORE
+# DOWNS CEPHALOMETRIC ANALYSIS - CORE
+
 
 Analyze only a true lateral cephalogram. First assess image quality and
 landmark visibility. Do not invent landmarks or measurements.
