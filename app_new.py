@@ -856,7 +856,8 @@ Assess Wits appraisal only on a true lateral cephalogram when A point, B point a
 
 4. SAFETY / LIMITATIONS
 - Wits is sensitive to construction of the occlusal plane and dental factors.
-- If A point, B point or the occlusal plane is unclear, state: “Not reliably assessable.”
+- If A point, B point or the occlusal plane is unclear, state: "Not reliably assessable."
+
 - Never infer a numeric value from a typical or expected result.
 - No definitive diagnosis or treatment plan.
 
