@@ -768,7 +768,8 @@ For every unavailable measurement state: "Not reliably assessable."
 """
 
 JARABAK_PROTOCOL = """
-JARABAK CEPHALOMETRIC ANALYSIS — CORE
+# JARABAK CEPHALOMETRIC ANALYSIS - CORE
+
 
 Assess Jarabak analysis only on a true lateral cephalogram. These are measurement targets, not findings that must appear.
 
