@@ -794,7 +794,8 @@ CORE PARAMETERS WHEN RELIABLY MEASURABLE:
 - Go-Me length
 - S-Go posterior facial height
 - N-Me anterior facial height
-- Jarabak ratio = S-Go / N-Me × 100
+- Jarabak ratio = S-Go / N-Me * 100
+
 - Gonial angle (Ar-Go-Me)
 
 INTERPRETATION:
