@@ -40,7 +40,7 @@ if st.session_state.usage_date != date.today():
     st.session_state.usage_date = date.today()
 
 # ------------------------------------------------------------
-# UI
+# UI STYLES
 # ------------------------------------------------------------
 st.markdown(
     """
@@ -180,9 +180,32 @@ if radiograph_type == "Lateral Cephalogram (Ceph)":
     )
     st.info(f"📊 Selected Ceph analysis: {ceph_analysis}")
 
+# ------------------------------------------------------------
+# PROMPT BUILDER FUNCTION
+# ------------------------------------------------------------
+def build_prompt(rad_type, ceph_an):
+    if rad_type == "IOPA":
+        return SAFETY_RULES + "\n\n" + IOPA_PROTOCOL
+    elif rad_type == "OPG":
+        return SAFETY_RULES + "\n\n" + OPG_PROTOCOL
+    elif rad_type == "Bitewing":
+        return SAFETY_RULES + "\n\n" + BITEWING_PROTOCOL
+    elif rad_type == "Occlusal":
+        return SAFETY_RULES + "\n\n" + OCCLUSAL_PROTOCOL
+    elif rad_type == "Facial radiograph":
+        return SAFETY_RULES + "\n\n" + FACIAL_PROTOCOL
+    elif rad_type == "Lateral Cephalogram (Ceph)":
+        if ceph_an == "Tweed":
+            return SAFETY_RULES + "\n\n" + TWEED_PROTOCOL
+        elif ceph_an == "Downs":
+            return SAFETY_RULES + "\n\n" + DOWNS_PROTOCOL
+        else:
+            return SAFETY_RULES + "\n\n" + TWEED_PROTOCOL + "\n\n" + DOWNS_PROTOCOL
+    else:
+        return SAFETY_RULES
 
 # ------------------------------------------------------------
-# UPLOAD
+# UPLOAD & ANALYZE
 # ------------------------------------------------------------
 st.markdown(
     '<div class="section">📤 Upload Dental Radiograph</div>',
@@ -197,8 +220,6 @@ xray = st.file_uploader(
     accept_multiple_files=False,
     key="dental_xray_upload",
 )
-# ANALYZE BUTTON
-# ------------------------------------------------------------
 
 if xray is not None:
 
@@ -317,12 +338,11 @@ if xray is not None:
                         with st.expander(
                             "Technical error details"
                         ):
-                            
-
+                            st.write(str(error))
 
 
 # ------------------------------------------------------------
-# COMMON SAFETY PROMPT
+# PROTOCOLS & SAFETY PROMPTS
 # ------------------------------------------------------------
 SAFETY_RULES = """
 You are AMRs Dental X-ray AI.
@@ -357,39 +377,6 @@ SAFETY RULES:
     dental professional.
 """
 
-You are an AI-assisted radiographic assessment system for
-qualified dental professionals.
-
-CORE PRINCIPLE:
-The actual uploaded radiograph is the source of truth.
-
-SAFETY RULES:
-1. Analyze ONLY the actual uploaded image.
-2. Never invent, hallucinate, or fabricate findings.
-3. Never use random, fixed, default, or predetermined findings.
-4. Report only findings supported by visible image evidence.
-5. If something cannot be assessed reliably, say:
-   "Not clearly assessable."
-6. Do not diagnose something merely because it is common.
-7. Do not force every checklist item into the report.
-8. Describe normal anatomy only when it is actually visible.
-9. Report pathology only when actual visual evidence supports it.
-10. Do not generate a long list of diseases merely to say absent.
-11. Clearly distinguish clearly visible, possible, and unclear findings.
-12. Use FDI tooth numbers only when reliably identifiable from anatomy.
-13. Never assign an FDI number from image position alone.
-14. Do not provide a definitive diagnosis.
-15. Do not prescribe medication.
-16. Do not provide definitive treatment planning.
-17. Do not use patient information to create radiographic findings.
-18. When uncertain, choose uncertainty rather than guessing.
-19. Final diagnosis and treatment decisions must be made by a qualified
-    dental professional.
-"""
-
-# ------------------------------------------------------------
-# RADIOGRAPH PROMPTS
-# ------------------------------------------------------------
 IOPA_PROTOCOL = """
 IOPA SYSTEMATIC ASSESSMENT
 
@@ -635,6 +622,7 @@ Inspect:
 
 Report only actual image-supported findings.
 """
+
 FACIAL_PROTOCOL = """
 FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT
 
@@ -684,7 +672,7 @@ If convincing evidence is present, describe:
 - Confidence
 
 If suspicious but insufficient:
-"Possible fracture — requires professional radiographic and clinical correlation."
+"Possible fracture - requires professional radiographic and clinical correlation."
 
 Never call an uncertain fracture confirmed.
 
@@ -705,9 +693,10 @@ Do not assume a fracture is absent merely because the region
 cannot be evaluated.
 Do not provide definitive fracture treatment or management.
 """
-# TWEED CEPHALOMETRIC ANALYSIS - CORE
 
-"""
+TWEED_PROTOCOL = """
+TWEED CEPHALOMETRIC ANALYSIS - CORE
+
 Analyze only a true lateral cephalogram. Assess image quality and
 landmark visibility before attempting measurements. Never invent a
 landmark or numerical value.
@@ -739,174 +728,10 @@ REPORTING:
 - Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
-
-DOWNS-PROTOCOL = """
-# DOWNS CEPHALOMETRIC ANALYSIS - CORE
-
+DOWNS_PROTOCOL = """
+DOWNS CEPHALOMETRIC ANALYSIS - CORE
 
 Analyze only a true lateral cephalogram. First assess image quality and
 landmark visibility. Do not invent landmarks or measurements.
-
-CORE DOWNS PARAMETERS WHEN RELIABLY MEASURABLE:
-- Facial angle
-- Angle of convexity
-- A-B plane angle
-- Mandibular plane angle
-- Y-axis
-- Occlusal plane angle
-- Interincisal angle
-- Lower incisor to mandibular plane angle (IMPA)
-
-INTERPRETATION:
-- Assess sagittal skeletal relationship and facial convexity.
-- Assess vertical growth tendency from relevant measurements.
-- Assess dental/incisor inclination where visible.
-- Do not classify a skeletal or dental pattern when required landmarks
-  are not reliably identified.
-
-For every unavailable measurement state: "Not reliably assessable."
 """
-
-JARABAK_PROTOCOL = """
-# JARABAK CEPHALOMETRIC ANALYSIS - CORE
-
-
-Assess Jarabak analysis only on a true lateral cephalogram. These are measurement targets, not findings that must appear.
-
-LANDMARKS / CONSTRUCTION:
-- Sella (S)
-- Nasion (N)
-- Articulare (Ar)
-- Gonion (Go)
-- Menton (Me)
-- S-N anterior cranial base
-- S-Ar posterior cranial base
-- Ar-Go ramus height
-- Go-Me mandibular body length
-- S-Go posterior facial height
-- N-Me anterior facial height
-- Go-Me mandibular plane
-
-CORE PARAMETERS WHEN RELIABLY MEASURABLE:
-- S-N length
-- S-Ar length
-- Ar-Go length
-- Go-Me length
-- S-Go posterior facial height
-- N-Me anterior facial height
-- Jarabak ratio = S-Go / N-Me * 100
-
-- Gonial angle (Ar-Go-Me)
-
-INTERPRETATION:
-- Assess facial-height proportions and apparent vertical growth tendency conservatively.
-- Consider the overall cephalometric pattern rather than relying on one measurement alone.
-- Separate measured values from interpretation.
-
-SAFETY:
-- Identify landmarks only when actually visible and sufficiently defined.
-- If a landmark or measurement is unclear, state: "Not reliably assessable."
-- Never fabricate mm values, angles, ratios, or landmark coordinates.
-- Do not infer values from age, sex, or expected norms.
-- Norms vary with population, age, sex, growth status, tracing method, and convention.
-- Do not provide a definitive orthodontic diagnosis or treatment plan.
-"""
-
-OTHER_PROTOCOL = """
-OTHER / UNCLASSIFIED RADIOGRAPH
-
-First determine whether the uploaded image appears to be a
-dental or maxillofacial radiograph.
-
-State whether the selected type appears compatible.
-
-If uncertain, state:
-"Radiograph type cannot be reliably classified."
-
-Then describe only:
-- Clearly visible structures
-- Actual image-supported findings
-- Important limitations
-
-Do not force a diagnosis or invent missing structures.
-"""
-
-WITS_PROTOCOL = r"""
-# WITS APPRAISAL - CORE PROTOCOL
-
-
-Assess Wits appraisal only on a true lateral cephalogram when A point, B point and the functional occlusal plane are clearly visible.
-
-1. LANDMARKS / CONSTRUCTION
-- Identify A point and B point reliably.
-- Identify the functional occlusal plane used for Wits appraisal.
-- Project perpendiculars from A and B to the occlusal plane to obtain AO and BO.
-- Do not invent landmark locations or measurements.
-
-2. MEASUREMENT
-- Determine the AO-BO linear relationship along the occlusal plane.
-
-- Report the relationship and direction only when reliably measurable.
-- Do not fabricate millimetre values.
-
-3. INTERPRETATION
-- Use Wits as a supplementary assessment of anteroposterior/sagittal jaw relationship.
-- If adequately measurable, describe whether the relationship is relatively Class II tendency, relatively Class III tendency, or approximately balanced, using appropriate reference context.
-- Wits alone must not establish a definitive orthodontic diagnosis.
-
-4. SAFETY / LIMITATIONS
-- Wits is sensitive to construction of the occlusal plane and dental factors.
-- If A point, B point or the occlusal plane is unclear, state: "Not reliably assessable."
-
-- Never infer a numeric value from a typical or expected result.
-- No definitive diagnosis or treatment plan.
-
-OUTPUT
-WITS APPRAISAL
-- Landmark/occlusal-plane visibility: Clear / Limited / Poor
-- AO: [value/description or Not reliably assessable]
-- BO: [value/description or Not reliably assessable]
-- AO–BO relationship: [value/description or Not reliably assessable]
-- Sagittal implication: [image-supported interpretation or Not reliably assessable]
-- Limitations/uncertainty: [brief]
-"""
-SOFT_TISSUE_PROTOCOL = """
-SOFT-TISSUE CEPHALOMETRIC ANALYSIS — CORE
-
-Assess the soft-tissue profile ONLY when the lateral cephalogram clearly
-shows the relevant soft-tissue outline and landmarks.
-
-TARGETS TO ASSESS (not findings that must be present):
-- Soft-tissue Nasion (N')
-- Pronasale (Prn)
-- Subnasale (Sn)
-- Labrale superius (Ls)
-- Labrale inferius (Li)
-- Soft-tissue Pogonion (Pog')
-- Menton (Me') when visible
-- Facial profile / overall convexity
-- Lip prominence and lip position relative to the facial reference line
-- Nasolabial angle when landmarks are reliably visible
-- Mentolabial sulcus when reliably visible
-
-RULES:
-- Do not invent landmark positions or numeric measurements.
-- Do not estimate measurements from an unclear profile.
-- If a soft-tissue landmark is obscured or poorly visualized, state:
-  "Not reliably assessable."
-- Distinguish visual observations from quantitative measurements.
-- Do not make a skeletal diagnosis from soft-tissue appearance alone.
-- Do not provide definitive orthodontic diagnosis or treatment planning.
-
-OUTPUT:
-SOFT-TISSUE ANALYSIS
-- Profile visibility: Clear / Limited / Poor
-- Landmarks visible: [list]
-- Profile/convexity: [image-supported description or Not reliably assessable]
-- Lip position/prominence: [image-supported description or Not reliably assessable]
-- Nasolabial angle: [value or Not reliably assessable]
-- Mentolabial contour: [description or Not reliably assessable]
-- Limitations/uncertainty: [brief]
-"""
-
-
+        
