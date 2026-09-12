@@ -742,4 +742,27 @@ Assess Wits appraisal only on a true lateral cephalogram when A point, B point a
 - Do not invent landmark locations or measurements.
 
 2. MEASUREMENT
-- Determine the AO–BO linear relationshi
+- Determine the AO–BO linear relationship along the occlusal plane.
+- Report the relationship and direction only when reliably measurable.
+- Do not fabricate millimetre values.
+
+3. INTERPRETATION
+- Use Wits as a supplementary assessment of anteroposterior/sagittal jaw relationship.
+- If adequately measurable, describe whether the relationship is relatively Class II tendency, relatively Class III tendency, or approximately balanced, using appropriate reference context.
+- Wits alone must not establish a definitive orthodontic diagnosis.
+
+4. SAFETY / LIMITATIONS
+- Wits is sensitive to construction of the occlusal plane and dental factors.
+- If A point, B point or the occlusal plane is unclear, state: "Not reliably assessable."
+- Never infer a numeric value from a typical or expected result.
+- No definitive diagnosis or treatment plan.
+
+OUTPUT
+WITS APPRAISAL
+- Landmark/occlusal-plane visibility: Clear / Limited / Poor
+- AO: [value/description or Not reliably assessable]
+- BO: [value/description or Not reliably assessable]
+- AO–BO relationship: [value/description or Not reliably assessable]
+- Sagittal implication: [image-supported interpretation or Not reliably assessable]
+- Limitations/uncertainty: [brief]
+"""
