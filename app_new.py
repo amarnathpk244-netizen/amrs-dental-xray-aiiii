@@ -844,7 +844,8 @@ Assess Wits appraisal only on a true lateral cephalogram when A point, B point a
 - Do not invent landmark locations or measurements.
 
 2. MEASUREMENT
-- Determine the AO–BO linear relationship along the occlusal plane.
+- Determine the AO-BO linear relationship along the occlusal plane.
+
 - Report the relationship and direction only when reliably measurable.
 - Do not fabricate millimetre values.
 
