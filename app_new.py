@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 DAILY_ANALYSIS_LIMIT = 3
-MODEL_NAME = "gemini-1.5-flash"  # Updated model name for reliability
+MODEL_NAME = "gemini-3.6-flash"  # Updated model name for reliability
 
 CEPH_ANALYSES = [
     "Steiner",
