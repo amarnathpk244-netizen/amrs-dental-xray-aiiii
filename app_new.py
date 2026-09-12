@@ -635,7 +635,6 @@ Inspect:
 
 Report only actual image-supported findings.
 """
-
 FACIAL_PROTOCOL = """
 FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT
 
@@ -689,8 +688,6 @@ If suspicious but insufficient:
 
 Never call an uncertain fracture confirmed.
 
-Never call an uncertain fracture confirmed.
-
 4. ASSOCIATED FINDINGS
 When actually visible, inspect for:
 - Maxillary sinus opacification
@@ -708,6 +705,7 @@ Do not assume a fracture is absent merely because the region
 cannot be evaluated.
 Do not provide definitive fracture treatment or management.
 """
+
 
 TWEED_PROTOCOL = """
 TWEED CEPHALOMETRIC ANALYSIS — CORE
@@ -742,7 +740,6 @@ REPORTING:
 - Do not use Tweed norms as a substitute for visible image evidence.
 - Do not provide definitive orthodontic diagnosis or treatment planning.
 """
-
 DOWNS_PROTOCOL = """
 DOWNS CEPHALOMETRIC ANALYSIS — CORE
 
