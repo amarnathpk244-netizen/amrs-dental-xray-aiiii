@@ -1,5 +1,8 @@
 import streamlit as st
 from datetime import date
+import json
+import math
+import re
 from google import genai
 import base64
 
@@ -11,6 +14,17 @@ st.set_page_config(
 
 DAILY_ANALYSIS_LIMIT = 3
 MODEL_NAME = "gemini-3.6-flash"
+
+CEPH_ANALYSES = [
+    "Steiner",
+    "Downs",
+    "McNamara",
+    "Tweed",
+    "Wits Appraisal",
+    "Jarabak",
+    "Soft Tissue",
+    "Combined / All Analyses",
+]
 
 # ------------------------------------------------------------
 # SESSION USAGE
@@ -139,50 +153,31 @@ examination_date = st.date_input(
 st.markdown(
     '<div class="section">🩻 Radiograph Type</div>',
     unsafe_allow_html=True,
-
 )
+
 radiograph_type = st.selectbox(
     "Select radiograph type",
     [
         "IOPA",
+        "Lateral Cephalogram (Ceph)",
         "OPG",
         "Bitewing",
         "Occlusal",
         "Facial radiograph",
-        "Lateral Cephalogram (Ceph)",
         "Other / Not reliably classifiable",
     ],
 )
 
 st.info(f"🩻 Selected radiograph: {radiograph_type}")
 
-
-# ------------------------------------------------------------
-# CEPHALOMETRIC ANALYSIS
-# Show ONLY when Lateral Cephalogram is selected
-# ------------------------------------------------------------
-
-ceph_analysis = None
-
+ceph_analysis = "Combined / All Analyses"
 if radiograph_type == "Lateral Cephalogram (Ceph)":
-
-    CEPH_ANALYSES = [
-        "Steiner",
-        "Downs",
-        "McNamara",
-        "Tweed",
-        "Wits Appraisal",
-        "Jarabak",
-        "Soft Tissue",
-        "Combined / All Analyses",
-    ]
-
+    st.markdown("### 📐 Cephalometric Analysis")
     ceph_analysis = st.selectbox(
         "Select the analysis you want to perform",
         CEPH_ANALYSES,
         key="ceph_analysis_selector",
     )
-
     st.info(f"📊 Selected Ceph analysis: {ceph_analysis}")
 
 
@@ -745,463 +740,4 @@ RULES:
 - Do not estimate measurements from an unclear profile.
 - If a soft-tissue landmark is obscured or poorly visualized, state:
   "Not reliably assessable."
-- Distinguish direct visual observations from measurements.
-- Do not infer skeletal diagnosis from soft-tissue appearance alone.
-- Do not provide definitive orthodontic diagnosis or treatment planning.
-"""
-# ------------------------------------------------------------
-# CEPHALOMETRIC ANALYSIS LIST
-# ------------------------------------------------------------
-
-CEPH_ANALYSES = [
-    "Steiner",
-    "Downs",
-    "McNamara",
-    "Tweed",
-    "Wits Appraisal",
-    "Jarabak",
-    "Soft Tissue",
-    "Combined / All Analyses",
-]
-
-
-# ------------------------------------------------------------
-# STEINER PROTOCOL
-# ------------------------------------------------------------
-
-STEINER_PROTOCOL = """
-STEINER CEPHALOMETRIC ANALYSIS
-
-Analyze only a true lateral cephalogram.
-
-Assess when reliably visible:
-- SNA
-- SNB
-- ANB
-- SN-GoGn
-- U1-NA
-- L1-NB
-- Interincisal angle
-- Relevant soft-tissue observations when visible
-
-Use only reliably identified landmarks.
-
-Do not invent landmark positions or numerical measurements.
-
-If a measurement cannot be reliably assessed, state:
-"Not reliably assessable."
-
-Separate measured findings from interpretation.
-
-Do not provide definitive orthodontic diagnosis or treatment planning.
-"""
-
-
-# ------------------------------------------------------------
-# McNAMARA PROTOCOL
-# ------------------------------------------------------------
-
-MCNAMARA_PROTOCOL = """
-McNAMARA CEPHALOMETRIC ANALYSIS
-
-Analyze only a true lateral cephalogram.
-
-Assess when reliably visible:
-- Maxillary position relative to cranial base
-- Mandibular position relative to cranial base
-- Effective midface length
-- Effective mandibular length
-- Maxillomandibular differential
-- Lower anterior facial height
-- Mandibular plane angle
-- Upper and lower incisor position when reliably visible
-- Airway-related structures only when clearly visualized
-
-Do not invent landmarks, measurements, or airway findings.
-
-If a parameter cannot be reliably assessed, state:
-"Not reliably assessable."
-
-Use conservative interpretation only.
-
-Do not provide definitive orthodontic diagnosis or treatment planning.
-"""
-
-
-# ------------------------------------------------------------
-# CEPH PROTOCOL ROUTING
-# ------------------------------------------------------------
-
-def get_protocol(selected_type, selected_ceph_analysis=None):
-
-    if selected_type == "Lateral Cephalogram (Ceph)":
-
-        if selected_ceph_analysis == "Steiner":
-            return STEINER_PROTOCOL
-
-        if selected_ceph_analysis == "Downs":
-            return DOWNS_PROTOCOL
-
-        if selected_ceph_analysis == "McNamara":
-            return MCNAMARA_PROTOCOL
-
-        if selected_ceph_analysis == "Tweed":
-            return TWEED_PROTOCOL
-
-        if selected_ceph_analysis == "Wits Appraisal":
-            return WITS_PROTOCOL
-
-        if selected_ceph_analysis == "Jarabak":
-            return JARABAK_PROTOCOL
-
-        if selected_ceph_analysis == "Soft Tissue":
-            return SOFT_TISSUE_PROTOCOL
-
-        return (
-            STEINER_PROTOCOL
-            + "\n\n"
-            + DOWNS_PROTOCOL
-            + "\n\n"
-            + MCNAMARA_PROTOCOL
-            + "\n\n"
-            + TWEED_PROTOCOL
-            + "\n\n"
-            + WITS_PROTOCOL
-            + "\n\n"
-            + JARABAK_PROTOCOL
-            + "\n\n"
-            + SOFT_TISSUE_PROTOCOL
-        )
-
-    if selected_type == "IOPA":
-        return IOPA_PROTOCOL
-
-    if selected_type == "OPG":
-        return OPG_PROTOCOL
-
-    if selected_type == "Bitewing":
-        return BITEWING_PROTOCOL
-
-    if selected_type == "Occlusal":
-        return OCCLUSAL_PROTOCOL
-
-    if selected_type == "Facial radiograph":
-        return FACIAL_PROTOCOL
-
-    return OTHER_PROTOCOL
-
-
-# ------------------------------------------------------------
-# BUILD PROMPT
-# ------------------------------------------------------------
-
-def build_prompt(selected_type, selected_ceph_analysis=None):
-
-    protocol = get_protocol(
-        selected_type,
-        selected_ceph_analysis,
-    )
-
-    selected_analysis_text = ""
-
-    if selected_type == "Lateral Cephalogram (Ceph)":
-        selected_analysis_text = f"""
-
-SELECTED CEPHALOMETRIC ANALYSIS:
-{selected_ceph_analysis}
-
-Perform ONLY the selected cephalometric analysis.
-
-Do not perform other cephalometric analyses unless
-"Combined / All Analyses" is selected.
-"""
-
-    return SAFETY_RULES + "\n\n" + protocol + f"""
-
-SELECTED RADIOGRAPH TYPE:
-{selected_type}
-
-{selected_analysis_text}
-
-Analyze ONLY the actual uploaded image.
-
-The uploaded image is the ONLY source of radiographic truth.
-
-Do not use patient name, OP number, age, or sex to create
-radiographic findings.
-
-Do not invent landmarks, measurements, coordinates,
-angles, ratios, or findings.
-
-If something cannot be reliably assessed, state:
-"Not reliably assessable."
-
-REPORT FORMAT:
-
-# AMRs Dental X-ray AI
-
-## Provisional Radiographic / Cephalometric Assessment
-
-### 1. Image Quality
-State:
-- Adequate / Limited / Poor
-- Reason
-- Important technical limitations
-
-### 2. Selected Analysis
-State the selected analysis.
-
-### 3. Landmarks / Structures Actually Visualized
-Describe only landmarks and structures genuinely visible.
-
-### 4. Measurements
-Report numerical measurements ONLY when reliably measurable.
-
-For unavailable measurements:
-"Not reliably assessable."
-
-### 5. Image-Supported Findings
-Report only findings supported by the uploaded image.
-
-### 6. Interpretation
-Give a conservative provisional interpretation.
-
-Do not convert uncertain findings into a definitive diagnosis.
-
-### 7. Limitations / Uncertainty
-Clearly mention unclear landmarks, poor image quality,
-superimposition, or other limitations.
-
-### 8. Professional Review
-Recommend review by a qualified dental professional.
-
-Do not provide definitive treatment planning.
-
-FINAL STATEMENT:
-
-"This is an AI-assisted provisional assessment and not a
-definitive diagnosis. Final interpretation, diagnosis and
-treatment decisions must be made by a qualified dental professional."
-"""
-
-
-# ------------------------------------------------------------
-# IMAGE + ANALYSIS
-# ------------------------------------------------------------
-
-if xray is not None:
-
-    st.success("✅ X-ray uploaded successfully.")
-
-    st.markdown(
-        '<div class="section">🖼️ X-ray Preview</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.image(
-        xray,
-        caption="Uploaded Dental Radiograph",
-        use_container_width=True,
-    )
-
-    st.markdown(
-        f"""
-        <div class="info-box">
-        <b>File:</b> {xray.name}<br>
-        <b>Type:</b> {xray.type}<br>
-        <b>Size:</b> {xray.size / 1024:.1f} KB
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        '<div class="section">🤖 AI Assessment</div>',
-        unsafe_allow_html=True,
-    )
-
-    analyze = st.button(
-        "🔍 Analyze X-ray",
-        use_container_width=True,
-        disabled=(
-            st.session_state.analysis_count
-            >= DAILY_ANALYSIS_LIMIT
-        ),
-    )
-
-    if analyze:
-
-        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
-
-            st.warning(
-                "⏳ Daily AI analysis limit reached. "
-                "Please try again tomorrow."
-            )
-
-        else:
-
-            api_key = st.secrets.get("GEMINI_API_KEY")
-
-            if not api_key:
-
-                st.error("❌ GEMINI_API_KEY was not found.")
-
-                st.info(
-                    "Open Streamlit Secrets and configure "
-                    "GEMINI_API_KEY."
-                )
-
-            else:
-
-                mime_type = xray.type
-
-                if mime_type not in [
-                    "image/jpeg",
-                    "image/png",
-                ]:
-
-                    st.error(
-                        "❌ Unsupported image format."
-                    )
-
-                else:
-
-                    try:
-
-                        client = genai.Client(
-                            api_key=api_key
-                        )
-
-                        image_bytes = xray.getvalue()
-
-                        image_base64 = base64.b64encode(
-                            image_bytes
-                        ).decode("utf-8")
-
-                        final_prompt = build_prompt(
-                            radiograph_type,
-                            ceph_analysis,
-                        )
-
-                        with st.spinner(
-                            "🔬 Analyzing the uploaded radiograph..."
-                        ):
-
-                            interaction = client.interactions.create(
-                                model=MODEL_NAME,
-                                input=[
-                                    {
-                                        "type": "image",
-                                        "mime_type": mime_type,
-                                        "data": image_base64,
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": final_prompt,
-                                    },
-                                ],
-                            )
-
-                        result_text = getattr(
-                            interaction,
-                            "output_text",
-                            None,
-                        )
-
-                        if result_text:
-
-                            st.session_state.analysis_count += 1
-
-                            st.success(
-                                "✅ AI assessment completed."
-                            )
-
-                            st.markdown(
-                                '<div class="section">'
-                                '📋 Assessment Report'
-                                '</div>',
-                                unsafe_allow_html=True,
-                            )
-
-                            st.markdown(result_text)
-
-                            st.markdown(
-                                '<div class="section">'
-                                '📄 Examination Information'
-                                '</div>',
-                                unsafe_allow_html=True,
-                            )
-
-                            st.write(
-                                f"**Radiograph:** "
-                                f"{radiograph_type}"
-                            )
-
-                            if ceph_analysis:
-                                st.write(
-                                    f"**Cephalometric Analysis:** "
-                                    f"{ceph_analysis}"
-                                )
-
-                            st.write(
-                                f"**Examination Date:** "
-                                f"{examination_date}"
-                            )
-
-                            if age > 0:
-                                st.write(
-                                    f"**Age:** {age}"
-                                )
-
-                            if sex != "Select":
-                                st.write(
-                                    f"**Sex:** {sex}"
-                                )
-
-                        else:
-
-                            st.warning(
-                                "⚠️ The AI returned no readable assessment."
-                            )
-
-                            st.info(
-                                "Please try again with a clearer radiograph."
-                            )
-
-                    except Exception as error:
-
-                        st.error(
-                            "❌ AI analysis failed."
-                        )
-
-                        with st.expander(
-                            "Technical error details"
-                        ):
-                            st.code(str(error))
-
-
-# ------------------------------------------------------------
-# DISCLAIMER
-# ------------------------------------------------------------
-
-st.markdown(
-    """
-    <div class="disclaimer">
-    <b>⚠️ Important Medical Disclaimer</b><br><br>
-
-    AMRs Dental X-ray AI provides an AI-assisted provisional
-    radiographic assessment for decision support only.<br><br>
-
-    It does not replace clinical examination, professional
-    radiographic interpretation, definitive diagnosis, or
-    treatment planning.<br><br>
-
-    The AI may make mistakes or may be unable to reliably
-    assess an image.<br><br>
-
-    Final diagnosis and treatment decisions must always be
-    made by a qualified dental professional.
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+- Distinguish
