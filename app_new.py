@@ -41,7 +41,7 @@ if st.session_state.usage_date != date.today():
     st.session_state.usage_date = date.today()
 
 # ------------------------------------------------------------
-# UI STYLES
+# UI STYLES & MEDICAL THEME
 # ------------------------------------------------------------
 st.markdown(
     """
@@ -49,36 +49,36 @@ st.markdown(
     .main { padding-top: 1rem; }
     .app-title {
         text-align: center;
-        font-size: 30px;
+        font-size: 28px;
         font-weight: 700;
-        margin-bottom: 4px;
+        color: #1e3d59;
+        margin-bottom: 2px;
     }
     .subtitle {
         text-align: center;
         color: #666;
-        font-size: 15px;
-        margin-bottom: 25px;
+        font-size: 14px;
+        margin-bottom: 20px;
     }
     .section {
-        font-size: 21px;
+        font-size: 19px;
         font-weight: 650;
-        margin-top: 20px;
-        margin-bottom: 10px;
+        margin-top: 15px;
+        margin-bottom: 8px;
+        color: #17b978;
     }
-    .info-box {
-        padding: 15px;
-        border-radius: 12px;
-        background: #f5f7fa;
-        margin-top: 10px;
-        margin-bottom: 15px;
-    }
-    .disclaimer {
-        font-size: 12px;
-        color: #666;
-        padding: 12px;
+    /* Modern Button Styling */
+    .stButton>button {
         border-radius: 10px;
-        background: #f7f7f7;
-        margin-top: 20px;
+        font-weight: 600;
+        background-color: #1e3d59;
+        color: white;
+        border: none;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        background-color: #17b978;
+        color: white;
     }
     </style>
     """,
@@ -89,72 +89,39 @@ st.markdown(
     '<div class="app-title">🦷 AMRs Dental X-ray AI</div>',
     unsafe_allow_html=True,
 )
-
 st.markdown(
     '<div class="subtitle">AI-Assisted Dental Radiographic Assessment</div>',
     unsafe_allow_html=True,
 )
 
+# Metric card for quota
 remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
+col_m1, col_m2 = st.columns(2)
+with col_m1:
+    st.metric(label="🧪 Daily Quota Left", value=f"{remaining} / {DAILY_ANALYSIS_LIMIT}")
 
-if remaining > 0:
-    st.info(
-        f"🧪 AI analyses remaining today: "
-        f"{remaining} / {DAILY_ANALYSIS_LIMIT}"
-    )
-else:
-    st.warning(
-        "⏳ Your 3 AI analyses for today have been used. "
-        "Please try again tomorrow."
-    )
+if remaining <= 0:
+    st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
 
 # ------------------------------------------------------------
-# PATIENT INFORMATION
+# PATIENT INFORMATION (Collapsible Expander)
 # ------------------------------------------------------------
-st.markdown(
-    '<div class="section">👤 Patient Information</div>',
-    unsafe_allow_html=True,
-)
+with st.expander("👤 Patient Information & Record Details", expanded=True):
+    patient_name = st.text_input("Patient Name", placeholder="Enter patient name")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        age = st.number_input("Age", min_value=0, max_value=120, value=0, step=1)
+    with col2:
+        sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
 
-patient_name = st.text_input(
-    "Patient Name",
-    placeholder="Enter patient name",
-)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    age = st.number_input(
-        "Age",
-        min_value=0,
-        max_value=120,
-        value=0,
-        step=1,
-    )
-
-with col2:
-    sex = st.selectbox(
-        "Sex",
-        ["Select", "Male", "Female", "Other"],
-    )
-
-op_number = st.text_input(
-    "OP Number",
-    placeholder="Enter OP number",
-)
-
-examination_date = st.date_input(
-    "Examination Date",
-    value=date.today(),
-)
+    op_number = st.text_input("OP Number", placeholder="Enter OP number")
+    examination_date = st.date_input("Examination Date", value=date.today())
 
 # ------------------------------------------------------------
-# RADIOGRAPH TYPE
+# RADIOGRAPH TYPE & CALIBRATION
 # ------------------------------------------------------------
-st.markdown(
-    '<div class="section">🩻 Radiograph Type</div>',
-    unsafe_allow_html=True,
-)
+st.markdown('<div class="section">🩻 Radiograph & Calibration</div>', unsafe_allow_html=True)
 
 radiograph_type = st.selectbox(
     "Select radiograph type",
@@ -169,38 +136,32 @@ radiograph_type = st.selectbox(
     ],
 )
 
-st.info(f"🩻 Selected radiograph: {radiograph_type}")
-
 ceph_analysis = "Combined / All Analyses"
 scale_factor = 1.0
 
 if radiograph_type == "Lateral Cephalogram (Ceph)":
-    st.markdown("### 📐 Cephalometric Analysis")
     ceph_analysis = st.selectbox(
-        "Select the analysis you want to perform",
+        "Select Cephalometric Analysis",
         CEPH_ANALYSES,
         key="ceph_analysis_selector",
     )
-    st.info(f"📊 Selected Ceph analysis: {ceph_analysis}")
 
-    # --- PIXEL-TO-MM CALIBRATION SETTINGS ---
-    st.markdown('<div class="section">📏 Scale Calibration</div>', unsafe_allow_html=True)
-    use_calibration = st.checkbox("Enable custom pixel-to-mm scale calibration")
-
-    if use_calibration:
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            known_mm = st.number_input("Known Ruler Length (mm)", min_value=1.0, value=50.0, step=1.0)
-        with col_c2:
-            measured_pixels = st.number_input("Measured Length in Image (pixels)", min_value=1.0, value=250.0, step=1.0)
-        
-        if measured_pixels > 0:
-            scale_factor = known_mm / measured_pixels
-            st.info(f"📐 Calculated Scale Factor: {scale_factor:.4f} mm/pixel")
+    with st.expander("📏 Scale Calibration Settings", expanded=False):
+        use_calibration = st.checkbox("Enable custom pixel-to-mm scale calibration")
+        if use_calibration:
+            col_c1, col_c2 = st.columns(2)
+            with col_c1:
+                known_mm = st.number_input("Known Ruler Length (mm)", min_value=1.0, value=50.0, step=1.0)
+            with col_c2:
+                measured_pixels = st.number_input("Measured Length (pixels)", min_value=1.0, value=250.0, step=1.0)
+            
+            if measured_pixels > 0:
+                scale_factor = known_mm / measured_pixels
+                st.metric(label="Calculated Scale Factor", value=f"{scale_factor:.4f} mm/pixel")
 
 
 # ------------------------------------------------------------
-# COMMON SAFETY & ADVANCED REPORTING PROMPT
+# PROMPTS & SAFETY RULES
 # ------------------------------------------------------------
 SAFETY_RULES = """
 You are AMRs Dental X-ray AI.
@@ -209,25 +170,25 @@ CORE PRINCIPLE: The actual uploaded radiograph is the source of truth.
 
 ENHANCED REPORTING REQUIREMENTS:
 1. Include Confidence Flagging (High / Medium / Low) for each reported parameter value in tables.
-2. Provide a dedicated Growth, Biotype & Growth Tendency Summary section based on visible morphology (e.g., CVM stages and vertical/horizontal skeletal divergence patterns).
+2. Provide a dedicated Growth, Biotype & Growth Tendency Summary section based on visible morphology.
 3. If "Combined / All Analyses" is selected, synthesize Steiner, Downs, McNamara, Tweed, Wits, Jarabak, and Soft Tissue assessments into one comprehensive structured report.
 4. Analyze ONLY the actual uploaded image. Never invent or fabricate findings. If unclear, state "Not reliably assessable."
 5. Do not provide a definitive diagnosis or definitive treatment plan.
 """
 
-IOPA_PROTOCOL = "IOPA SYSTEMATIC ASSESSMENT: Assess image quality, dental, periodontal, and periapical structures systematically with confidence indicators."
+IOPA_PROTOCOL = "IOPA SYSTEMATIC ASSESSMENT: Assess image quality, dental, periodontal, and periapical structures systematically."
 OPG_PROTOCOL = "OPG SYSTEMATIC PANORAMIC ASSESSMENT: Perform a comprehensive panoramic overview covering all structural domains."
 BITEWING_PROTOCOL = "BITEWING SYSTEMATIC ASSESSMENT: Inspect interproximal contacts, bone crests, and decay status."
 OCCLUSAL_PROTOCOL = "OCCLUSAL RADIOGRAPH SYSTEMATIC ASSESSMENT: Inspect jaw arches and developmental dental structures."
-FACIAL_PROTOCOL = "FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT: Screen facial bones for structural integrity and trauma indicators."
+FACIAL_PROTOCOL = "FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT: Screen facial bones for structural integrity."
 
-STEINER_PROTOCOL = "STEINER CEPHALOMETRIC ANALYSIS: Assess SNA, SNB, ANB, Incisor positions, and plane angles with explicit confidence levels."
-DOWNS_PROTOCOL = "DOWNS CEPHALOMETRIC ANALYSIS: Assess facial angle, convexity, A-B plane, and dental parameters with confidence flags."
-MCNAMARA_PROTOCOL = "MCNAMARA CEPHALOMETRIC ANALYSIS: Assess maxilla/mandible positions and effective midface/mandibular lengths."
+STEINER_PROTOCOL = "STEINER CEPHALOMETRIC ANALYSIS: Assess SNA, SNB, ANB, Incisor positions, and plane angles."
+DOWNS_PROTOCOL = "DOWNS CEPHALOMETRIC ANALYSIS: Assess facial angle, convexity, A-B plane, and dental parameters."
+MCNAMARA_PROTOCOL = "MCNAMARA CEPHALOMETRIC ANALYSIS: Assess maxilla/mandible positions and effective lengths."
 TWEED_PROTOCOL = "TWEED CEPHALOMETRIC ANALYSIS: Assess FMA, IMPA, and FMIA parameters."
-WITS_PROTOCOL = "WITS APPRAISAL: Assess AO-BO linear relationship along the functional occlusal plane."
-JARABAK_PROTOCOL = "JARABAK CEPHALOMETRIC ANALYSIS: Assess facial proportions and Jarabak ratio for vertical growth patterns."
-SOFT_TISSUE_PROTOCOL = "SOFT TISSUE CEPHALOMETRIC ANALYSIS: Assess profile convexity, nasolabial angle, and lip posture."
+WITS_PROTOCOL = "WITS APPRAISAL: Assess AO-BO linear relationship."
+JARABAK_PROTOCOL = "JARABAK CEPHALOMETRIC ANALYSIS: Assess facial proportions and vertical growth patterns."
+SOFT_TISSUE_PROTOCOL = "SOFT TISSUE CEPHALOMETRIC ANALYSIS: Assess profile convexity and nasolabial angle."
 
 def build_prompt(rad_type, ceph_an, scale_fac):
     protocol = SAFETY_RULES + f"\n\n[IMAGE CALIBRATION SCALE: {scale_fac:.4f} mm/pixel]\n\n"
@@ -245,30 +206,12 @@ def build_prompt(rad_type, ceph_an, scale_fac):
         if ceph_an == "Combined / All Analyses":
             protocol += (
                 "COMPREHENSIVE COMBINED CEPHALOMETRIC ANALYSIS:\n"
-                + STEINER_PROTOCOL + "\n"
-                + DOWNS_PROTOCOL + "\n"
-                + MCNAMARA_PROTOCOL + "\n"
-                + TWEED_PROTOCOL + "\n"
-                + WITS_PROTOCOL + "\n"
-                + JARABAK_PROTOCOL + "\n"
-                + SOFT_TISSUE_PROTOCOL
+                + STEINER_PROTOCOL + "\n" + DOWNS_PROTOCOL + "\n"
+                + MCNAMARA_PROTOCOL + "\n" + TWEED_PROTOCOL + "\n"
+                + WITS_PROTOCOL + "\n" + JARABAK_PROTOCOL + "\n" + SOFT_TISSUE_PROTOCOL
             )
-        elif ceph_an == "Steiner":
-            protocol += STEINER_PROTOCOL
-        elif ceph_an == "Downs":
-            protocol += DOWNS_PROTOCOL
-        elif ceph_an == "McNamara":
-            protocol += MCNAMARA_PROTOCOL
-        elif ceph_an == "Tweed":
-            protocol += TWEED_PROTOCOL
-        elif ceph_an == "Wits Appraisal":
-            protocol += WITS_PROTOCOL
-        elif ceph_an == "Jarabak":
-            protocol += JARABAK_PROTOCOL
-        elif ceph_an == "Soft Tissue":
-            protocol += SOFT_TISSUE_PROTOCOL
         else:
-            protocol += STEINER_PROTOCOL
+            protocol += f"{ceph_an} CEPHALOMETRIC ANALYSIS."
     else:
         protocol += "General radiographic screening."
     return protocol
@@ -278,7 +221,6 @@ def build_prompt(rad_type, ceph_an, scale_fac):
 # UPLOAD & ANALYZE
 # ------------------------------------------------------------
 st.markdown('<div class="section">📤 Upload Dental Radiograph</div>', unsafe_allow_html=True)
-st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
 
 xray = st.file_uploader(
     "📷 Choose X-ray image",
@@ -288,68 +230,33 @@ xray = st.file_uploader(
 )
 
 if xray is not None:
-
-    st.image(
-        xray,
-        caption="Uploaded radiograph",
-        use_container_width=True,
-    )
+    st.image(xray, caption="Uploaded radiograph", use_container_width=True)
 
     analyze = st.button(
         "🔍 Analyze X-ray",
         use_container_width=True,
-        disabled=(
-            st.session_state.analysis_count
-            >= DAILY_ANALYSIS_LIMIT
-        ),
+        disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT),
     )
 
     if analyze:
-
         if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
-            st.warning(
-                "⏳ Daily AI analysis limit reached. "
-                "Please try again tomorrow."
-            )
-
+            st.warning("⏳ Daily AI analysis limit reached.")
         else:
-
             api_key = st.secrets.get("GEMINI_API_KEY")
-
             if not api_key:
-                st.error("❌ GEMINI_API_KEY was not found.")
-                st.info(
-                    "Open Streamlit Secrets and configure "
-                    "GEMINI_API_KEY."
-                )
-
+                st.error("❌ GEMINI_API_KEY was not found in Streamlit Secrets.")
             else:
-
                 mime_type = xray.type
-
                 if mime_type not in ["image/jpeg", "image/png"]:
                     st.error("❌ Unsupported image format.")
-
                 else:
-
                     try:
-
                         client = genai.Client(api_key=api_key)
-
                         image_bytes = xray.getvalue()
-
-                        final_prompt = build_prompt(
-                            radiograph_type,
-                            ceph_analysis,
-                            scale_factor,
-                        )
+                        final_prompt = build_prompt(radiograph_type, ceph_analysis, scale_factor)
 
                         response = None
-                        last_error = None
-
-                        with st.spinner(
-                            "🔬 Analyzing the uploaded radiograph..."
-                        ):
+                        with st.spinner("🔬 Analyzing the uploaded radiograph..."):
                             for attempt in range(3):
                                 try:
                                     response = client.models.generate_content(
@@ -365,100 +272,70 @@ if xray is not None:
                                         ],
                                     )
                                     break
-
                                 except Exception as error:
-                                    last_error = error
-                                    error_text = str(error)
-
-                                    if "503" in error_text or "UNAVAILABLE" in error_text:
-                                        if attempt < 2:
-                                            wait_time = 5 * (2 ** attempt)
-                                            time.sleep(wait_time)
-                                            continue
-
+                                    if "503" in str(error) and attempt < 2:
+                                        time.sleep(5 * (2 ** attempt))
+                                        continue
                                     raise error
 
-                        result_text = getattr(
-                            response,
-                            "text",
-                            None,
-                        )
+                        result_text = getattr(response, "text", None)
 
                         if result_text:
-
                             st.session_state.analysis_count += 1
+                            st.success("✅ AI assessment completed.")
 
-                            st.success(
-                                "✅ AI assessment completed."
-                            )
+                            # Tabbed Output View
+                            tab_report, tab_export = st.tabs(["📋 Assessment Report", "📥 Export & Options"])
 
-                            st.markdown(
-                                '<div class="section">'
-                                '📋 Assessment Report'
-                                '</div>',
-                                unsafe_allow_html=True,
-                            )
+                            with tab_report:
+                                st.markdown(result_text)
 
-                            st.markdown(result_text)
-
-                            # --- EXPORT REPORT OPTIONS (Mobile Friendly) ---
-                            st.markdown("---")
-                            st.markdown("### 📥 Export Assessment Report")
-                            
-                            safe_patient_name = patient_name if patient_name else "Patient"
-                            
-                            # 1. Text File Download Button
-                            report_filename = f"Dental_Report_{safe_patient_name}.txt"
-                            st.download_button(
-                                label="📥 Download Report as Text File (.txt)",
-                                data=result_text,
-                                file_name=report_filename,
-                                mime="text/plain",
-                                use_container_width=True,
-                            )
-                            
-                            # 2. Printable HTML / PDF View Link (Bulletproof on Mobile)
-                            formatted_html = f"""
-                            <!DOCTYPE html>
-                            <html>
-                            <head>
-                                <title>AMRs Dental Report - {safe_patient_name}</title>
-                                <style>
-                                    body {{ font-family: Arial, sans-serif; padding: 30px; color: #333; line-height: 1.6; }}
-                                    h2 {{ color: #1f77b4; border-bottom: 2px solid #ddd; padding-bottom: 10px; }}
-                                    .meta {{ background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
-                                    pre {{ white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }}
-                                </style>
-                            </head>
-                            <body>
-                                <h2>AMRs Dental X-ray AI - Assessment Report</h2>
-                                <div class="meta">
-                                    <p><b>Patient Name:</b> {safe_patient_name}</p>
-                                    <p><b>Date:</b> {date.today()}</p>
-                                </div>
-                                <pre>{result_text}</pre>
-                            </body>
-                            </html>
-                            """
-                            
-                            b64 = base64.b64encode(formatted_html.encode()).decode()
-                            href = f'<a href="data:text/html;base64,{b64}" download="Dental_Report_{safe_patient_name}.html" target="_blank" style="display: block; text-align: center; background: #ff4b4b; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px;">🌐 Open Printable Web Report / Save as PDF</a>'
-                            st.markdown(href, unsafe_allow_html=True)
+                            with tab_export:
+                                st.markdown("### Export Assessment Report")
+                                safe_patient_name = patient_name if patient_name else "Patient"
+                                
+                                # 1. Text Download
+                                report_filename = f"Dental_Report_{safe_patient_name}.txt"
+                                st.download_button(
+                                    label="📥 Download Report as Text (.txt)",
+                                    data=result_text,
+                                    file_name=report_filename,
+                                    mime="text/plain",
+                                    use_container_width=True,
+                                )
+                                
+                                # 2. Mobile Friendly Print/PDF Link
+                                formatted_html = f"""
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <title>AMRs Dental Report - {safe_patient_name}</title>
+                                    <style>
+                                        body {{ font-family: Arial, sans-serif; padding: 30px; color: #333; line-height: 1.6; }}
+                                        h2 {{ color: #1e3d59; border-bottom: 2px solid #ddd; padding-bottom: 10px; }}
+                                        .meta {{ background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
+                                        pre {{ white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }}
+                                    </style>
+                                </head>
+                                <body>
+                                    <h2>AMRs Dental X-ray AI - Assessment Report</h2>
+                                    <div class="meta">
+                                        <p><b>Patient Name:</b> {safe_patient_name}</p>
+                                        <p><b>Date:</b> {date.today()}</p>
+                                    </div>
+                                    <pre>{result_text}</pre>
+                                </body>
+                                </html>
+                                """
+                                b64 = base64.b64encode(formatted_html.encode()).decode()
+                                href = f'<a href="data:text/html;base64,{b64}" download="Dental_Report_{safe_patient_name}.html" target="_blank" style="display: block; text-align: center; background: #17b978; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px;">🌐 Open Printable Web Report / Save as PDF</a>'
+                                st.markdown(href, unsafe_allow_html=True)
 
                         else:
-
-                            st.warning(
-                                "⚠️ The AI returned no readable assessment."
-                            )
+                            st.warning("⚠️ The AI returned no readable assessment.")
 
                     except Exception as error:
-
-                        st.error(
-                            "❌ AI analysis failed."
-                        )
-
-                        with st.expander(
-                            "Technical error details"
-                        ):
+                        st.error("❌ AI analysis failed.")
+                        with st.expander("Technical error details"):
                             st.write(str(error))
                             
