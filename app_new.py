@@ -832,7 +832,8 @@ Do not force a diagnosis or invent missing structures.
 """
 
 WITS_PROTOCOL = r"""
-WITS APPRAISAL — CORE PROTOCOL
+# WITS APPRAISAL - CORE PROTOCOL
+
 
 Assess Wits appraisal only on a true lateral cephalogram when A point, B point and the functional occlusal plane are clearly visible.
 
