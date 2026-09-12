@@ -740,7 +740,6 @@ Assess Wits appraisal only on a true lateral cephalogram when A point, B point a
 - Identify the functional occlusal plane used for Wits appraisal.
 - Project perpendiculars from A and B to the occlusal plane to obtain AO and BO.
 - Do not invent landmark locations or measurements.
-
 2. MEASUREMENT
 - Determine the AO–BO linear relationship along the occlusal plane.
 - Report the relationship and direction only when reliably measurable.
@@ -766,3 +765,211 @@ WITS APPRAISAL
 - Sagittal implication: [image-supported interpretation or Not reliably assessable]
 - Limitations/uncertainty: [brief]
 """
+
+SOFT_TISSUE_PROTOCOL = """
+SOFT-TISSUE CEPHALOMETRIC ANALYSIS — CORE
+
+Assess the soft-tissue profile ONLY when the lateral cephalogram clearly
+shows the relevant soft-tissue outline and landmarks.
+
+TARGETS TO ASSESS (not findings that must be present):
+- Soft-tissue Nasion (N')
+- Pronasale (Prn)
+- Subnasale (Sn)
+- Labrale superius (Ls)
+- Labrale inferius (Li)
+- Soft-tissue Pogonion (Pog')
+- Menton (Me') when visible
+- Facial profile / overall convexity
+- Lip prominence and lip position relative to the facial reference line
+- Nasolabial angle when landmarks are reliably visible
+- Mentolabial sulcus when reliably visible
+
+RULES:
+- Do not invent landmark positions or numeric measurements.
+- Do not estimate measurements from an unclear profile.
+- If a soft-tissue landmark is obscured or poorly visualized, state:
+  "Not reliably assessable."
+- Never fabricate mm values, angles, or ratios.
+- Do not provide a definitive orthodontic diagnosis or treatment plan.
+"""
+
+# ------------------------------------------------------------
+# PROMPT BUILDER FUNCTION WITH CALIBRATION
+# ------------------------------------------------------------
+def build_prompt(rad_type, ceph_an, scale_fac):
+    protocol = SAFETY_RULES + f"\n\n[IMAGE CALIBRATION SCALE: {scale_fac:.4f} mm/pixel]\n\n"
+    if rad_type == "IOPA":
+        protocol += IOPA_PROTOCOL
+    elif rad_type == "OPG":
+        protocol += OPG_PROTOCOL
+    elif rad_type == "Bitewing":
+        protocol += BITEWING_PROTOCOL
+    elif rad_type == "Occlusal":
+        protocol += OCCLUSAL_PROTOCOL
+    elif rad_type == "Facial radiograph":
+        protocol += FACIAL_PROTOCOL
+    elif rad_type == "Lateral Cephalogram (Ceph)":
+        if ceph_an == "Steiner":
+            protocol += STEINER_PROTOCOL
+        elif ceph_an == "Downs":
+            protocol += DOWNS_PROTOCOL
+        elif ceph_an == "McNamara":
+            protocol += MCNAMARA_PROTOCOL
+        elif ceph_an == "Tweed":
+            protocol += TWEED_PROTOCOL
+        elif ceph_an == "Wits Appraisal":
+            protocol += WITS_PROTOCOL
+        elif ceph_an == "Jarabak":
+            protocol += JARABAK_PROTOCOL
+        elif ceph_an == "Soft Tissue":
+            protocol += SOFT_TISSUE_PROTOCOL
+        else:
+            protocol += STEINER_PROTOCOL + "\n\n" + DOWNS_PROTOCOL + "\n\n" + TWEED_PROTOCOL
+    else:
+        protocol += OTHER_PROTOCOL
+    return protocol
+
+# ------------------------------------------------------------
+# UPLOAD & ANALYZE
+# ------------------------------------------------------------
+st.markdown('<div class="section">📤 Upload Dental Radiograph</div>', unsafe_allow_html=True)
+st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
+
+xray = st.file_uploader(
+    "📷 Choose X-ray image",
+    type=["jpg", "jpeg", "png"],
+    accept_multiple_files=False,
+    key="dental_xray_upload",
+)
+
+if xray is not None:
+
+    st.image(
+        xray,
+        caption="Uploaded radiograph",
+        use_container_width=True,
+    )
+
+    analyze = st.button(
+        "🔍 Analyze X-ray",
+        use_container_width=True,
+        disabled=(
+            st.session_state.analysis_count
+            >= DAILY_ANALYSIS_LIMIT
+        ),
+    )
+
+    if analyze:
+
+        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
+            st.warning(
+                "⏳ Daily AI analysis limit reached. "
+                "Please try again tomorrow."
+            )
+
+        else:
+
+            api_key = st.secrets.get("GEMINI_API_KEY")
+
+            if not api_key:
+                st.error("❌ GEMINI_API_KEY was not found.")
+                st.info(
+                    "Open Streamlit Secrets and configure "
+                    "GEMINI_API_KEY."
+                )
+
+            else:
+
+                mime_type = xray.type
+
+                if mime_type not in ["image/jpeg", "image/png"]:
+                    st.error("❌ Unsupported image format.")
+
+                else:
+
+                    try:
+
+                        client = genai.Client(api_key=api_key)
+
+                        image_bytes = xray.getvalue()
+
+                        final_prompt = build_prompt(
+                            radiograph_type,
+                            ceph_analysis,
+                            scale_factor,
+                        )
+
+                        response = None
+                        last_error = None
+
+                        with st.spinner(
+                            "🔬 Analyzing the uploaded radiograph..."
+                        ):
+                            for attempt in range(3):
+                                try:
+                                    response = client.models.generate_content(
+                                        model=MODEL_NAME,
+                                        contents=[
+                                            {
+                                                "inline_data": {
+                                                    "mime_type": mime_type,
+                                                    "data": image_bytes,
+                                                }
+                                            },
+                                            final_prompt,
+                                        ],
+                                    )
+                                    break
+
+                                except Exception as error:
+                                    last_error = error
+                                    error_text = str(error)
+
+                                    if "503" in error_text or "UNAVAILABLE" in error_text:
+                                        if attempt < 2:
+                                            wait_time = 5 * (2 ** attempt)
+                                            time.sleep(wait_time)
+                                            continue
+
+                                    raise error
+
+                        result_text = getattr(
+                            response,
+                            "text",
+                            None,
+                        )
+
+                        if result_text:
+
+                            st.session_state.analysis_count += 1
+
+                            st.success(
+                                "✅ AI assessment completed."
+                            )
+
+                            st.markdown(
+                                '<div class="section">'
+                                '📋 Assessment Report'
+                                '</div>',
+                                unsafe_allow_html=True,
+                            )
+
+                            st.markdown(result_text)
+
+                        else:
+
+                            st.warning(
+                                "⚠️ The AI returned no readable assessment."
+                            )
+
+                    except Exception as error:
+
+                        st.error(
+                            "❌ AI analysis failed."
+                        )
+
+                        with st.expander(
+                            "Technical error details"
+                        ):
+                            st.write(str(error))
