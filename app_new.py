@@ -197,80 +197,470 @@ SAFETY RULES:
 
 IOPA_PROTOCOL = """
 IOPA SYSTEMATIC ASSESSMENT
+
 Assess the actual uploaded IOPA systematically.
+
+IMAGE QUALITY:
+- Exposure
+- Contrast
+- Sharpness
+- Positioning
+- Cropping
+- Cone cut
+- Distortion
+- Other technical limitations
+
+DENTAL STRUCTURES:
+- Crowns
+- Roots
+- Visible teeth
+- Obvious caries
+- Obvious restorations
+- Gross tooth abnormalities
+- Root morphology when visible
+
+PERIODONTAL STRUCTURES:
+- Lamina dura when visible
+- Periodontal ligament space when visible
+- Alveolar crest
+- Obvious periodontal bone loss
+
+PERIAPICAL REGION:
+- Periapical radiolucency
+- Periapical radiopacity
+- Root abnormalities
+- Other visible periapical findings
+
+OTHER:
+- Impacted or unerupted teeth when clearly visible
+- Other obvious abnormalities
+
+Do not automatically label a periapical lesion as abscess,
+granuloma, or cyst when the image does not support that distinction.
+Describe the radiographic appearance and uncertainty.
 """
 
 OPG_PROTOCOL = """
 OPG SYSTEMATIC PANORAMIC ASSESSMENT
-Perform a systematic panoramic assessment.
+
+Perform a systematic panoramic assessment from one side to the
+other and then review the entire image.
+
+The following are TARGETS TO INSPECT, not findings that must
+appear in the report.
+
+1. IMAGE QUALITY AND ARTIFACTS
+Inspect:
+- Positioning
+- Rotation
+- Head tilt
+- Anteroposterior positioning
+- Exposure
+- Motion blur
+- Cropping
+- Magnification
+- Distortion
+- Superimposition
+- Ghost images
+
+Ghost images are artifacts, not pathology. Report them only
+when an actual artifact is visible.
+
+2. ANATOMICAL LANDMARKS
+When actually visible, inspect:
+- Incisive foramen
+- Median palatal suture
+- Nasal fossa
+- Nasal septum
+- Maxillary sinus
+- Zygomatic process of maxilla
+- Zygomatic arch
+- Pterygoid plates
+- Pterygoid hamulus
+- Coronoid process
+- Condyles
+- Mandibular ramus
+- Mandibular angle
+- Lingual foramen
+- Genial tubercles
+- Mental foramen
+- Inferior alveolar canal
+- Mylohyoid ridge
+- External oblique ridge
+- Inferior border of mandible
+- Glossopalatal air space
+- Nasopharyngeal air space
+
+Do not force identification of a landmark that is not adequately
+visualized.
+
+3. DENTITION
+Inspect:
+- Present teeth
+- Missing teeth when reliably evident
+- Unerupted teeth
+- Impacted teeth
+- Impacted third molars
+- Impacted canines
+- Supernumerary teeth
+- Odontomes
+- Gross developmental abnormalities
+- Obvious caries
+- Obvious restorations
+- Gross root abnormalities
+- Actual periapical abnormalities
+
+Use FDI numbering only when anatomically reliable.
+
+4. PERIODONTAL STRUCTURES
+Inspect:
+- Alveolar crest
+- General alveolar bone level
+- Obvious horizontal bone loss
+- Obvious vertical/angular bone loss
+- Other clearly visible periodontal changes
+
+Do not overcall subtle bone-level changes.
+
+5. PERIAPICAL / DENTOALVEOLAR FINDINGS
+Look for actual evidence of:
+- Periapical radiolucency
+- Periapical radiopacity
+- Inflammatory-looking periapical changes
+- Root abnormalities
+- Other dentoalveolar abnormalities
+
+Do not automatically call a lesion an abscess, granuloma,
+or radicular cyst unless the image supports that conclusion.
+
+6. ODONTOGENIC CYSTS / TUMORS / LESIONS
+Inspect for actual image-supported evidence of:
+- Dentigerous cyst
+- Radicular cyst
+- Odontogenic keratocyst (OKC)
+- Ameloblastoma
+- Odontome
+- Other odontogenic lesions
+
+These are screening targets only. Do not report them merely
+because they are listed here.
+
+If a lesion is visible but its exact diagnosis is uncertain,
+describe:
+- Radiolucent / radiopaque / mixed appearance
+- Location
+- Relationship to teeth
+- Borders if visible
+- Effect on surrounding structures if visible
+- Confidence
+
+7. MAXILLA AND MAXILLARY SINUSES
+When visible, inspect:
+- Maxillary bone
+- Maxillary sinus
+- Sinus outline
+- Obvious opacification
+- Air-fluid level
+- Gross mucosal thickening when clearly visible
+- Other obvious abnormalities
+
+Do not provide a definitive medical sinus diagnosis.
+
+8. MANDIBLE
+When visible, inspect:
+- Body
+- Inferior border
+- Ramus
+- Angle
+- Alveolar process
+- Cortical outline
+- Inferior alveolar canal
+- Mental foramina
+- Other obvious abnormalities
+
+9. TMJ / CONDYLES
+When adequately visualized, inspect:
+- Condylar size
+- Condylar shape
+- Gross asymmetry
+- Gross deformity
+- Obvious enlargement
+- Obvious reduction in size
+
+Do not definitively diagnose condylar hyperplasia or hypoplasia
+from an OPG alone.
+
+10. BONY ABNORMALITIES
+Inspect for actual evidence of:
+- Osteomyelitis-related changes
+- Fibrous-dysplasia-like changes
+- Other radiolucent lesions
+- Other radiopaque lesions
+- Cortical expansion
+- Cortical destruction
+- Other gross bony abnormalities
+
+Do not diagnose from vague density changes alone.
+
+OPG REPORTING RULE:
+Do not output a huge checklist of diseases with "absent".
+Describe relevant anatomy actually visualized and report only
+actual abnormalities supported by the image.
 """
 
 BITEWING_PROTOCOL = """
 BITEWING SYSTEMATIC ASSESSMENT
-Inspect interproximal surfaces and bone levels.
+
+Inspect:
+- Interproximal surfaces
+- Obvious interproximal caries
+- Occlusal surfaces when visible
+- Existing restorations
+- Alveolar crest
+- Obvious periodontal bone loss
+- Obvious calculus when visible
+- Other clearly visible findings
+
+Do not label subtle radiolucencies as caries without evidence.
 """
 
 OCCLUSAL_PROTOCOL = """
 OCCLUSAL RADIOGRAPH SYSTEMATIC ASSESSMENT
-Inspect teeth, jaw structures, and obvious abnormalities.
+
+Inspect:
+- Teeth
+- Unerupted/developing teeth
+- Jaw structures
+- Cortical outlines
+- Gross bony abnormalities
+- Obvious radiolucencies
+- Obvious radiopacities
+- Supernumerary teeth when clearly visible
+- Other clearly visible abnormalities
+
+Report only actual image-supported findings.
 """
 
 FACIAL_PROTOCOL = """
 FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT
-Conservative assessment of visible facial bones and fracture screening.
+
+The main purpose is conservative assessment of visible facial
+bones and screening for obvious traumatic bony abnormalities.
+
+1. IMAGE QUALITY
+Assess:
+- Positioning
+- Rotation
+- Exposure
+- Sharpness
+- Motion
+- Cropping
+- Superimposition
+- Whether relevant facial bones are adequately included
+
+2. FACIAL BONES
+When included and visible, inspect:
+- Nasal bones
+- Nasal septum
+- Orbital margins
+- Orbital walls
+- Zygomatic bones
+- Zygomatic arches
+- Zygomaticomaxillary region
+- Maxillary bones
+- Maxillary sinus walls
+- Frontal facial bone regions
+- Alveolar processes
+- Mandible if included
+
+3. FRACTURE SCREENING
+Look for actual evidence of:
+- Fracture line
+- Cortical discontinuity
+- Step deformity
+- Displacement
+- Abnormal alignment
+- Gross traumatic asymmetry
+- Other obvious traumatic bony abnormalities
+
+If convincing evidence is present, describe:
+- Location
+- Visible fracture features
+- Displacement if visible
+- Confidence
+
+If suspicious but insufficient:
+"Possible fracture - requires professional radiographic and clinical correlation."
+
+Never call an uncertain fracture confirmed.
+
+4. ASSOCIATED FINDINGS
+When actually visible, inspect for:
+- Maxillary sinus opacification
+- Air-fluid level
+- Radiographically visible soft-tissue swelling
+- Other associated abnormalities
+
+Do not automatically attribute these findings to trauma.
+
+5. LIMITATIONS
+If a facial region is not adequately visualized, state:
+"Not reliably assessable on this radiograph."
+
+Do not assume a fracture is absent merely because the region
+cannot be evaluated.
+Do not provide definitive fracture treatment or management.
 """
 
 STEINER_PROTOCOL = """
 STEINER CEPHALOMETRIC ANALYSIS - CORE
-Analyze only a true lateral cephalogram. Assess image quality and landmark visibility.
-CORE PARAMETERS:
-- SNA angle: Maxillary position relative to cranial base
-- SNB angle: Mandibular position relative to cranial base
-- ANB angle: Relative anteroposterior skeletal jaw relationship
-- Upper incisor to NA (angle and linear)
-- Lower incisor to NB (angle and linear)
-- Occlusal plane to SN angle
-- Mandibular plane to SN angle (Go-Gn to SN)
-- Interincisal angle
-REPORTING: Give numerical values only when landmarks can be identified with adequate confidence. State "Not reliably assessable" for an unavailable measurement.
+
+Analyze only a true lateral cephalogram. Assess image quality and
+landmark visibility before attempting measurements. Never invent a
+landmark or numerical value.
+
+CORE STEINER PARAMETERS WHEN RELIABLY MEASURABLE:
+- SNA Angle: Maxillary position relative to cranial base
+- SNB Angle: Mandibular position relative to cranial base
+- ANB Angle: Relative anteroposterior skeletal jaw relationship
+- Upper Incisor to NA (Angle and Linear distance)
+- Lower Incisor to NB (Angle and Linear distance)
+- Occlusal Plane to SN Angle
+- Mandibular Plane to SN Angle (Go-Gn to SN)
+- Interincisal Angle
+
+REPORTING:
+- Give numerical values only when landmarks can be identified with adequate confidence.
+- State "Not reliably assessable" for an unavailable measurement.
+- Separate measured findings from interpretation.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
 DOWNS_PROTOCOL = """
 DOWNS CEPHALOMETRIC ANALYSIS - CORE
-Analyze only a true lateral cephalogram. First assess image quality and landmark visibility. Do not invent landmarks or measurements.
-CORE PARAMETERS:
-- Facial angle
-- Angle of convexity
-- A-B plane angle
-- Mandibular plane angle
-- Interincisal angle
-- Lower incisor to occlusal plane
-REPORTING: Give numerical values only when reliably measurable. State "Not reliably assessable" otherwise.
+
+Analyze only a true lateral cephalogram. Assess image quality and
+landmark visibility before attempting measurements. Never invent a
+landmark or numerical value.
+
+CORE DOWNS PARAMETERS WHEN RELIABLY MEASURABLE:
+Skeletal Profile:
+- Facial Angle: Frankfort horizontal to facial plane (N-Pog)
+- Angle of Convexity: Nasion to Point A, and Point A to Pogonion
+- A-B Plane Angle: A-B line relative to facial plane (N-Pog)
+- Mandibular Plane Angle: Frankfort horizontal to mandibular plane (Go-Me)
+
+Dental Profile:
+- Interincisal Angle: Long axes of maxillary and mandibular central incisors
+- Lower Incisor to Occlusal Plane Angle
+- Lower Incisor to Mandibular Plane Angle (IMPA)
+- Occlusal Plane to Frankfort Horizontal Angle
+- Y-Axis (Growth pattern): S-Gn to Frankfort Horizontal
+
+REPORTING:
+- Give numerical values only when landmarks can be identified with adequate confidence.
+- State "Not reliably assessable" for an unavailable measurement.
+- Separate measured findings from interpretation.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
 MCNAMARA_PROTOCOL = """
 MCNAMARA CEPHALOMETRIC ANALYSIS - CORE
-Analyze only a true lateral cephalogram. Focus on maxillary and mandibular positions relative to nasion perpendicular, effective midface and mandibular lengths.
+
+Analyze only a true lateral cephalogram. Assess image quality and
+landmark visibility before attempting measurements. Never invent a
+landmark or numerical value.
+
+CORE MCNAMARA PARAMETERS WHEN RELIABLY MEASURABLE:
+- Maxillary Position: Maxilla relative to nasion perpendicular
+- Mandibular Position: Mandible relative to nasion perpendicular
+- Effective Midface Length: Condylion to Point A (Co-A)
+- Effective Mandibular Length: Condylion to Gnathion (Co-Gn)
+- Mandibular Difference: Effective mandibular length minus midface length
+- Vertical Pterygoid Vertical (PTV) analysis and lower facial height proportions
+
+REPORTING:
+- Give numerical values only when landmarks can be identified with adequate confidence.
+- State "Not reliably assessable" for an unavailable measurement.
+- Separate measured findings from interpretation.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
 TWEED_PROTOCOL = """
 TWEED CEPHALOMETRIC ANALYSIS - CORE
-Analyze only a true lateral cephalogram. Assess FMA, IMPA, FMIA, and the Tweed triangle relationship.
+
+Analyze only a true lateral cephalogram. Assess image quality and
+landmark visibility before attempting measurements. Never invent a
+landmark or numerical value.
+
+CORE TWEED PARAMETERS WHEN RELIABLY MEASURABLE:
+- FMA: Frankfort horizontal to mandibular plane angle
+- IMPA: Long axis of mandibular central incisor to mandibular plane
+- FMIA: Long axis of mandibular central incisor to Frankfort horizontal
+- Tweed Triangle relationship assessment (FMA, IMPA, FMIA balance)
+
+REPORTING:
+- Give numerical values only when landmarks can be identified with adequate confidence.
+- State "Not reliably assessable" for an unavailable measurement.
+- Separate measured findings from interpretation.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
 WITS_PROTOCOL = """
 WITS APPRAISAL - CORE PROTOCOL
-Determine the AO-BO linear relationship along the functional occlusal plane to evaluate the relative anteroposterior skeletal jaw discrepancy.
+
+Analyze only a true lateral cephalogram. Assess image quality and
+landmark visibility before attempting measurements. Never invent a
+landmark or numerical value.
+
+CORE WITS PARAMETERS WHEN RELIABLY MEASURABLE:
+- Functional Occlusal Plane (FOP) determination
+- Point A Perpendicular (AO) projection onto FOP
+- Point B Perpendicular (BO) projection onto FOP
+- AO-BO linear relationship and jaw discrepancy categorization (Class I, II, or III tendency)
+
+REPORTING:
+- Give numerical values only when landmarks can be identified with adequate confidence.
+- State "Not reliably assessable" for an unavailable measurement.
+- Separate measured findings from interpretation.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
 JARABAK_PROTOCOL = """
 JARABAK CEPHALOMETRIC ANALYSIS - CORE
-Assess polygon proportions, sum of posterior angles, and Jarabak ratio (S-Go / N-Me * 100) for vertical growth patterns.
+
+Analyze only a true lateral cephalogram. Assess image quality and
+landmark visibility before attempting measurements. Never invent a
+landmark or numerical value.
+
+CORE JARABAK PARAMETERS WHEN RELIABLY MEASURABLE:
+- Polygon proportions and cranial base relationships
+- Sum of posterior angles (Saddle angle, Articular angle, Gonial angle) for growth pattern assessment
+- Jarabak Ratio: (S-Go / N-Me) * 100 for vertical growth proportion evaluation (divergent vs counter-divergent)
+
+REPORTING:
+- Give numerical values only when landmarks can be identified with adequate confidence.
+- State "Not reliably assessable" for an unavailable measurement.
+- Separate measured findings from interpretation.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
 SOFT_TISSUE_PROTOCOL = """
 SOFT TISSUE CEPHALOMETRIC ANALYSIS - CORE
-Assess facial profile convexity, nasolabial angle, lip thicknesses, and aesthetic line relationships.
+
+Analyze only a true lateral cephalogram. Assess image quality and soft tissue profile visibility before attempting evaluations. Never invent a value.
+
+CORE SOFT TISSUE PARAMETERS WHEN RELIABLY MEASURABLE:
+- Facial Profile Convexity (Soft tissue Nasion, Subnasale, Soft tissue Pogonion)
+- Nasolabial Angle
+- Upper and Lower Lip Thickness and Protrusion relative to Ricketts E-plane or Steiner S-line
+- Mentolabial sulcus depth
+
+REPORTING:
+- Give numerical values or descriptive findings only when reliable.
+- State "Not reliably assessable" for unavailable evaluations.
+- Separate measured findings from interpretation.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
 """
 
 # ------------------------------------------------------------
@@ -310,135 +700,4 @@ def build_prompt(rad_type, ceph_an):
 # ------------------------------------------------------------
 # UPLOAD & ANALYZE
 # ------------------------------------------------------------
-st.markdown(
-    '<div class="section">📤 Upload Dental Radiograph</div>',
-    unsafe_allow_html=True,
-)
-
-st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
-
-xray = st.file_uploader(
-    "📷 Choose X-ray image",
-    type=["jpg", "jpeg", "png"],
-    accept_multiple_files=False,
-    key="dental_xray_upload",
-)
-
-if xray is not None:
-
-    st.image(
-        xray,
-        caption="Uploaded radiograph",
-        use_container_width=True,
-    )
-
-    analyze = st.button(
-        "🔍 Analyze X-ray",
-        use_container_width=True,
-        disabled=(
-            st.session_state.analysis_count
-            >= DAILY_ANALYSIS_LIMIT
-        ),
-    )
-
-    if analyze:
-
-        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
-            st.warning(
-                "⏳ Daily AI analysis limit reached. "
-                "Please try again tomorrow."
-            )
-
-        else:
-
-            api_key = st.secrets.get("GEMINI_API_KEY")
-
-            if not api_key:
-                st.error("❌ GEMINI_API_KEY was not found.")
-                st.info(
-                    "Open Streamlit Secrets and configure "
-                    "GEMINI_API_KEY."
-                )
-
-            else:
-
-                mime_type = xray.type
-
-                if mime_type not in ["image/jpeg", "image/png"]:
-                    st.error("❌ Unsupported image format.")
-
-                else:
-
-                    try:
-
-                        client = genai.Client(api_key=api_key)
-
-                        image_bytes = xray.getvalue()
-
-                        image_base64 = base64.b64encode(
-                            image_bytes
-                        ).decode("utf-8")
-
-                        final_prompt = build_prompt(
-                            radiograph_type,
-                            ceph_analysis,
-                        )
-
-                        with st.spinner(
-                            "🔬 Analyzing the uploaded radiograph..."
-                        ):
-
-                            interaction = client.interactions.create(
-                                model=MODEL_NAME,
-                                input=[
-                                    {
-                                        "type": "image",
-                                        "mime_type": mime_type,
-                                        "data": image_base64,
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": final_prompt,
-                                    },
-                                ],
-                            )
-
-                        result_text = getattr(
-                            interaction,
-                            "output_text",
-                            None,
-                        )
-
-                        if result_text:
-
-                            st.session_state.analysis_count += 1
-
-                            st.success(
-                                "✅ AI assessment completed."
-                            )
-
-                            st.markdown(
-                                '<div class="section">'
-                                '📋 Assessment Report'
-                                '</div>',
-                                unsafe_allow_html=True,
-                            )
-
-                            st.markdown(result_text)
-
-                        else:
-
-                            st.warning(
-                                "⚠️ The AI returned no readable assessment."
-                            )
-
-                    except Exception as error:
-
-                        st.error(
-                            "❌ AI analysis failed."
-                        )
-
-                        with st.expander(
-                            "Technical error details"
-                        ):
-                            st.write(str(error))
+st.mar
