@@ -192,6 +192,128 @@ st.markdown(
 st.info("Upload a dental X-ray image in JPG, JPEG or PNG format.")
 
 xray = st.file_uploader(
+    # ------------------------------------------------------------
+# ANALYZE BUTTON
+# ------------------------------------------------------------
+
+if xray is not None:
+
+    st.image(
+        xray,
+        caption="Uploaded radiograph",
+        use_container_width=True,
+    )
+
+    analyze = st.button(
+        "🔍 Analyze X-ray",
+        use_container_width=True,
+        disabled=(
+            st.session_state.analysis_count
+            >= DAILY_ANALYSIS_LIMIT
+        ),
+    )
+
+    if analyze:
+
+        if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
+            st.warning(
+                "⏳ Daily AI analysis limit reached. "
+                "Please try again tomorrow."
+            )
+
+        else:
+
+            api_key = st.secrets.get("GEMINI_API_KEY")
+
+            if not api_key:
+                st.error("❌ GEMINI_API_KEY was not found.")
+                st.info(
+                    "Open Streamlit Secrets and configure "
+                    "GEMINI_API_KEY."
+                )
+
+            else:
+
+                mime_type = xray.type
+
+                if mime_type not in ["image/jpeg", "image/png"]:
+                    st.error("❌ Unsupported image format.")
+
+                else:
+
+                    try:
+
+                        client = genai.Client(api_key=api_key)
+
+                        image_bytes = xray.getvalue()
+
+                        image_base64 = base64.b64encode(
+                            image_bytes
+                        ).decode("utf-8")
+
+                        final_prompt = build_prompt(
+                            radiograph_type,
+                            ceph_analysis,
+                        )
+
+                        with st.spinner(
+                            "🔬 Analyzing the uploaded radiograph..."
+                        ):
+
+                            interaction = client.interactions.create(
+                                model=MODEL_NAME,
+                                input=[
+                                    {
+                                        "type": "image",
+                                        "mime_type": mime_type,
+                                        "data": image_base64,
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": final_prompt,
+                                    },
+                                ],
+                            )
+
+                        result_text = getattr(
+                            interaction,
+                            "output_text",
+                            None,
+                        )
+
+                        if result_text:
+
+                            st.session_state.analysis_count += 1
+
+                            st.success(
+                                "✅ AI assessment completed."
+                            )
+
+                            st.markdown(
+                                '<div class="section">'
+                                '📋 Assessment Report'
+                                '</div>',
+                                unsafe_allow_html=True,
+                            )
+
+                            st.markdown(result_text)
+
+                        else:
+
+                            st.warning(
+                                "⚠️ The AI returned no readable assessment."
+                            )
+
+                    except Exception as error:
+
+                        st.error(
+                            "❌ AI analysis failed."
+                        )
+
+                        with st.expander(
+                            "Technical error details"
+                        ):
+                            st.code(str(error))
     "📷 Choose X-ray image",
     type=["jpg", "jpeg", "png"],
     accept_multiple_files=False,
