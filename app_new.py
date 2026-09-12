@@ -3,9 +3,9 @@ from datetime import date
 import json
 import math
 import re
+import time
 from google import genai
 import base64
-import time
 
 st.set_page_config(
     page_title="AMRs Dental X-ray AI",
@@ -730,7 +730,7 @@ Then describe only:
 Do not force a diagnosis or invent missing structures.
 """
 
-WITS_PROTOCOL = r"""
+WITS_PROTOCOL = """
 WITS APPRAISAL — CORE PROTOCOL
 
 Assess Wits appraisal only on a true lateral cephalogram when A point, B point and the functional occlusal plane are clearly visible.
@@ -742,4 +742,4 @@ Assess Wits appraisal only on a true lateral cephalogram when A point, B point a
 - Do not invent landmark locations or measurements.
 
 2. MEASUREMENT
-- Determine the AO–BO linear relationsh
+- Determine the AO–BO linear relationshi
