@@ -318,11 +318,23 @@ if xray is not None:
                             "Technical error details"
                         ):
                             st.code(str(error))
-    "📷 Choose X-ray image",
-    type=["jpg", "jpeg", "png"],
-    accept_multiple_files=False,
-    key="dental_xray_upload",
-)
+                        except Exception as error:
+
+                        st.error(
+                            "❌ AI analysis failed."
+                        )
+
+                        with st.expander(
+                            "Technical error details"
+                        ):
+                            st.code(str(error))
+
+
+# ------------------------------------------------------------
+# COMMON SAFETY PROMPT
+# ------------------------------------------------------------
+SAFETY_RULES = """
+You are AMRs Dental X-ray AI.
 
 # ------------------------------------------------------------
 # COMMON SAFETY PROMPT
