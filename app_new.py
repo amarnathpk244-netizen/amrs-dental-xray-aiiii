@@ -1,4 +1,4 @@
-Import streamlit as st
+import streamlit as st
 from datetime import date
 import json
 import math
