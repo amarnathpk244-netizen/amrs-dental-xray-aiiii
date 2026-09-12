@@ -713,9 +713,6 @@ WITS APPRAISAL
 - Sagittal implication: [image-supported interpretation or Not reliably assessable]
 - Limitations/uncertainty: [brief]
 """
-
-
-
 SOFT_TISSUE_PROTOCOL = """
 SOFT-TISSUE CEPHALOMETRIC ANALYSIS — CORE
 
@@ -734,10 +731,25 @@ TARGETS TO ASSESS (not findings that must be present):
 - Lip prominence and lip position relative to the facial reference line
 - Nasolabial angle when landmarks are reliably visible
 - Mentolabial sulcus when reliably visible
-"""
+
 RULES:
 - Do not invent landmark positions or numeric measurements.
 - Do not estimate measurements from an unclear profile.
 - If a soft-tissue landmark is obscured or poorly visualized, state:
   "Not reliably assessable."
-- Distinguish
+- Distinguish visual observations from quantitative measurements.
+- Do not make a skeletal diagnosis from soft-tissue appearance alone.
+- Do not provide definitive orthodontic diagnosis or treatment planning.
+
+OUTPUT:
+SOFT-TISSUE ANALYSIS
+- Profile visibility: Clear / Limited / Poor
+- Landmarks visible: [list]
+- Profile/convexity: [image-supported description or Not reliably assessable]
+- Lip position/prominence: [image-supported description or Not reliably assessable]
+- Nasolabial angle: [value or Not reliably assessable]
+- Mentolabial contour: [description or Not reliably assessable]
+- Limitations/uncertainty: [brief]
+"""
+
+
