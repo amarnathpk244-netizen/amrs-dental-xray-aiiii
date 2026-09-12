@@ -705,11 +705,9 @@ Do not assume a fracture is absent merely because the region
 cannot be evaluated.
 Do not provide definitive fracture treatment or management.
 """
+# TWEED CEPHALOMETRIC ANALYSIS - CORE
 
-
-TWEED_PROTOCOL = """
-TWEED CEPHALOMETRIC ANALYSIS — CORE
-
+"""
 Analyze only a true lateral cephalogram. Assess image quality and
 landmark visibility before attempting measurements. Never invent a
 landmark or numerical value.
@@ -740,6 +738,8 @@ REPORTING:
 - Do not use Tweed norms as a substitute for visible image evidence.
 - Do not provide definitive orthodontic diagnosis or treatment planning.
 """
+
+
 DOWNS_PROTOCOL = """
 DOWNS CEPHALOMETRIC ANALYSIS — CORE
 
