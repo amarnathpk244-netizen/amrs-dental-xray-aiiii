@@ -401,44 +401,38 @@ if xray is not None:
 
                             st.markdown(result_text)
 
-                            # --- EXPORT REPORT OPTIONS (PDF & Text Selection) ---
+                            # --- EXPORT REPORT OPTIONS (HTML & Text Choice - No Package Needed) ---
                             st.markdown("---")
                             st.markdown("### 📥 Export Assessment Report")
                             
-                            export_format = st.radio(
-                                "Select Export Format:",
-                                ("PDF Document (.pdf)", "Text File (.txt)"),
+                            export_choice = st.radio(
+                                "Select File Format",
+                                ["Text File (.txt)", "HTML Report (.html - Print/Save as PDF)"],
                                 horizontal=True
                             )
 
                             safe_patient_name = patient_name if patient_name else "Patient"
 
-                            if export_format == "PDF Document (.pdf)":
-                                try:
-                                    from fpdf import FPDF
-                                    
-                                    def generate_pdf(text, p_name):
-                                        pdf = FPDF()
-                                        pdf.add_page()
-                                        pdf.set_font("Arial", size=11)
-                                        pdf.cell(200, 10, txt="AMRs Dental X-ray AI - Assessment Report", ln=True, align="C")
-                                        pdf.cell(200, 8, txt=f"Patient Name: {p_name}", ln=True, align="L")
-                                        pdf.ln(5)
-                                        clean_text = text.replace("**", "").replace("#", "")
-                                        for line in clean_text.split('\n'):
-                                            pdf.multi_cell(0, 6, txt=line)
-                                        return pdf.output(dest='S').encode('latin1', 'replace')
-                                        
-                                    pdf_data = generate_pdf(result_text, safe_patient_name)
-                                    st.download_button(
-                                        label="📥 Download Report as PDF (.pdf)",
-                                        data=pdf_data,
-                                        file_name=f"Dental_Report_{safe_patient_name}.pdf",
-                                        mime="application/pdf",
-                                        use_container_width=True,
-                                    )
-                                except ImportError:
-                                    st.error("`fpdf2` package missing aanu. Terminal-il `pip install fpdf2` run cheyyuka.")
+                            if "HTML" in export_choice:
+                                html_content = f"""
+                                <html>
+                                <head><title>AMRs Dental Report - {safe_patient_name}</title></head>
+                                <body style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
+                                    <h2>AMRs Dental X-ray AI - Assessment Report</h2>
+                                    <p><b>Patient Name:</b> {safe_patient_name}</p>
+                                    <p><b>Date:</b> {date.today()}</p>
+                                    <hr>
+                                    <pre style="white-space: pre-wrap; font-family: Arial, sans-serif;">{result_text}</pre>
+                                </body>
+                                </html>
+                                """
+                                st.download_button(
+                                    label="📥 Download HTML Report (.html)",
+                                    data=html_content,
+                                    file_name=f"Dental_Report_{safe_patient_name}.html",
+                                    mime="text/html",
+                                    use_container_width=True,
+                                )
                             else:
                                 report_filename = f"Dental_Report_{safe_patient_name}.txt"
                                 st.download_button(
@@ -465,4 +459,4 @@ if xray is not None:
                             "Technical error details"
                         ):
                             st.write(str(error))
-        
+                            
