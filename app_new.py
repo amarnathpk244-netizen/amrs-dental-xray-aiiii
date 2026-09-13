@@ -15,6 +15,7 @@ st.set_page_config(
 
 DAILY_ANALYSIS_LIMIT = 3
 MODEL_NAME = "gemini-3.8-flash"
+MAX_FILE_SIZE_MB = 10
 
 CEPH_ANALYSES = [
     "Steiner",
@@ -28,7 +29,7 @@ CEPH_ANALYSES = [
 ]
 
 # ------------------------------------------------------------
-# SESSION USAGE
+# SESSION USAGE & STATE PERSISTENCE
 # ------------------------------------------------------------
 if "analysis_count" not in st.session_state:
     st.session_state.analysis_count = 0
@@ -39,6 +40,12 @@ if "usage_date" not in st.session_state:
 if st.session_state.usage_date != date.today():
     st.session_state.analysis_count = 0
     st.session_state.usage_date = date.today()
+
+if "last_report" not in st.session_state:
+    st.session_state.last_report = None
+
+if "last_patient" not in st.session_state:
+    st.session_state.last_patient = ""
 
 # ------------------------------------------------------------
 # UI STYLES & MEDICAL THEME
@@ -159,7 +166,7 @@ if radiograph_type == "Lateral Cephalogram (Ceph)":
 
 
 # ------------------------------------------------------------
-# PROMPTS & SAFETY RULES WITH TREATMENT CONSIDERATIONS
+# PROMPTS & SAFETY RULES
 # ------------------------------------------------------------
 SAFETY_RULES = """
 You are AMRs Dental X-ray AI.
@@ -180,13 +187,13 @@ BITEWING_PROTOCOL = "BITEWING SYSTEMATIC ASSESSMENT: Inspect interproximal conta
 OCCLUSAL_PROTOCOL = "OCCLUSAL RADIOGRAPH SYSTEMATIC ASSESSMENT: Inspect jaw arches and developmental dental structures."
 FACIAL_PROTOCOL = "FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT: Screen facial bones for structural integrity."
 
-STEINER_PROTOCOL = "STEINER CEPHALOMETRIC ANALYSIS: Assess SNA, SNB, ANB, Incisor positions, and plane angles."
-DOWNS_PROTOCOL = "DOWNS CEPHALOMETRIC ANALYSIS: Assess facial angle, convexity, A-B plane, and dental parameters."
-MCNAMARA_PROTOCOL = "MCNAMARA CEPHALOMETRIC ANALYSIS: Assess maxilla/mandible positions and effective lengths."
-TWEED_PROTOCOL = "TWEED CEPHALOMETRIC ANALYSIS: Assess FMA, IMPA, and FMIA parameters."
+STEINER_PROTOCOL = "STEINER CEPHALOMETRIC ASSESSMENT: Assess SNA, SNB, ANB, Incisor positions, and plane angles."
+DOWNS_PROTOCOL = "DOWNS CEPHALOMETRIC ASSESSMENT: Assess facial angle, convexity, A-B plane, and dental parameters."
+MCNAMARA_PROTOCOL = "MCNAMARA CEPHALOMETRIC ASSESSMENT: Assess maxilla/mandible positions and effective lengths."
+TWEED_PROTOCOL = "TWEED CEPHALOMETRIC ASSESSMENT: Assess FMA, IMPA, and FMIA parameters."
 WITS_PROTOCOL = "WITS APPRAISAL: Assess AO-BO linear relationship."
-JARABAK_PROTOCOL = "JARABAK CEPHALOMETRIC ANALYSIS: Assess facial proportions and vertical growth patterns."
-SOFT_TISSUE_PROTOCOL = "SOFT TISSUE CEPHALOMETRIC ANALYSIS: Assess profile convexity and nasolabial angle."
+JARABAK_PROTOCOL = "JARABAK CEPHALOMETRIC ASSESSMENT: Assess facial proportions and vertical growth patterns."
+SOFT_TISSUE_PROTOCOL = "SOFT TISSUE CEPHALOMETRIC ASSESSMENT: Assess profile convexity and nasolabial angle."
 
 def build_prompt(rad_type, ceph_an, scale_fac):
     protocol = SAFETY_RULES + f"\n\n[IMAGE CALIBRATION SCALE: {scale_fac:.4f} mm/pixel]\n\n"
@@ -216,7 +223,7 @@ def build_prompt(rad_type, ceph_an, scale_fac):
 
 
 # ------------------------------------------------------------
-# UPLOAD & ANALYZE
+# UPLOAD & FILE GUARDRAILS
 # ------------------------------------------------------------
 st.markdown('<div class="section">📤 Upload Dental Radiograph</div>', unsafe_allow_html=True)
 
@@ -228,6 +235,10 @@ xray = st.file_uploader(
 )
 
 if xray is not None:
+    if xray.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+        st.error(f"❌ File size exceeds {MAX_FILE_SIZE_MB}MB limit. Please upload a compressed radiographic image.")
+        st.stop()
+
     st.image(xray, caption="Uploaded radiograph", use_container_width=True)
 
     analyze = st.button(
@@ -240,98 +251,111 @@ if xray is not None:
         if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
             st.warning("⏳ Daily AI analysis limit reached.")
         else:
-            api_key = st.secrets.get("GEMINI_API_KEY")
-            if not api_key:
-                st.error("❌ GEMINI_API_KEY was not found in Streamlit Secrets.")
+            if "GEMINI_API_KEY" not in st.secrets:
+                st.error("❌ GEMINI_API_KEY missing from Streamlit secrets. Please configure it to proceed.")
+                st.stop()
+
+            api_key = st.secrets["GEMINI_API_KEY"]
+            mime_type = xray.type
+            if mime_type not in ["image/jpeg", "image/png"]:
+                st.error("❌ Unsupported image format.")
             else:
-                mime_type = xray.type
-                if mime_type not in ["image/jpeg", "image/png"]:
-                    st.error("❌ Unsupported image format.")
-                else:
-                    try:
-                        client = genai.Client(api_key=api_key)
-                        image_bytes = xray.getvalue()
-                        final_prompt = build_prompt(radiograph_type, ceph_analysis, scale_factor)
+                try:
+                    client = genai.Client(api_key=api_key)
+                    image_bytes = xray.getvalue()
+                    final_prompt = build_prompt(radiograph_type, ceph_analysis, scale_factor)
 
-                        response = None
-                        with st.spinner("🔬 Analyzing the uploaded radiograph..."):
-                            for attempt in range(3):
-                                try:
-                                    response = client.models.generate_content(
-                                        model=MODEL_NAME,
-                                        contents=[
-                                            {
-                                                "inline_data": {
-                                                    "mime_type": mime_type,
-                                                    "data": image_bytes,
-                                                }
-                                            },
-                                            final_prompt,
-                                        ],
-                                    )
-                                    break
-                                except Exception as error:
-                                    if "503" in str(error) and attempt < 2:
-                                        time.sleep(5 * (2 ** attempt))
-                                        continue
-                                    raise error
-
-                        result_text = getattr(response, "text", None)
-
-                        if result_text:
-                            st.session_state.analysis_count += 1
-                            st.success("✅ AI assessment completed.")
-
-                            # Tabbed Output View
-                            tab_report, tab_export = st.tabs(["📋 Assessment Report", "📥 Export & Options"])
-
-                            with tab_report:
-                                st.markdown(result_text)
-
-                            with tab_export:
-                                st.markdown("### Export Assessment Report")
-                                safe_patient_name = patient_name if patient_name else "Patient"
-                                
-                                report_filename = f"Dental_Report_{safe_patient_name}.txt"
-                                st.download_button(
-                                    label="📥 Download Report as Text (.txt)",
-                                    data=result_text,
-                                    file_name=report_filename,
-                                    mime="text/plain",
-                                    use_container_width=True,
+                    response = None
+                    with st.spinner("🔬 Analyzing the uploaded radiograph..."):
+                        for attempt in range(3):
+                            try:
+                                response = client.models.generate_content(
+                                    model=MODEL_NAME,
+                                    contents=[
+                                        {
+                                            "inline_data": {
+                                                "mime_type": mime_type,
+                                                "data": image_bytes,
+                                            }
+                                        },
+                                        final_prompt,
+                                    ],
                                 )
-                                
-                                formatted_html = f"""
-                                <!DOCTYPE html>
-                                <html>
-                                <head>
-                                    <title>AMRs Dental Report - {safe_patient_name}</title>
-                                    <style>
-                                        body {{ font-family: Arial, sans-serif; padding: 30px; color: #333; line-height: 1.6; }}
-                                        h2 {{ color: #1e3d59; border-bottom: 2px solid #ddd; padding-bottom: 10px; }}
-                                        .meta {{ background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
-                                        pre {{ white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }}
-                                    </style>
-                                </head>
-                                <body>
-                                    <h2>AMRs Dental X-ray AI - Assessment Report</h2>
-                                    <div class="meta">
-                                        <p><b>Patient Name:</b> {safe_patient_name}</p>
-                                        <p><b>Date:</b> {date.today()}</p>
-                                    </div>
-                                    <pre>{result_text}</pre>
-                                </body>
-                                </html>
-                                """
-                                b64 = base64.b64encode(formatted_html.encode()).decode()
-                                href = f'<a href="data:text/html;base64,{b64}" download="Dental_Report_{safe_patient_name}.html" target="_blank" style="display: block; text-align: center; background: #17b978; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px;">🌐 Open Printable Web Report / Save as PDF</a>'
-                                st.markdown(href, unsafe_allow_html=True)
+                                break
+                            except Exception as error:
+                                if "503" in str(error) and attempt < 2:
+                                    time.sleep(5 * (2 ** attempt))
+                                    continue
+                                raise error
 
-                        else:
-                            st.warning("⚠️ The AI returned no readable assessment.")
+                    result_text = getattr(response, "text", None)
 
-                    except Exception as error:
-                        st.error("❌ AI analysis failed.")
-                        with st.expander("Technical error details"):
-                            st.write(str(error))
-                            
+                    if result_text:
+                        st.session_state.analysis_count += 1
+                        st.session_state.last_report = result_text
+                        st.session_state.last_patient = patient_name if patient_name else "Patient"
+                        st.success("✅ AI assessment completed.")
+                    else:
+                        st.warning("⚠️ The AI returned no readable assessment.")
+
+                except Exception as error:
+                    st.error("❌ AI analysis failed.")
+                    with st.expander("Technical error details"):
+                        st.write(str(error))
+
+# ------------------------------------------------------------
+# RENDER PERSISTED REPORT & EXPORT OPTIONS
+# ------------------------------------------------------------
+if st.session_state.last_report:
+    tab_report, tab_export = st.tabs(["📋 Assessment Report", "📥 Export & Options"])
+
+    with tab_report:
+        st.markdown(st.session_state.last_report)
+
+    with tab_export:
+        st.markdown("### Export Assessment Report")
+        safe_patient_name = st.session_state.last_patient
+        
+        report_filename = f"Dental_Report_{safe_patient_name}.txt"
+        st.download_button(
+            label="📥 Download Report as Text (.txt)",
+            data=st.session_state.last_report,
+            file_name=report_filename,
+            mime="text/plain",
+            use_container_width=True,
+        )
+        
+        formatted_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>AMRs Dental Report - {safe_patient_name}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; max-width: 800px; margin: auto; }}
+                .header {{ border-bottom: 3px solid #1e3d59; padding-bottom: 15px; margin-bottom: 25px; }}
+                h2 {{ color: #1e3d59; margin: 0 0 5px 0; }}
+                .meta-grid {{ display: grid; grid-template-columns: 1fr 1fr; background: #f4f6f8; padding: 15px; border-radius: 8px; margin-bottom: 25px; gap: 10px; }}
+                .meta-item {{ font-size: 14px; }}
+                pre {{ white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; background: #fff; border: 1px solid #e1e4e8; padding: 20px; border-radius: 8px; }}
+                @media print {{ body {{ padding: 0; }} }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>AMRs Dental X-ray AI</h2>
+                <p style="margin: 0; color: #666; font-size: 13px;">AI-Assisted Dental Radiographic Assessment Report</p>
+            </div>
+            <div class="meta-grid">
+                <div class="meta-item"><b>Patient Name:</b> {safe_patient_name}</div>
+                <div class="meta-item"><b>OP Number:</b> {op_number if 'op_number' in locals() else 'N/A'}</div>
+                <div class="meta-item"><b>Examination Date:</b> {examination_date}</div>
+                <div class="meta-item"><b>Radiograph Type:</b> {radiograph_type}</div>
+            </div>
+            <pre>{st.session_state.last_report}</pre>
+        </body>
+        </html>
+        """
+        b64 = base64.b64encode(formatted_html.encode()).decode()
+        href = f'<a href="data:text/html;base64,{b64}" download="Dental_Report_{safe_patient_name}.html" target="_blank" style="display: block; text-align: center; background: #17b978; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px;">🌐 Open Printable Web Report / Save as PDF</a>'
+        st.markdown(href, unsafe_allow_html=True)
+        
