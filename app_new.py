@@ -183,39 +183,146 @@ elif radiograph_type == "Facial radiograph":
 
 
 # ------------------------------------------------------------
-# PROMPTS & SAFETY RULES
+# HIGH-PRECISION CLINICAL PROTOCOLS & DOMAIN KNOWLEDGE
 # ------------------------------------------------------------
 SAFETY_RULES = """
-You are AMRs Dental X-ray AI.
-You are an AI-assisted radiographic assessment system for qualified dental professionals.
-CORE PRINCIPLE: The actual uploaded radiograph is the source of truth.
+You are AMRs Dental X-ray AI, an expert AI-assisted radiographic assessment system built for qualified dental professionals and orthodontists.
+CORE PRINCIPLE: The actual uploaded radiograph is the absolute source of truth. Analyze ONLY visible structures. Never fabricate or hallucinate landmarks. If obscured or unreadable, explicitly state "Not reliably assessable."
 
-ENHANCED REPORTING REQUIREMENTS:
-1. Include Confidence Flagging (High / Medium / Low) for each reported parameter value in tables.
-2. Provide a dedicated Growth, Biotype & Growth Tendency Summary section based on visible morphology.
-3. Include a dedicated **Treatment Considerations** section covering biomechanical, skeletal anchorage, or growth-modification options suited to the findings (avoiding definitive prescriptive diagnoses).
-4. Analyze ONLY the actual uploaded image. Never invent or fabricate findings. If unclear, state "Not reliably assessable."
+MANDATORY REPORT STRUCTURE:
+1. **Image Quality & Technical Evaluation** (Contrast, positioning, artifacts, distortion).
+2. **Detailed Anatomical & Pathological Findings** (Structured in clean markdown tables with Confidence Flagging: High / Medium / Low).
+3. **Growth, Biotype & Morphological Tendency Summary** (Where applicable based on view).
+4. **Clinical Treatment Considerations** (Biomechanical, surgical, growth-modification, or therapeutic options suited to findings; non-prescriptive).
 """
 
-IOPA_PROTOCOL = "IOPA SYSTEMATIC ASSESSMENT: Assess image quality, dental, periodontal, and periapical structures systematically."
-OPG_PROTOCOL = "OPG SYSTEMATIC PANORAMIC ASSESSMENT: Perform a comprehensive panoramic overview covering all structural domains."
-BITEWING_PROTOCOL = "BITEWING SYSTEMATIC ASSESSMENT: Inspect interproximal contacts, bone crests, and decay status."
-OCCLUSAL_PROTOCOL = "OCCLUSAL RADIOGRAPH SYSTEMATIC ASSESSMENT: Inspect jaw arches and developmental dental structures."
+IOPA_PROTOCOL = """
+[DETAILED IOPA PROTOCOL]
+Systematically evaluate:
+- **Crown & Enamel-Dentin Integrity:** Detect interproximal/occlusal caries, defective restorations, and pulp chamber calcifications.
+- **Periodontal Status:** Measure alveolar bone crest height relative to cementoenamel junction (CEJ), check lamina dura continuity, and assess periodontal ligament (PDL) space widening.
+- **Periapical Pathology:** Scan root apices for periapical radiolucencies (granulomas, cysts, abscesses), root resorption, dilaceration, or hypercementosis.
+- **Anatomical Landmarks:** Identify adjacent structures (e.g., mental foramen, maxillary sinus floor, nasal fossa) relative to root tips.
+"""
 
-PA_CEPH_PROTOCOL = "PA CEPHALOGRAM ASSESSMENT: Evaluate transverse skeletal dimensions, bilateral facial symmetry, and mandibular deviation."
-WATERS_PROTOCOL = "WATERS VIEW ASSESSMENT: Evaluate midface bone integrity, maxillary sinuses, orbital floors, and zygomatic complexes."
-SMV_PROTOCOL = "SMV VIEW ASSESSMENT: Evaluate cranial base integrity, sphenoid sinuses, and zygomatic arch symmetry/fractures."
-TOWNES_PROTOCOL = "REVERSE TOWNE'S ASSESSMENT: Evaluate mandibular condyles, condylar necks, and rami for mediolateral displacement."
-LATERAL_SKULL_PROTOCOL = "LATERAL SKULL ASSESSMENT: Evaluate cranial vault, frontonasal structures, and facial soft tissue profile."
-GENERAL_FACIAL_PROTOCOL = "GENERAL FACIAL RADIOGRAPH SCREENING: Perform comprehensive structural evaluation of facial bones and trauma indicators."
+OPG_PROTOCOL = """
+[DETAILED OPG PANORAMIC PROTOCOL]
+Systematically evaluate across all anatomical domains:
+- **Dentition & Occlusion:** Complete tooth count, impacted teeth (e.g., third molars), root convergence/divergence, unerupted supernumeraries, and missing teeth.
+- **Maxillofacial Bone Framework:** Mandibular condyles (symmetry, flattening, erosion, osteophyte formation), sigmoid notches, coronoid processes, ramus height, and inferior alveolar nerve canal path.
+- **Maxillary Sinuses & Nasal Cavity:** Sinus pneumatization, mucosal thickening, fluid levels, and antral wall integrity.
+- **Temporomandibular Joint (TMJ):** Condylar head position within the glenoid fossa during rest, articular eminence slope, and cortical integrity.
+- **Pathology Screening:** Cysts, odontogenic tumors, radiolucent/radiopaque jaw lesions, and generalized alveolar bone loss patterns.
+"""
 
-STEINER_PROTOCOL = "STEINER CEPHALOMETRIC ASSESSMENT: Assess SNA, SNB, ANB, Incisor positions, and plane angles."
-DOWNS_PROTOCOL = "DOWNS CEPHALOMETRIC ASSESSMENT: Assess facial angle, convexity, A-B plane, and dental parameters."
-MCNAMARA_PROTOCOL = "MCNAMARA CEPHALOMETRIC ASSESSMENT: Assess maxilla/mandible positions and effective lengths."
-TWEED_PROTOCOL = "TWEED CEPHALOMETRIC ASSESSMENT: Assess FMA, IMPA, and FMIA parameters."
-WITS_PROTOCOL = "WITS APPRAISAL: Assess AO-BO linear relationship."
-JARABAK_PROTOCOL = "JARABAK CEPHALOMETRIC ASSESSMENT: Assess facial proportions and vertical growth patterns."
-SOFT_TISSUE_PROTOCOL = "SOFT TISSUE CEPHALOMETRIC ASSESSMENT: Assess profile convexity and nasolabial angle."
+BITEWING_PROTOCOL = """
+[DETAILED BITEWING PROTOCOL]
+Systematically evaluate:
+- **Interproximal Contacts & Decay:** Precise inspection of proximal enamel and dentin for early carious lesions (E1, E2, D1, D2, D3) hidden between teeth.
+- **Restorative Margins:** Check existing restorations for overhangs, open margins, recurrent/secondary caries beneath fillings.
+- **Alveolar Bone Crests:** Measure distance from CEJ to alveolar bone crest (normal ≤ 2 mm) to grade horizontal or vertical bone loss patterns.
+"""
+
+OCCLUSAL_PROTOCOL = """
+[DETAILED OCCLUSAL RADIOGRAPH PROTOCOL]
+Systematically evaluate:
+- **Arch Integrity & Expansion:** Maxillary or mandibular midline fractures, palatal expansion status, or cross-arch skeletal symmetry.
+- **Impacted / Supernumerary Teeth:** Localization of unerupted canines, mesiodens, odontomas, or embedded third molars using the SLOB rule principles visually.
+- **Cortical Bone Plates:** Assessment of buccal and lingual cortical plate expansion, cortical thinning, or localized expansion due to pathology.
+"""
+
+PA_CEPH_PROTOCOL = """
+[DETAILED PA CEPHALOGRAM / PA SKULL PROTOCOL]
+Systematically evaluate:
+- **Transverse Skeletal Discrepancies:** Maxillary to mandibular transverse width ratios, crossbites, and skeletal asymmetry.
+- **Bilateral Facial Symmetry:** Compare right and left lateral structures (orbits, zygomatic arches, nasal cavity width, ramus height, and menton deviation from midline).
+- **Mandibular Deviation:** Quantify skeletal midline shift of Me (Menton) relative to nasal vertical reference line.
+"""
+
+WATERS_PROTOCOL = """
+[DETAILED WATERS' VIEW / OCCIPITOMENTAL PROTOCOL]
+Systematically evaluate:
+- **Maxillary Sinuses:** Bilateral antral radiolucency, mucosal thickening, polypoidal changes, fluid levels, and complete opacification.
+- **Midface & Orbital Structures:** Integrity of orbital floors (screening for blowout fractures), zygomaticomaxillary (ZM) complexes, zygomatic arches, and infraorbital margins.
+- **Nasal Complex:** Deviated nasal septum and inferior/middle turbinate hypertrophy.
+"""
+
+SMV_PROTOCOL = """
+[DETAILED SUBMENTOVERTEX (SMV) PROTOCOL]
+Systematically evaluate:
+- **Zygomatic Arches:** Bilateral integrity and projection of zygomatic arches to rule out depressed or 'bucket-handle' fractures.
+- **Cranial Base & Sphenoid Sinuses:** Sphenoid sinus radiodensity and symmetry of middle cranial fossae.
+- **Mandible Position:** Condylar head angulation and mediolateral positioning relative to the foramen magnum.
+"""
+
+TOWNES_PROTOCOL = """
+[DETAILED REVERSE TOWNE'S VIEW PROTOCOL]
+Systematically evaluate:
+- **Condylar Necks & Heads:** Screening for high condylar neck fractures, medial/lateral displacement, and dislocation out of the glenoid fossae.
+- **Ramus Height Symmetry:** Vertical height comparison of left and right mandibular rami.
+- **Posterior Cranial Fossa:** Structural evaluation of occipital bone and foramen magnum margins.
+"""
+
+LATERAL_SKULL_PROTOCOL = """
+[DETAILED LATERAL SKULL / PROFILE PROTOCOL]
+Systematically evaluate:
+- **Cranial Vault & Sella Turcica:** Bone thickness, suture closure status, and size/shape of sella turcica (hypophysis fossa).
+- **Frontonasal Structures:** Frontal sinus development, nasal bone fracture lines, and soft tissue facial profile contour.
+"""
+
+GENERAL_FACIAL_PROTOCOL = """
+[DETAILED GENERAL FACIAL SCREENING PROTOCOL]
+Systematically evaluate:
+- **Pan-Facial Skeletal Integrity:** Overview of frontal, zygomatic, maxillary, and mandibular bones.
+- **Trauma Screening:** Detection of step-deformities, cortical disruptions, radiolucent fracture lines, and soft tissue swelling indicators.
+"""
+
+STEINER_PROTOCOL = """
+[STEINER CEPHALOMETRIC ANALYSIS]
+- Measure and evaluate: SNA angle (Maxillary position), SNB angle (Mandibular position), ANB angle (Skeletal sagittal discrepancy/jaw relationship).
+- Dental parameters: Upper Incisor to NA angle/linear, Lower Incisor to NB angle/linear.
+- Reference planes: SN plane, Mandibular plane (Go-Gn), Occlusal plane.
+"""
+
+DOWNS_PROTOCOL = """
+[DOWNS CEPHALOMETRIC ANALYSIS]
+- Measure and evaluate: Facial angle, Angle of convexity, A-B plane angle (Skeletal profile).
+- Mandibular plane angle, Y-axis (growth pattern).
+- Interincisal angle, Lower incisor to mandibular plane angle.
+"""
+
+MCNAMARA_PROTOCOL = """
+[MCNAMARA CEPHALOMETRIC ANALYSIS]
+- Measure and evaluate: Effective midfacial length (Co-A), Effective mandibular length (Co-Gn).
+- Maxillary position relative to nasion perpendicular, Mandibular position relative to nasion perpendicular.
+- Lower vertical facial height (ANS-Me), Maxillomandibular differential.
+"""
+
+TWEED_PROTOCOL = """
+[TWEED CEPHALOMETRIC ANALYSIS]
+- Measure and evaluate: FMA (Frankfort-Mandibular Plane Angle) - vertical growth indicator.
+- IMPA (Incisor-Mandibular Plane Angle) - lower incisor proclination.
+- FMIA (Frankfort-Mandibular Incisor Angle). Tweed Diagnostic Triangle evaluation.
+"""
+
+WITS_PROTOCOL = """
+[WITS APPRAISAL]
+- Measure linear distance between perpendicular drops from point A and point B onto the functional occlusal plane.
+- Assess true dental/skeletal jaw mismatch independent of cranial reference planes (SNA/SNB).
+"""
+
+JARABAK_PROTOCOL = """
+[JARABAK CEPHALOMETRIC ANALYSIS]
+- Measure facial proportions: Posterior facial height (S-Go) to Anterior facial height (N-Me) percentage ratio (normal ~ 62-65%).
+- Assess vertical growth tendencies (hypodivergent/square face vs. hyperdivergent/long-face vertical grower).
+- Sum of posterior angles.
+"""
+
+SOFT_TISSUE_PROTOCOL = """
+[SOFT TISSUE CEPHALOMETRIC ANALYSIS]
+- Evaluate Holdaway or Steiner soft tissue profile convexity.
+- Nasolabial angle, upper and lower lip thickness, esthetic plane (E-plane) relationship to lips.
+"""
 
 def build_prompt(rad_type, ceph_an, facial_an, scale_fac):
     protocol = SAFETY_RULES + f"\n\n[IMAGE CALIBRATION SCALE: {scale_fac:.4f} mm/pixel]\n\n"
@@ -227,7 +334,7 @@ def build_prompt(rad_type, ceph_an, facial_an, scale_fac):
         protocol += BITEWING_PROTOCOL
     elif rad_type == "Occlusal":
         protocol += OCCLUSAL_PROTOCOL
-    elif rad_type == "Facial radiograph":
+    elif radiograph_type == "Facial radiograph":
         if "PA Cephalogram" in facial_an:
             protocol += PA_CEPH_PROTOCOL
         elif "Waters'" in facial_an:
@@ -248,10 +355,22 @@ def build_prompt(rad_type, ceph_an, facial_an, scale_fac):
                 + MCNAMARA_PROTOCOL + "\n" + TWEED_PROTOCOL + "\n"
                 + WITS_PROTOCOL + "\n" + JARABAK_PROTOCOL + "\n" + SOFT_TISSUE_PROTOCOL
             )
-        else:
-            protocol += f"{ceph_an} CEPHALOMETRIC ANALYSIS."
+        elif ceph_an == "Steiner":
+            protocol += STEINER_PROTOCOL
+        elif ceph_an == "Downs":
+            protocol += DOWNS_PROTOCOL
+        elif ceph_an == "McNamara":
+            protocol += MCNAMARA_PROTOCOL
+        elif ceph_an == "Tweed":
+            protocol += TWEED_PROTOCOL
+        elif ceph_an == "Wits Appraisal":
+            protocol += WITS_PROTOCOL
+        elif ceph_an == "Jarabak":
+            protocol += JARABAK_PROTOCOL
+        elif ceph_an == "Soft Tissue":
+            protocol += SOFT_TISSUE_PROTOCOL
     else:
-        protocol += "General radiographic screening."
+        protocol += "General radiographic screening and pathology detection protocol."
     return protocol
 
 
@@ -299,7 +418,7 @@ if xray is not None:
                     final_prompt = build_prompt(radiograph_type, ceph_analysis, facial_analysis, scale_factor)
 
                     response = None
-                    with st.spinner("🔬 Analyzing the uploaded radiograph..."):
+                    with st.spinner("🔬 Analyzing the uploaded radiograph with domain-specific clinical protocols..."):
                         for attempt in range(3):
                             try:
                                 response = client.models.generate_content(
@@ -351,44 +470,4 @@ if st.session_state.last_report:
         
         report_filename = f"Dental_Report_{safe_patient_name}.txt"
         st.download_button(
-            label="📥 Download Report as Text (.txt)",
-            data=st.session_state.last_report,
-            file_name=report_filename,
-            mime="text/plain",
-            use_container_width=True,
-        )
-        
-        formatted_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>AMRs Dental Report - {safe_patient_name}</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; max-width: 800px; margin: auto; }}
-                .header {{ border-bottom: 3px solid #1e3d59; padding-bottom: 15px; margin-bottom: 25px; }}
-                h2 {{ color: #1e3d59; margin: 0 0 5px 0; }}
-                .meta-grid {{ display: grid; grid-template-columns: 1fr 1fr; background: #f4f6f8; padding: 15px; border-radius: 8px; margin-bottom: 25px; gap: 10px; }}
-                .meta-item {{ font-size: 14px; }}
-                pre {{ white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; background: #fff; border: 1px solid #e1e4e8; padding: 20px; border-radius: 8px; }}
-                @media print {{ body {{ padding: 0; }} }}
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>AMRs Dental X-ray AI</h2>
-                <p style="margin: 0; color: #666; font-size: 13px;">AI-Assisted Dental Radiographic Assessment Report</p>
-            </div>
-            <div class="meta-grid">
-                <div class="meta-item"><b>Patient Name:</b> {safe_patient_name}</div>
-                <div class="meta-item"><b>OP Number:</b> {op_number if 'op_number' in locals() else 'N/A'}</div>
-                <div class="meta-item"><b>Examination Date:</b> {examination_date}</div>
-                <div class="meta-item"><b>Radiograph Type:</b> {radiograph_type}</div>
-            </div>
-            <pre>{st.session_state.last_report}</pre>
-        </body>
-        </html>
-        """
-        b64 = base64.b64encode(formatted_html.encode()).decode()
-        href = f'<a href="data:text/html;base64,{b64}" download="Dental_Report_{safe_patient_name}.html" target="_blank" style="display: block; text-align: center; background: #17b978; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px;">🌐 Open Printable Web Report / Save as PDF</a>'
-        st.markdown(href, unsafe_allow_html=True)
-        
+            label="📥 Dow
