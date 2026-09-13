@@ -220,7 +220,7 @@ BITEWING_PROTOCOL = """
 Systematically evaluate:
 - **Interproximal Contacts & Decay:** Precise inspection of proximal enamel and dentin for early carious lesions (E1, E2, D1, D2, D3) hidden between teeth.
 - **Restorative Margins:** Check existing restorations for overhangs, open margins, recurrent/secondary caries beneath fillings.
-- **Alveolar Bone Crests:** Measure distance from CEJ to alveolar bone crest (normal ≤ 2 mm) to grade horizontal or vertical bone loss patterns.
+- **Alveolar Bone Crests:** Measure distance from CEJ to alveolar bone crest (normal <= 2 mm) to grade horizontal or vertical bone loss patterns.
 """
 
 OCCLUSAL_PROTOCOL = """
@@ -334,7 +334,7 @@ def build_prompt(rad_type, ceph_an, facial_an, scale_fac):
         protocol += BITEWING_PROTOCOL
     elif rad_type == "Occlusal":
         protocol += OCCLUSAL_PROTOCOL
-    elif radiograph_type == "Facial radiograph":
+    elif rad_type == "Facial radiograph":
         if "PA Cephalogram" in facial_an:
             protocol += PA_CEPH_PROTOCOL
         elif "Waters'" in facial_an:
@@ -470,4 +470,4 @@ if st.session_state.last_report:
         
         report_filename = f"Dental_Report_{safe_patient_name}.txt"
         st.download_button(
-            label="📥 Dow
+            label="📥 Download 
