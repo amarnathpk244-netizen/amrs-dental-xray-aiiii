@@ -470,4 +470,4 @@ if st.session_state.last_report:
         
         report_filename = f"Dental_Report_{safe_patient_name}.txt"
         st.download_button(
-            label="📥 Download 
+            label="📥 Download Report"
