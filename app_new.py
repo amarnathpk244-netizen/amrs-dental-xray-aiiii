@@ -454,7 +454,6 @@ if xray is not None:
                     st.error("❌ AI analysis failed.")
                     with st.expander("Technical error details"):
                         st.write(str(error))
-
 # ------------------------------------------------------------
 # RENDER PERSISTED REPORT & EXPORT OPTIONS
 # ------------------------------------------------------------
