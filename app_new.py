@@ -28,6 +28,15 @@ CEPH_ANALYSES = [
     "Combined / All Analyses",
 ]
 
+FACIAL_ANALYSES = [
+    "PA Cephalogram / PA Skull (Symmetry & Transverse)",
+    "Waters' View / Occipitomental (Midface & Sinuses)",
+    "Submentovertex (SMV) View (Zygomatic Arches & Skull Base)",
+    "Reverse Towne's View (Condyles & Rami)",
+    "Lateral Skull / Profile View (Cranial & Soft Tissue)",
+    "General Facial Screening / All Views",
+]
+
 # ------------------------------------------------------------
 # SESSION USAGE & STATE PERSISTENCE
 # ------------------------------------------------------------
@@ -142,6 +151,7 @@ radiograph_type = st.selectbox(
 )
 
 ceph_analysis = "Combined / All Analyses"
+facial_analysis = "General Facial Screening / All Views"
 scale_factor = 1.0
 
 if radiograph_type == "Lateral Cephalogram (Ceph)":
@@ -164,6 +174,13 @@ if radiograph_type == "Lateral Cephalogram (Ceph)":
                 scale_factor = known_mm / measured_pixels
                 st.metric(label="Calculated Scale Factor", value=f"{scale_factor:.4f} mm/pixel")
 
+elif radiograph_type == "Facial radiograph":
+    facial_analysis = st.selectbox(
+        "Select Facial Radiograph Analysis",
+        FACIAL_ANALYSES,
+        key="facial_analysis_selector",
+    )
+
 
 # ------------------------------------------------------------
 # PROMPTS & SAFETY RULES
@@ -177,15 +194,20 @@ ENHANCED REPORTING REQUIREMENTS:
 1. Include Confidence Flagging (High / Medium / Low) for each reported parameter value in tables.
 2. Provide a dedicated Growth, Biotype & Growth Tendency Summary section based on visible morphology.
 3. Include a dedicated **Treatment Considerations** section covering biomechanical, skeletal anchorage, or growth-modification options suited to the findings (avoiding definitive prescriptive diagnoses).
-4. If "Combined / All Analyses" is selected, synthesize Steiner, Downs, McNamara, Tweed, Wits, Jarabak, and Soft Tissue assessments into one comprehensive structured report.
-5. Analyze ONLY the actual uploaded image. Never invent or fabricate findings. If unclear, state "Not reliably assessable."
+4. Analyze ONLY the actual uploaded image. Never invent or fabricate findings. If unclear, state "Not reliably assessable."
 """
 
 IOPA_PROTOCOL = "IOPA SYSTEMATIC ASSESSMENT: Assess image quality, dental, periodontal, and periapical structures systematically."
 OPG_PROTOCOL = "OPG SYSTEMATIC PANORAMIC ASSESSMENT: Perform a comprehensive panoramic overview covering all structural domains."
 BITEWING_PROTOCOL = "BITEWING SYSTEMATIC ASSESSMENT: Inspect interproximal contacts, bone crests, and decay status."
 OCCLUSAL_PROTOCOL = "OCCLUSAL RADIOGRAPH SYSTEMATIC ASSESSMENT: Inspect jaw arches and developmental dental structures."
-FACIAL_PROTOCOL = "FACIAL BONE / TRAUMA SYSTEMATIC ASSESSMENT: Screen facial bones for structural integrity."
+
+PA_CEPH_PROTOCOL = "PA CEPHALOGRAM ASSESSMENT: Evaluate transverse skeletal dimensions, bilateral facial symmetry, and mandibular deviation."
+WATERS_PROTOCOL = "WATERS VIEW ASSESSMENT: Evaluate midface bone integrity, maxillary sinuses, orbital floors, and zygomatic complexes."
+SMV_PROTOCOL = "SMV VIEW ASSESSMENT: Evaluate cranial base integrity, sphenoid sinuses, and zygomatic arch symmetry/fractures."
+TOWNES_PROTOCOL = "REVERSE TOWNE'S ASSESSMENT: Evaluate mandibular condyles, condylar necks, and rami for mediolateral displacement."
+LATERAL_SKULL_PROTOCOL = "LATERAL SKULL ASSESSMENT: Evaluate cranial vault, frontonasal structures, and facial soft tissue profile."
+GENERAL_FACIAL_PROTOCOL = "GENERAL FACIAL RADIOGRAPH SCREENING: Perform comprehensive structural evaluation of facial bones and trauma indicators."
 
 STEINER_PROTOCOL = "STEINER CEPHALOMETRIC ASSESSMENT: Assess SNA, SNB, ANB, Incisor positions, and plane angles."
 DOWNS_PROTOCOL = "DOWNS CEPHALOMETRIC ASSESSMENT: Assess facial angle, convexity, A-B plane, and dental parameters."
@@ -195,7 +217,7 @@ WITS_PROTOCOL = "WITS APPRAISAL: Assess AO-BO linear relationship."
 JARABAK_PROTOCOL = "JARABAK CEPHALOMETRIC ASSESSMENT: Assess facial proportions and vertical growth patterns."
 SOFT_TISSUE_PROTOCOL = "SOFT TISSUE CEPHALOMETRIC ASSESSMENT: Assess profile convexity and nasolabial angle."
 
-def build_prompt(rad_type, ceph_an, scale_fac):
+def build_prompt(rad_type, ceph_an, facial_an, scale_fac):
     protocol = SAFETY_RULES + f"\n\n[IMAGE CALIBRATION SCALE: {scale_fac:.4f} mm/pixel]\n\n"
     if rad_type == "IOPA":
         protocol += IOPA_PROTOCOL
@@ -206,7 +228,18 @@ def build_prompt(rad_type, ceph_an, scale_fac):
     elif rad_type == "Occlusal":
         protocol += OCCLUSAL_PROTOCOL
     elif rad_type == "Facial radiograph":
-        protocol += FACIAL_PROTOCOL
+        if "PA Cephalogram" in facial_an:
+            protocol += PA_CEPH_PROTOCOL
+        elif "Waters'" in facial_an:
+            protocol += WATERS_PROTOCOL
+        elif "Submentovertex" in facial_an:
+            protocol += SMV_PROTOCOL
+        elif "Towne's" in facial_an:
+            protocol += TOWNES_PROTOCOL
+        elif "Lateral Skull" in facial_an:
+            protocol += LATERAL_SKULL_PROTOCOL
+        else:
+            protocol += GENERAL_FACIAL_PROTOCOL
     elif rad_type == "Lateral Cephalogram (Ceph)":
         if ceph_an == "Combined / All Analyses":
             protocol += (
@@ -263,7 +296,7 @@ if xray is not None:
                 try:
                     client = genai.Client(api_key=api_key)
                     image_bytes = xray.getvalue()
-                    final_prompt = build_prompt(radiograph_type, ceph_analysis, scale_factor)
+                    final_prompt = build_prompt(radiograph_type, ceph_analysis, facial_analysis, scale_factor)
 
                     response = None
                     with st.spinner("🔬 Analyzing the uploaded radiograph..."):
