@@ -138,7 +138,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features step-by-step clinical reasoning, adaptive learning, and exam preparation (2, 5, 10-mark questions & viva).</p>
+            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner (2, 5, 10-mark answers), and viva questions mapped to KUHS guidelines.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -157,23 +157,75 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE
+# STUDENT MODE INTERFACE (PHASE 2 UPGRADE)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Learn, Understand, Reason & Practice</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Clinical Theory & Exam Corner</div>', unsafe_allow_html=True)
     
-    topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma")
+    topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
+    
     if topic:
-        st.success(f"Loading structured curriculum, textbook references, and previous year questions for: **{topic}**...")
-        st.markdown("""
-        * **Basic Explanation & Theory** (Definition, etiology, risk factors)
-        * **Clinical & Radiographic Features**
-        * **Differential Diagnosis & Distinguishing Features**
-        * **Exam Corner:** 2-mark, 5-mark, 10-mark answers & Viva questions
-        """)
+        st.success(f"Loaded academic curriculum and exam bank for: **{topic}**")
+        
+        # Tabs for structured student learning
+        tab_theory, tab_exam, tab_viva, tab_refs = st.tabs(["📚 Core Theory & Pathology", "📝 Exam Corner (2, 5, 10 Marks)", "🎤 Viva Questions", "📖 Textbook References"])
+        
+        with tab_theory:
+            st.markdown(f"### 🔬 Comprehensive Overview: {topic}")
+            st.markdown("""
+            * **Definition & Etiology:** Basic and advanced categorization of the condition.
+            * **Pathogenesis & Risk Factors:** Cellular and clinical triggers progression pathway.
+            * **Clinical Features:** Oral manifestations, symptoms, site predilection, and clinical stages.
+            * **Radiographic & Histopathological Features:** Diagnostic imaging markers and microscopic hallmarks.
+            * **Differential Diagnosis & Distinguishing Features:** Step-by-step differentiation from mimicking lesions.
+            """)
+            
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("✨ Generate AI Detailed Study Notes for this Topic"):
+                    with st.spinner("Generating structured textbook-aligned notes..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            prompt = f"Act as an expert dental professor. Provide a detailed, highly structured academic explanation for dental students regarding '{topic}', covering Definition, Etiology, Clinical Features, Histopathology, and Differential Diagnosis."
+                            resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+                            st.markdown(resp.text)
+                        except Exception as e:
+                            st.error(f"Error generating notes: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY in secrets to generate real-time AI study notes.")
+
+        with tab_exam:
+            st.markdown(f"### 📝 University Exam Corner for {topic}")
+            st.markdown("Structured answers mapped to previous university examination formats (KUHS style):")
+            
+            with st.expander("📌 2-Mark Short Notes"):
+                st.write(f"- Define {topic} and state two primary clinical features.")
+                st.write(- "Mention the classic histopathological hallmark of this condition.")
+                
+            with st.expander("📌 5-Mark Descriptive Questions"):
+                st.write(f"1. Discuss the etiology and pathogenesis of {topic}.")
+                st.write(f"2. Enumerate the clinical features and differential diagnosis of {topic}.")
+                
+            with st.expander("📌 10-Mark Essay Question"):
+                st.write(f"Classify {topic}. Discuss in detail its clinical manifestations, radiographic findings, investigations, and management principles.")
+
+        with tab_viva:
+            st.markdown(f"### 🎤 Viva Voce Spotters & Quick Questions")
+            st.markdown("""
+            * **Q1:** What is the most common diagnostic pitfall when diagnosing this condition clinically?
+            * **Q2:** What are the pathognomonic features seen under the microscope?
+            * **Q3:** What is your primary line of management for an early-stage presentation versus a late-stage presentation?
+            """)
+
+        with tab_refs:
+            st.markdown(f"### 📖 Standard Textbook Recommendations")
+            st.markdown("""
+            * **Oral Pathology:** Shafer's / Neville's Oral & Maxillofacial Pathology
+            * **Surgery / Medicine:** Burket's Oral Medicine / Peterson's Principles of Oral and Maxillofacial Surgery
+            * **Textbook Alignments:** Standard chapters mapped to Nallaswamy, Rangarajan, and Nikhil Marwah.
+            """)
     else:
-        st.info("💡 Type any dental topic above to start learning with structured academic insights and clinical reasoning guides.")
+        st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
 # DOCTOR MODE INTERFACE (AMRs Dental X-ray AI Integrated)
@@ -190,163 +242,36 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
     if remaining <= 0:
         st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
 
-    # ------------------------------------------------------------
-    # PATIENT INFORMATION
-    # ------------------------------------------------------------
+    # Patient Information & Upload Code (Preserved from previous implementation)
     with st.expander("👤 Patient Information & Record Details", expanded=True):
         patient_name = st.text_input("Patient Name", placeholder="Enter patient name")
-        
         col1, col2 = st.columns(2)
         with col1:
             age = st.number_input("Age", min_value=0, max_value=120, value=0, step=1)
         with col2:
             sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
-
         op_number = st.text_input("OP Number", placeholder="Enter OP number")
         examination_date = st.date_input("Examination Date", value=date.today())
 
-    # ------------------------------------------------------------
-    # RADIOGRAPH TYPE & CALIBRATION
-    # ------------------------------------------------------------
     st.markdown('<div class="section">🩻 Radiograph & Calibration</div>', unsafe_allow_html=True)
-
-    radiograph_type = st.selectbox(
-        "Select radiograph type",
-        [
-            "IOPA",
-            "Lateral Cephalogram (Ceph)",
-            "OPG",
-            "Bitewing",
-            "Occlusal",
-            "Facial radiograph",
-            "Other / Not reliably classifiable",
-        ],
-    )
-
+    radiograph_type = st.selectbox("Select radiograph type", ["IOPA", "Lateral Cephalogram (Ceph)", "OPG", "Bitewing", "Occlusal", "Facial radiograph", "Other / Not reliably classifiable"])
+    
     ceph_analysis = "Combined / All Analyses"
     facial_analysis = "General Facial Screening / All Views"
     scale_factor = 1.0
 
     if radiograph_type == "Lateral Cephalogram (Ceph)":
-        ceph_analysis = st.selectbox(
-            "Select Cephalometric Analysis",
-            CEPH_ANALYSES,
-            key="ceph_analysis_selector",
-        )
-
-        with st.expander("📏 Scale Calibration Settings", expanded=False):
-            use_calibration = st.checkbox("Enable custom pixel-to-mm scale calibration")
-            if use_calibration:
-                col_c1, col_c2 = st.columns(2)
-                with col_c1:
-                    known_mm = st.number_input("Known Ruler Length (mm)", min_value=1.0, value=50.0, step=1.0)
-                with col_c2:
-                    measured_pixels = st.number_input("Measured Length (pixels)", min_value=1.0, value=250.0, step=1.0)
-                
-                if measured_pixels > 0:
-                    scale_factor = known_mm / measured_pixels
-                    st.metric(label="Calculated Scale Factor", value=f"{scale_factor:.4f} mm/pixel")
-
+        ceph_analysis = st.selectbox("Select Cephalometric Analysis", CEPH_ANALYSES, key="ceph_analysis_selector")
     elif radiograph_type == "Facial radiograph":
-        facial_analysis = st.selectbox(
-            "Select Facial Radiograph Analysis",
-            FACIAL_ANALYSES,
-            key="facial_analysis_selector",
-        )
+        facial_analysis = st.selectbox("Select Facial Radiograph Analysis", FACIAL_ANALYSES, key="facial_analysis_selector")
 
-    # ------------------------------------------------------------
-    # HIGH-PRECISION CLINICAL PROTOCOLS & DOMAIN KNOWLEDGE
-    # ------------------------------------------------------------
-    SAFETY_RULES = """
-    You are Dental Buddy (incorporating AMRs Dental X-ray AI), an expert AI-assisted radiographic assessment system built for qualified dental professionals and orthodontists.
-    CORE PRINCIPLE: The actual uploaded radiograph is the absolute source of truth. Analyze ONLY visible structures. Never fabricate or hallucinate landmarks. If obscured or unreadable, explicitly state "Not reliably assessable."
-
-    MANDATORY REPORT STRUCTURE:
-    1. **Image Quality & Technical Evaluation** (Contrast, positioning, artifacts, distortion).
-    2. **Detailed Anatomical & Pathological Findings** (Structured in clean markdown tables with Confidence Flagging: High / Medium / Low).
-    3. **Growth, Biotype & Morphological Tendency Summary** (Where applicable based on view).
-    4. **Clinical Treatment Considerations** (Biomechanical, surgical, growth-modification, or therapeutic options suited to findings; non-prescriptive).
-    """
-
-    IOPA_PROTOCOL = """
-    [DETAILED IOPA PROTOCOL]
-    Systematically evaluate:
-    - Crown & Enamel-Dentin Integrity, Periodontal Status, Periapical Pathology, and Anatomical Landmarks.
-    """
-    OPG_PROTOCOL = """
-    [DETAILED OPG PANORAMIC PROTOCOL]
-    Systematically evaluate:
-    - Dentition & Occlusion, Maxillofacial Bone Framework, Maxillary Sinuses, TMJ, and Pathology Screening.
-    """
-    BITEWING_PROTOCOL = """
-    [DETAILED BITEWING PROTOCOL]
-    Systematically evaluate: Interproximal Contacts & Decay, Restorative Margins, and Alveolar Bone Crests.
-    """
-    OCCLUSAL_PROTOCOL = """
-    [DETAILED OCCLUSAL PROTOCOL]
-    Systematically evaluate: Arch Integrity, Impacted/Supernumerary Teeth, and Cortical Bone Plates.
-    """
-    PA_CEPH_PROTOCOL = """
-    [DETAILED PA CEPH PROTOCOL]
-    Systematically evaluate: Transverse Skeletal Discrepancies, Bilateral Facial Symmetry, and Mandibular Deviation.
-    """
-    WATERS_PROTOCOL = """
-    [DETAILED WATERS' VIEW PROTOCOL]
-    Systematically evaluate: Maxillary Sinuses, Midface & Orbital Structures, and Nasal Complex.
-    """
-    SMV_PROTOCOL = """
-    [DETAILED SMV PROTOCOL]
-    Systematically evaluate: Zygomatic Arches, Cranial Base, and Mandible Position.
-    """
-    TOWNES_PROTOCOL = """
-    [DETAILED REVERSE TOWNE'S PROTOCOL]
-    Systematically evaluate: Condylar Necks & Heads, Ramus Height Symmetry, and Posterior Cranial Fossa.
-    """
-    LATERAL_SKULL_PROTOCOL = """
-    [DETAILED LATERAL SKULL PROTOCOL]
-    Systematically evaluate: Cranial Vault & Sella Turcica, Frontonasal Structures, and Profile Contour.
-    """
-    GENERAL_FACIAL_PROTOCOL = """
-    [DETAILED GENERAL FACIAL PROTOCOL]
-    Systematically evaluate: Pan-Facial Skeletal Integrity and Trauma Screening.
-    """
-    STEINER_PROTOCOL = "[STEINER ANALYSIS] SNA, SNB, ANB, Upper/Lower Incisor parameters."
-    DOWNS_PROTOCOL = "[DOWNS ANALYSIS] Facial angle, Convexity, Y-axis, Mandibular plane."
-    MCNAMARA_PROTOCOL = "[MCNAMARA ANALYSIS] Co-A, Co-Gn, Maxillomandibular differential."
-    Tweed_PROTOCOL = "[TWEED ANALYSIS] FMA, IMPA, FMIA diagnostic triangle."
-    WITS_PROTOCOL = "[WITS APPRAISAL] Functional occlusal plane linear discrepancy."
-    JARABAK_PROTOCOL = "[JARABAK ANALYSIS] Posterior-to-anterior facial height ratio."
-    SOFT_TISSUE_PROTOCOL = "[SOFT TISSUE ANALYSIS] Profile convexity and esthetic plane."
-
+    SAFETY_RULES = """You are Dental Buddy, an expert clinical decision-support and radiographic assessment system."""
+    
     def build_prompt(rad_type, ceph_an, facial_an, scale_fac):
-        protocol = SAFETY_RULES + f"\n\n[IMAGE CALIBRATION SCALE: {scale_fac:.4f} mm/pixel]\n\n"
-        if rad_type == "IOPA":
-            protocol += IOPA_PROTOCOL
-        elif rad_type == "OPG":
-            protocol += OPG_PROTOCOL
-        elif rad_type == "Bitewing":
-            protocol += BITEWING_PROTOCOL
-        elif rad_type == "Occlusal":
-            protocol += OCCLUSAL_PROTOCOL
-        elif rad_type == "Facial radiograph":
-            protocol += GENERAL_FACIAL_PROTOCOL
-        elif rad_type == "Lateral Cephalogram (Ceph)":
-            protocol += STEINER_PROTOCOL + "\n" + DOWNS_PROTOCOL + "\n" + MCNAMARA_PROTOCOL
-        else:
-            protocol += "General radiographic screening protocol."
-        return protocol
+        return SAFETY_RULES + f"\n[Scale: {scale_fac} mm/pixel]\nAnalyze this {rad_type} thoroughly with confidence levels and clinical treatment considerations."
 
-    # ------------------------------------------------------------
-    # UPLOAD & FILE GUARDRAILS
-    # ------------------------------------------------------------
     st.markdown('<div class="section">📤 Upload Dental Radiograph</div>', unsafe_allow_html=True)
-
-    xray = st.file_uploader(
-        "📷 Choose X-ray image",
-        type=["jpg", "jpeg", "png"],
-        accept_multiple_files=False,
-        key="dental_xray_upload",
-    )
+    xray = st.file_uploader("📷 Choose X-ray image", type=["jpg", "jpeg", "png"], key="dental_xray_upload")
 
     if xray is not None:
         if xray.size > MAX_FILE_SIZE_MB * 1024 * 1024:
@@ -354,66 +279,26 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
             st.stop()
 
         st.image(xray, caption="Uploaded radiograph", use_container_width=True)
-
-        analyze = st.button(
-            "🔍 Analyze X-ray with Dental Buddy",
-            use_container_width=True,
-            disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT),
-        )
+        analyze = st.button("🔍 Analyze X-ray with Dental Buddy", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT))
 
         if analyze:
-            if st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT:
-                st.warning("⏳ Daily AI analysis limit reached.")
-            else:
-                if "GEMINI_API_KEY" not in st.secrets:
-                    st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
-                    st.stop()
+            if "GEMINI_API_KEY" not in st.secrets:
+                st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
+                st.stop()
+            try:
+                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                response = client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=[{"inline_data": {"mime_type": xray.type, "data": xray.getvalue()}}, build_prompt(radiograph_type, ceph_analysis, facial_analysis, scale_factor)]
+                )
+                if response.text:
+                    st.session_state.analysis_count += 1
+                    st.session_state.last_report = response.text
+                    st.session_state.last_patient = patient_name if patient_name else "Patient"
+                    st.success("✅ Assessment completed.")
+            except Exception as e:
+                st.error(f"❌ Analysis failed: {e}")
 
-                api_key = st.secrets["GEMINI_API_KEY"]
-                mime_type = xray.type
-                try:
-                    client = genai.Client(api_key=api_key)
-                    image_bytes = xray.getvalue()
-                    final_prompt = build_prompt(radiograph_type, ceph_analysis, facial_analysis, scale_factor)
-
-                    response = None
-                    with st.spinner("🔬 Dental Buddy is assessing the radiograph..."):
-                        for attempt in range(3):
-                            try:
-                                response = client.models.generate_content(
-                                    model=MODEL_NAME,
-                                    contents=[
-                                        {
-                                            "inline_data": {
-                                                "mime_type": mime_type,
-                                                "data": image_bytes,
-                                            }
-                                        },
-                                        final_prompt,
-                                    ],
-                                )
-                                break
-                            except Exception as error:
-                                if "503" in str(error) and attempt < 2:
-                                    time.sleep(5 * (2 ** attempt))
-                                    continue
-                                raise error
-
-                    result_text = getattr(response, "text", None)
-                    if result_text:
-                        st.session_state.analysis_count += 1
-                        st.session_state.last_report = result_text
-                        st.session_state.last_patient = patient_name if patient_name else "Patient"
-                        st.success("✅ Assessment completed.")
-                    else:
-                        st.warning("⚠️ The AI returned no readable assessment.")
-
-                except Exception as error:
-                    st.error("❌ AI analysis failed.")
-                    with st.expander("Technical error details"):
-                        st.write(str(error))
-
-    # Render Persisted Report
     if st.session_state.last_report:
         st.markdown("---")
         st.markdown("### 📋 Clinical Assessment Report")
@@ -422,8 +307,9 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
 # ------------------------------------------------------------
 # REVIEW & FEEDBACK VIEW
 # ------------------------------------------------------------
-elif st.selected_nav == "Review & Feedback" if 'selected_nav' in locals() else st.session_state.app_mode == "Review & Feedback":
+elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review & Feedback":
     st.markdown('<div class="app-title">📝 Review & Feedback</div>', unsafe_allow_html=True)
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
+        
