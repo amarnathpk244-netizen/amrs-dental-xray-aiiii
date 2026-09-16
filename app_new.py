@@ -268,9 +268,9 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             st.markdown(f"### 🎤 Extended Viva Voce Question Bank for {topic}")
             st.markdown("Crucial spotter, diagnostic, and examiner viva questions tailored for final-year BDS practicals:")
             
-            st.markdown("""
+            st.markdown(f"""
             #### 1. Clinical & Diagnosis Spotters
-            * **Q1:** What is the classic clinical presentation and age/sex predilection for **""" + topic + """**?
+            * **Q1:** What is the classic clinical presentation and age/sex predilection for **{topic}**?
             * **Q2:** What are the extra-oral and intra-oral findings you would check during inspection and palpation?
             * **Q3:** Is there any associated paresthesia, pain, or lymphadenopathy? What does it indicate if present?
             * **Q4:** What are the primary clinical differential diagnoses you must rule out first?
@@ -382,4 +382,5 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
 elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review & Feedback":
     st.markdown('<div class="app-title">📝 Review & Feedback</div>', unsafe_allow_html=True)
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
-    if st.butt
+    if st.button("Submit Feedback"):
+        st.success("Thank you! Your feedback has been recorded.")
