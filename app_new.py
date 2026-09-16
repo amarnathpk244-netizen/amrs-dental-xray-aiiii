@@ -159,7 +159,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-student">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, and Phase 5 Mock Exam & Flashcards.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, Phase 5 Mock Exam, and Phase 6 Spotter Simulator.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -178,24 +178,25 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (PHASE 5 MOCK EXAM & FLASHCARDS UPGRADED)
+# STUDENT MODE INTERFACE (PHASE 6 SPOTTER SIMULATOR UPGRADED)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva & Phase 5 Mock Exam</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva, Mock Exam & Phase 6 Spotter Simulator</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
         st.success(f"Loaded academic curriculum and learning modules for: **{topic}**")
         
-        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_refs = st.tabs([
+        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_spotter, tab_refs = st.tabs([
             "📚 Core Theory", 
             "📝 Exam Corner", 
             "🧠 Clinical Reasoning", 
             "🎯 Adaptive Quiz", 
             "🎤 10+ Viva Qs", 
-            "🚀 Phase 5 Mock & Flash", 
+            "🚀 Phase 5 Mock", 
+            "🔬 Phase 6 Spotter AI", 
             "📖 Textbook Refs"
         ])
         
@@ -355,6 +356,30 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             st.error(f"Error generating flashcards: {e}")
             else:
                 st.info("Configure GEMINI_API_KEY to access Phase 5 Mock Exam & Flashcards.")
+
+        with tab_spotter:
+            st.markdown(f"### 🔬 Phase 6: Smart Image Diagnostics & Visual Spotter Simulator")
+            st.markdown("Upload a clinical photo, radiograph, or histopathological slide to evaluate it for practical spotter examination practice:")
+            
+            spotter_image = st.file_uploader("📷 Upload Spotter Image for Analysis", type=["jpg", "jpeg", "png"], key="phase6_spotter_upload")
+            
+            if spotter_image is not None:
+                st.image(spotter_image, caption="Uploaded Spotter Image", use_container_width=True)
+                if st.button("🔍 Run Spotter & Examiner Evaluation"):
+                    if "GEMINI_API_KEY" not in st.secrets:
+                        st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
+                    else:
+                        with st.spinner("Analyzing spotter image for practical viva examination..."):
+                            try:
+                                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                                spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide: 1. Identification / Probable Diagnosis, 2. Key Visual Findings / Hallmark Features, 3. Two potential Differential Diagnoses, and 4. Three rapid-fire viva examiner questions regarding this image."
+                                spot_resp = client.models.generate_content(
+                                    model=MODEL_NAME,
+                                    contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
+                                ]
+                                st.markdown(spot_resp.text)
+                            except Exception as e:
+                                st.error(f"Spotter analysis failed: {e}")
 
         with tab_refs:
             st.markdown(f"### 📖 Standard Textbook Recommendations")
