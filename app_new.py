@@ -211,7 +211,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-doctor">
             <h3>🩺 Doctor Mode</h3>
-            <p>Advanced Soft-Tissue AI Workflow, Radiograph module, Smart calibration, Prescription Generator, Treatment Cost Estimator, and Case Database Archive.</p>
+            <p>Advanced Soft-Tissue AI Workflow, Radiograph module, Smart calibration, Prescription Generator, Kerala-based Treatment Cost Estimator (₹), and Case Database Archive.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Doctor Mode", use_container_width=True):
@@ -219,7 +219,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (WITH INTERACTIVE FLASHCARDS)
+# STUDENT MODE INTERFACE
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
@@ -334,7 +334,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
 
         with tab_flashcards:
             st.markdown(f"### ⚡ Interactive Flashcards & Spaced Repetition for {topic}")
-            st.markdown("Test your fast-recall memory with high-yield revision flashcards:")
             if "GEMINI_API_KEY" in st.secrets:
                 if st.button("🗂️ Generate High-Yield Flashcards"):
                     with st.spinner("Generating flashcards..."):
@@ -396,7 +395,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                 st.image(spotter_image, caption="Uploaded Spotter Image", use_container_width=True)
                 if st.button("🔍 Run Spotter & Examiner Evaluation"):
                     if "GEMINI_API_KEY" not in st.secrets:
-                       st.error("❌ GEMINI_API_KEY missing from secrets.")
+                        st.error("❌ GEMINI_API_KEY missing from secrets.")
                     else:
                         with st.spinner("Analyzing spotter image..."):
                             try:
@@ -451,18 +450,17 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             * **Surgery / Medicine:** Burket's Oral Medicine / Peterson's Principles of Oral and Maxillofacial Surgery
             """)
 
-        # Download / PDF Print Widget for Student Output
         if "student_last_output" in st.session_state and st.session_state.student_last_output:
             display_pdf_download_button(st.session_state.student_last_output, f"Dental_Buddy_{topic.replace(' ', '_')}")
     else:
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (WITH PRESCRIPTION, COST ESTIMATOR & DB)
+# DOCTOR MODE INTERFACE (WITH KERALA COST ESTIMATOR IN ₹)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Radiograph Module, Smart Calibration, Prescription Generator, Cost Estimator & Soft-Tissue AI</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Radiograph Module, Smart Calibration, Prescription, Kerala Cost Estimator (₹) & Soft-Tissue AI</div>', unsafe_allow_html=True)
 
     remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
     col_m1, col_m2 = st.columns(2)
@@ -514,7 +512,7 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         if "GEMINI_API_KEY" not in st.secrets:
             st.error("❌ GEMINI_API_KEY missing from secrets.")
         else:
-            with st.spinner("Running Image Quality Gate, Smart Calibration, Evidence & Contradiction Engine..."):
+            with st.spinner("Running Image Quality Gate, Smart Calibration, Evidence Engine & Kerala Cost Estimator..."):
                 try:
                     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                     combined_workflow_prompt = f"""
@@ -537,7 +535,7 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                     6. CONTRADICTION CHECKING & UNCERTAINTY ASSESSMENT
                     7. RED-FLAG / SAFETY ENGINE
                     8. PROVISIONAL ASSESSMENT & NEXT-BEST CLINICAL STEPS
-                    9. RECOMMENDED PRESCRIPTION & TREATMENT COST ESTIMATOR (Provide standard evidence-based medication prescription breakdown and estimated treatment cost range).
+                    9. RECOMMENDED PRESCRIPTION & TREATMENT COST ESTIMATOR IN KERALA (Provide standard evidence-based medication prescription breakdown and estimated treatment cost range formatted in Indian Rupees (₹) reflecting private dental clinics in Kerala, e.g., RCT ₹2,500 - ₹8,000, Crown ₹3,500 - ₹10,000, etc.).
                     """
                     
                     contents_payload = [
@@ -552,7 +550,6 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                         st.session_state.last_report = response.text
                         st.session_state.last_patient = doc_patient_name if doc_patient_name else "Patient"
                         
-                        # Save to Case Archive Database
                         case_record = {
                             "date": str(date.today()),
                             "patient": doc_patient_name if doc_patient_name else "Anonymous",
@@ -607,4 +604,6 @@ elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
         submitted = st.form_submit_button("Submit Feedback Securely", use_container_width=True)
         if submitted:
             st.session_state.feedback_submitted = True
-            st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.") 
+            st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.")
+                        
+                        
