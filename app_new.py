@@ -1,4 +1,4 @@
-import streamlit as st
+            import streamlit as st
 from datetime import date
 import json
 import math
@@ -157,7 +157,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (PHASE 2 UPGRADE)
+# STUDENT MODE INTERFACE (FAST & STABLE NOTES)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
@@ -168,40 +168,44 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
     if topic:
         st.success(f"Loaded academic curriculum and exam bank for: **{topic}**")
         
-        # Tabs for structured student learning
         tab_theory, tab_exam, tab_viva, tab_refs = st.tabs(["📚 Core Theory & Pathology", "📝 Exam Corner (2, 5, 10 Marks)", "🎤 Viva Questions", "📖 Textbook References"])
         
         with tab_theory:
-            st.markdown(f"### 🔬 Comprehensive Overview: {topic}")
-            st.markdown("""
-            * **Definition & Etiology:** Basic and advanced categorization of the condition.
-            * **Pathogenesis & Risk Factors:** Cellular and clinical triggers progression pathway.
-            * **Clinical Features:** Oral manifestations, symptoms, site predilection, and clinical stages.
-            * **Radiographic & Histopathological Features:** Diagnostic imaging markers and microscopic hallmarks.
-            * **Differential Diagnosis & Distinguishing Features:** Step-by-step differentiation from mimicking lesions.
-            """)
+            st.markdown(f"### 🔬 High-Scoring University Notes: {topic}")
+            st.markdown("Click below to instantly generate structured exam notes point-by-point:")
             
             if "GEMINI_API_KEY" in st.secrets:
-                if st.button("✨ Generate AI Detailed Study Notes for this Topic"):
-                    with st.spinner("Preparing comprehensive university-level exam notes..."):
+                # Fast section buttons to prevent hanging
+                col_b1, col_b2 = st.columns(2)
+                with col_b1:
+                    gen_basics = st.button("📌 Definition, Etiology & Pathogenesis")
+                with col_b2:
+                    gen_clinical = st.button("🩺 Clinical & Histopathological Features")
+
+                if gen_basics:
+                    with st.spinner("Generating basics and etiology..."):
                         try:
                             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            prompt = f"Act as an expert dental professor and senior examiner. Provide a comprehensive, high-scoring university examination answer layout for dental students regarding '{topic}'. Cover: 1. Definition & Classification, 2. Etiology & Pathogenesis, 3. Clinical Features (Stage-wise), 4. Radiographic & Histopathological Hallmarks, 5. Differential Diagnosis, and 6. Management Principles. Make it structured, detailed, and easy to memorize for exams."
-                            
-                            resp = client.models.generate_content(
-                                model=MODEL_NAME, 
-                                contents=prompt
-                            )
+                            prompt = f"Provide a precise, high-scoring university exam answer format for dental students regarding '{topic}' focusing strictly on: 1. Definition, 2. Classification/Types, 3. Etiology, and 4. Pathogenesis in clear bullet points."
+                            resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
                             st.markdown(resp.text)
                         except Exception as e:
-                            st.error(f"Error generating notes: {e}")
+                            st.error(f"Error: {e}")
+
+                if gen_clinical:
+                    with st.spinner("Generating clinical and pathological features..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            prompt = f"Provide a precise university exam answer format for dental students regarding '{topic}' focusing strictly on: 1. Clinical Features (Stage-wise), 2. Radiographic Findings, 3. Histopathological Hallmarks, and 4. Differential Diagnosis."
+                            resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+                            st.markdown(resp.text)
+                        except Exception as e:
+                            st.error(f"Error: {e}")
             else:
                 st.info("Configure GEMINI_API_KEY in secrets to generate real-time AI study notes.")
 
         with tab_exam:
             st.markdown(f"### 📝 University Exam Corner for {topic}")
-            st.markdown("Structured answers mapped to previous university examination formats (KUHS style):")
-            
             with st.expander("📌 2-Mark Short Notes"):
                 st.write(f"- Define {topic} and state two primary clinical features.")
                 st.write("- Mention the classic histopathological hallmark of this condition.")
@@ -246,7 +250,6 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
     if remaining <= 0:
         st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
 
-    # Patient Information & Upload Code
     with st.expander("👤 Patient Information & Record Details", expanded=True):
         patient_name = st.text_input("Patient Name", placeholder="Enter patient name")
         col1, col2 = st.columns(2)
@@ -316,4 +319,4 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
-                
+                            
