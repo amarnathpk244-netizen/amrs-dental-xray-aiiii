@@ -62,6 +62,9 @@ if "app_mode" not in st.session_state:
 if "feedback_submitted" not in st.session_state:
     st.session_state.feedback_submitted = False
 
+if "student_last_output" not in st.session_state:
+    st.session_state.student_last_output = ""
+
 # ------------------------------------------------------------
 # UI STYLES & COLORFUL MEDICAL THEME
 # ------------------------------------------------------------
@@ -133,6 +136,39 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+# Helper function to generate print-to-PDF HTML viewer
+def display_pdf_download_button(content_text, filename_prefix):
+    st.markdown("---")
+    col_d1, col_d2 = st.columns(2)
+    with col_d1:
+        st.download_button(
+            label="📥 Download as Text File (.txt)",
+            data=content_text,
+            file_name=f"{filename_prefix}.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
+    with col_d2:
+        b64 = base64.b64encode(content_text.encode()).decode()
+        html_pdf_link = f"""
+        <a href="data:text/html;base64,{base64.b64encode(f'''
+            <html>
+                <head><title>{filename_prefix}</title></head>
+                <body style="font-family: Arial, sans-serif; padding: 40px; line-height: 1.6;">
+                    <h2 style="color: #1e3d59;">🦷 Dental Buddy - Official Report</h2>
+                    <hr/>
+                    <pre style="white-space: pre-wrap; font-family: Arial, sans-serif;">{content_text}</pre>
+                    <br/><hr/>
+                    <p style="font-size: 12px; color: #666;">Generated via Dental Buddy AI Platform.</p>
+                    <script>window.print();</script>
+                </body>
+            </html>
+        '''.encode()).decode()}" target="_blank" style="display: block; text-align: center; background-color: #1e3d59; color: white; padding: 10px 15px; border-radius: 12px; text-decoration: none; font-weight: 700; font-family: sans-serif; box-shadow: 0 3px 6px rgba(0,0,0,0.15);">
+            🖨️ Open Print / Save as PDF View
+        </a>
+        """
+        st.markdown(html_pdf_link, unsafe_allow_html=True)
 
 # ------------------------------------------------------------
 # SIDEBAR NAVIGATION & MODES
@@ -362,96 +398,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                         with st.spinner("Analyzing spotter image..."):
                             try:
                                 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                                spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide Identification, Hallmark Features, Differentials, and Viva Questions."
-                                spot_resp = client.models.generate_content(
-                                    model=MODEL_NAME,
-                                    contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
-                                )
-                                st.markdown(spot_resp.text)
-                                st.session_state.student_last_output = spot_resp.text
-                            except Exception as e:
-                                st.error(f"Analysis failed: {e}")
-
-        with tab_essay:
-            st.markdown(f"### ✍️ Phase 7: AI Smart Essay & Answer Sheet Generator")
-            if "GEMINI_API_KEY" in st.secrets:
-                if st.button("📝 Generate 10-Mark University Essay Answer Sheet"):
-                    with st.spinner("Writing structured high-scoring university essay model..."):
-                        try:
-                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            treat_prompt = f"Act as an expert oral surgeon. Formulate a complete treatment and management protocol for '{topic}' for patient presenting with '{case_stage}'."
-                            treat_resp = client.models.generate_content(model=MODEL_NAME, contents=treat_prompt)
-                            st.markdown(treat_resp.text)
-                            st.session_state.student_last_output = treat_resp.text
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-            else:
-                st.info("Configure GEMINI_API_KEY.")
-
-        with tab_refs:
-            st.markdown(f"### 📖 Standard Textbook Recommendations")
-            st.markdown("""
-            * **Oral Pathology:** Shafer's / Neville's Oral & Maxillofacial Pathology
-            * **Surgery / Medicine:** Burket's Oral Medicine / Peterson's Principles of Oral and Maxillofacial Surgery
-            """)
-
-        # Download PDF Option for Student Output
-        if "student_last_output" in st.session_state and st.session_state.student_last_output:
-            st.markdown("---")
-            st.download_button(
-                label="📥 Download Study Notes / Result as PDF/Text",
-                data=st.session_state.student_last_output,
-                file_name=f"Dental_Buddy_{topic.replace(' ', '_')}.txt",
-                mime="text/plain",
-                use_container_width=True
-            )
-    else:
-        st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
-
-# ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (SOFT-TISSUE AI WORKFLOW)
-# ------------------------------------------------------------
-elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
-    st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Soft-Tissue AI Clinical Workflow, Dynamic Evidence & Contradiction Engine</div>', unsafe_allow_html=True)
-
-    remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
-    col_m1, col_m2 = st.columns(2)
-    with col_m1:
-        st.metric(label="🧪 Daily Quota Left", value=f"{remaining} / {DAILY_ANALYSIS_LIMIT}")
-
-    if remaining <= 0:
-        st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
-
-    with st.expander("👤 Patient Clinical Profile & Examination Details", expanded=True):
-        doc_patient_name = st.text_input("Patient Name / Identifier", placeholder="Enter patient name or ID")
-        col_d1, col_d2 = st.columns(2)
-        with col_d1:
-            doc_age = st.number_input("Age", min_value=0, max_value=120, value=30, step=1)
-        with col_d2:
-            doc_sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
-        
-        doc_duration = st.text_input("Symptom Duration", placeholder="e.g., 1 week")
-        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Painful ulcer on lower lip mucosa, burning sensation.")
-        doc_history = st.text_area("Relevant Medical & Dental History", placeholder="e.g., Recurrent episodes, no systemic illness.")
-        doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Stress, minor trauma, no tobacco")
-
-    st.markdown('<div class="section">📤 Upload Clinical Photograph or Radiograph (JPG, PNG, WEBP)</div>', unsafe_allow_html=True)
-    doc_file = st.file_uploader("📷 Choose image file", type=["jpg", "jpeg", "png", "webp"], key="doctor_multimodal_upload")
-
-    if doc_file is not None:
-        if doc_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
-            st.error(f"❌ File size exceeds {MAX_FILE_SIZE_MB}MB limit.")
-            st.stop()
-        st.image(doc_file, caption="Uploaded Clinical Record", use_container_width=True)
-
-    if st.button("🔍 Run Soft-Tissue AI Clinical Workflow", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
-        if "GEMINI_API_KEY" not in st.secrets:
-            st.error("❌ GEMINI_API_KEY missing from secrets.")
-        else:
-            with st.spinner("Running Image Quality Gate, Lesion Localization, Evidence & Contradiction Engine..."):
-                try:
-                    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                     soft_tissue_workflow_prompt = f"""
                     You are Dental Buddy Doctor Mode, operating under a strict Soft-Tissue AI Clinical Decision Support Workflow. 
                     Analyze the uploaded clinical photograph/radiograph along with patient details:
@@ -493,15 +439,8 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         st.markdown("### 📋 Soft-Tissue Clinical Decision Support Report")
         st.markdown(st.session_state.last_report)
         
-        # Download Report Option for Doctor Mode
-        st.markdown("---")
-        st.download_button(
-            label="📥 Download Clinical Report as Text/Document",
-            data=st.session_state.last_report,
-            file_name=f"Clinical_Report_{st.session_state.last_patient.replace(' ', '_')}.txt",
-            mime="text/plain",
-            use_container_width=True
-        )
+        # Download / PDF Print Widget for Doctor Report
+        display_pdf_download_button(st.session_state.last_report, f"Clinical_Report_{st.session_state.last_patient.replace(' ', '_')}")
 
 # ------------------------------------------------------------
 # REVIEW & FEEDBACK VIEW
@@ -521,3 +460,4 @@ elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
         if submitted:
             st.session_state.feedback_submitted = True
             st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.")
+                              
