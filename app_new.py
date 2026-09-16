@@ -138,7 +138,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner (3, 5, 10-mark answers), and viva questions mapped to KUHS guidelines.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, interactive clinical reasoning, and viva questions.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -157,18 +157,25 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (FAST & STABLE NOTES)
+# STUDENT MODE INTERFACE (PHASE 2 & PHASE 3 UPGRADED)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Clinical Theory & Exam Corner (KUHS Pattern)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner & Interactive Clinical Reasoning</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
-        st.success(f"Loaded academic curriculum and exam bank for: **{topic}**")
+        st.success(f"Loaded academic curriculum and clinical reasoning engine for: **{topic}**")
         
-        tab_theory, tab_exam, tab_viva, tab_refs = st.tabs(["📚 Core Theory & Pathology", "📝 Exam Corner (3, 5, 10 Marks)", "🎤 Viva Questions", "📖 Textbook References"])
+        # Tabs including Phase 3 Interactive Clinical Reasoning Engine
+        tab_theory, tab_exam, tab_reasoning, tab_viva, tab_refs = st.tabs([
+            "📚 Core Theory", 
+            "📝 Exam Corner (15-Yr Qs)", 
+            "🧠 Clinical Reasoning (Phase 3)", 
+            "🎤 Viva Questions", 
+            "📖 Textbook Refs"
+        ])
         
         with tab_theory:
             st.markdown(f"### 🔬 High-Scoring University Notes: {topic}")
@@ -219,6 +226,26 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             st.error(f"Error fetching question bank: {e}")
             else:
                 st.info("Configure GEMINI_API_KEY to load the full 15-year question bank.")
+
+        with tab_reasoning:
+            st.markdown(f"### 🧠 Interactive Clinical Case & Reasoning Engine")
+            st.markdown("Test your clinical logic by stepping through patient symptoms, lesion features, and diagnostic paths for **" + topic + "**:")
+            
+            patient_age_sex = st.text_input("Patient Profile (e.g., 25-year-old male)", placeholder="e.g., 40-year-old female with painless mandibular swelling")
+            chief_complaint = st.text_area("Chief Complaint & Clinical Findings", placeholder="e.g., Hard swelling in the posterior mandible, duration 6 months, egg-shell crackling absent.")
+
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("🚀 Run Step-by-Step Clinical Logic Analysis"):
+                    with st.spinner("Evaluating clinical findings and building differential diagnosis pathway..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            reason_prompt = f"Act as a master clinician in oral medicine and diagnosis. For the topic '{topic}' with patient profile '{patient_age_sex}' and findings '{chief_complaint}', provide a step-by-step interactive clinical reasoning flow: 1. Key diagnostic questions to ask, 2. Critical radiographic features to evaluate, 3. Top 3 Differential Diagnoses with justification, and 4. Definitive diagnostic test (e.g., Incisional Biopsy / FNAC)."
+                            r_resp = client.models.generate_content(model=MODEL_NAME, contents=reason_prompt)
+                            st.markdown(r_resp.text)
+                        except Exception as e:
+                            st.error(f"Error in clinical reasoning engine: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY to use the Clinical Reasoning Engine.")
 
         with tab_viva:
             st.markdown(f"### 🎤 Viva Voce Spotters & Quick Questions")
