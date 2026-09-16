@@ -401,8 +401,11 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                                 spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide Identification, Hallmark Features, Differentials, and Viva Questions."
                                 spot_resp = client.models.generate_content(
                                     model=MODEL_NAME,
-                                    contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
-                                ]
+                                    contents=[
+                                        {"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}},
+                                        spotter_prompt
+                                    ]
+                                )
                                 st.markdown(spot_resp.text)
                                 st.session_state.student_last_output = spot_resp.text
                             except Exception as e:
@@ -530,10 +533,10 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                     7. PROVISIONAL ASSESSMENT & NEXT-BEST CLINICAL STEPS.
                     """
                     
-                    contents_payload = []
-                    if doc_file is not None:
-                        contents_payload.append({"inline_data": {"mime_type": doc_file.type, "data": doc_file.getvalue()}})
-                    contents_payload.append(combined_workflow_prompt)
+                    contents_payload = [
+                        {"inline_data": {"mime_type": doc_file.type, "data": doc_file.getvalue()}},
+                        combined_workflow_prompt
+                    ] if doc_file is not None else [combined_workflow_prompt]
 
                     response = client.models.generate_content(model=MODEL_NAME, contents=contents_payload)
                     
@@ -571,6 +574,4 @@ elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
         if submitted:
             st.session_state.feedback_submitted = True
             st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.")
-                                
-                                
         
