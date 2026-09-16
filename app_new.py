@@ -456,7 +456,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (WITH KERALA COST ESTIMATOR IN ₹)
+# DOCTOR MODE INTERFACE (WITH 503 ERROR RETRY & KERALA COST ESTIMATOR)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
@@ -543,9 +543,21 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                         combined_workflow_prompt
                     ] if doc_file is not None else [combined_workflow_prompt]
 
-                    response = client.models.generate_content(model=MODEL_NAME, contents=contents_payload)
+                    # Retry mechanism for 503 high demand errors
+                    response = None
+                    max_retries = 3
+                    for attempt in range(max_retries):
+                        try:
+                            response = client.models.generate_content(model=MODEL_NAME, contents=contents_payload)
+                            break
+                        except Exception as api_err:
+                            if "503" in str(api_err) and attempt < max_retries - 1:
+                                time.sleep(2) # Wait 2 seconds before retry
+                                continue
+                            else:
+                                raise api_err
                     
-                    if response.text:
+                    if response and response.text:
                         st.session_state.analysis_count += 1
                         st.session_state.last_report = response.text
                         st.session_state.last_patient = doc_patient_name if doc_patient_name else "Patient"
@@ -561,7 +573,7 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                         st.session_state.saved_cases.append(case_record)
                         st.success("✅ Assessment completed & securely saved to Case History Database.")
                 except Exception as e:
-                    st.error(f"❌ Analysis failed: {e}")
+                    st.error(f"❌ Analysis failed due to high server demand (503 / Unavailable). Please wait a few seconds and click the button again.")
 
     if st.session_state.last_report:
         st.markdown("---")
@@ -605,5 +617,4 @@ elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
         if submitted:
             st.session_state.feedback_submitted = True
             st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.")
-                        
                         
