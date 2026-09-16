@@ -159,7 +159,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-student">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, Phase 5 Mock Exam, and Phase 6 Spotter Simulator.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, Mock Exam, Spotter AI, and Phase 7 Smart Essay Generator.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -178,25 +178,26 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (PHASE 6 SPOTTER SIMULATOR UPGRADED)
+# STUDENT MODE INTERFACE (PHASE 7 SMART ESSAY GENERATOR UPGRADED)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva, Mock Exam & Phase 6 Spotter Simulator</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva, Mock, Spotter & Phase 7 Essay Generator</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
         st.success(f"Loaded academic curriculum and learning modules for: **{topic}**")
         
-        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_spotter, tab_refs = st.tabs([
+        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_spotter, tab_essay, tab_refs = st.tabs([
             "📚 Core Theory", 
             "📝 Exam Corner", 
             "🧠 Clinical Reasoning", 
             "🎯 Adaptive Quiz", 
             "🎤 10+ Viva Qs", 
             "🚀 Phase 5 Mock", 
-            "🔬 Phase 6 Spotter AI", 
+            "🔬 Phase 6 Spotter", 
+            "✍️ Phase 7 Smart Essay", 
             "📖 Textbook Refs"
         ])
         
@@ -383,6 +384,23 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                                 st.markdown(spot_resp.text)
                             except Exception as e:
                                 st.error(f"Spotter analysis failed: {e}")
+
+        with tab_essay:
+            st.markdown(f"### ✍️ Phase 7: AI Smart Essay & Answer Sheet Generator")
+            st.markdown("Generate a comprehensive, high-scoring university exam answer sheet layout (suitable for 10-mark essays) for **" + topic + "**:")
+            
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("📝 Generate 10-Mark University Essay Answer Sheet"):
+                    with st.spinner("Writing structured high-scoring university essay model..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            essay_prompt = f"Act as a top-ranking university student and expert professor. Write a comprehensive, beautifully structured 10-mark essay model answer for '{topic}' complete with: Introduction, Detailed Classification, Pathogenesis, Clinical Features, Radiographic/Histopathological Findings, Management, and Conclusion."
+                            essay_resp = client.models.generate_content(model=MODEL_NAME, contents=essay_prompt)
+                            st.markdown(essay_resp.text)
+                        except Exception as e:
+                            st.error(f"Error generating essay: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY to generate smart essay answer sheets.")
 
         with tab_refs:
             st.markdown(f"### 📖 Standard Textbook Recommendations")
