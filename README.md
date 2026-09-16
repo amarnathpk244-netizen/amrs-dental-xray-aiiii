@@ -1,1 +1,1 @@
-# amrs-dental-xray-aiiii
+dental buddy 
