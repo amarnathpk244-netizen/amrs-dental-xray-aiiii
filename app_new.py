@@ -209,7 +209,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-doctor">
             <h3>🩺 Doctor Mode</h3>
-            <p>Advanced Soft-Tissue AI Workflow with Image Quality Gate, Lesion Localization, Visual Feature Extraction, Dynamic Evidence & Contradiction Engine, and Red-Flag Safety Checks.</p>
+            <p>Advanced Radiograph & Soft-Tissue AI Clinical Workflow with Image Quality Gate, Lesion Localization, Visual Feature Extraction, Dynamic Evidence & Contradiction Engine, and Red-Flag Safety Checks.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Doctor Mode", use_container_width=True):
@@ -402,7 +402,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                                 spot_resp = client.models.generate_content(
                                     model=MODEL_NAME,
                                     contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
-                                )
+                                ]
                                 st.markdown(spot_resp.text)
                                 st.session_state.student_last_output = spot_resp.text
                             except Exception as e:
@@ -455,11 +455,11 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (SOFT-TISSUE AI WORKFLOW)
+# DOCTOR MODE INTERFACE (RADIOGRAPH MODULE + SOFT-TISSUE AI WORKFLOW)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Soft-Tissue AI Clinical Workflow, Dynamic Evidence & Contradiction Engine</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Radiograph Module, Soft-Tissue AI Workflow, Dynamic Evidence & Contradiction Engine</div>', unsafe_allow_html=True)
 
     remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
     col_m1, col_m2 = st.columns(2)
@@ -478,51 +478,62 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
             doc_sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
         
         doc_duration = st.text_input("Symptom Duration", placeholder="e.g., 1 week")
-        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Painful ulcer on lower lip mucosa, burning sensation.")
+        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Painful ulcer on lower lip mucosa, burning sensation / or swelling / pain.")
         doc_history = st.text_area("Relevant Medical & Dental History", placeholder="e.g., Recurrent episodes, no systemic illness.")
-        doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Stress, minor trauma, no tobacco")
+        doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Stress, minor trauma, tobacco/alcohol")
 
-    st.markdown('<div class="section">📤 Upload Clinical Photograph or Radiograph (JPG, PNG, WEBP)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section">🩻 Radiographic Assessment & Calibration Module</div>', unsafe_allow_html=True)
+    radiograph_type = st.selectbox("Select radiograph type", ["IOPA", "Lateral Cephalogram (Ceph)", "OPG", "Bitewing", "Occlusal", "Facial radiograph", "Other / Not reliably classifiable"])
+    
+    ceph_analysis = "Combined / All Analyses"
+    facial_analysis = "General Facial Screening / All Views"
+    scale_factor = 1.0
+
+    if radiograph_type == "Lateral Cephalogram (Ceph)":
+        ceph_analysis = st.selectbox("Select Cephalometric Analysis", CEPH_ANALYSES, key="ceph_analysis_selector_doc")
+    elif radiograph_type == "Facial radiograph":
+        facial_analysis = st.selectbox("Select Facial Radiograph Analysis", FACIAL_ANALYSES, key="facial_analysis_selector_doc")
+
+    st.markdown('<div class="section">📤 Upload Clinical Photograph or Dental Radiograph (JPG, PNG, WEBP)</div>', unsafe_allow_html=True)
     doc_file = st.file_uploader("📷 Choose image file", type=["jpg", "jpeg", "png", "webp"], key="doctor_multimodal_upload")
 
     if doc_file is not None:
         if doc_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
             st.error(f"❌ File size exceeds {MAX_FILE_SIZE_MB}MB limit.")
             st.stop()
-        st.image(doc_file, caption="Uploaded Clinical Record", use_container_width=True)
+        st.image(doc_file, caption=f"Uploaded {radiograph_type} / Clinical Record", use_container_width=True)
 
-    if st.button("🔍 Run Soft-Tissue AI Clinical Workflow", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
+    if st.button("🔍 Run Radiograph & Soft-Tissue AI Workflow", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
         if "GEMINI_API_KEY" not in st.secrets:
             st.error("❌ GEMINI_API_KEY missing from secrets.")
         else:
-            with st.spinner("Running Image Quality Gate, Lesion Localization, Evidence & Contradiction Engine..."):
+            with st.spinner("Running Image Quality Gate, Radiographic/Soft-Tissue Assessment, Evidence & Contradiction Engine..."):
                 try:
                     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                    soft_tissue_workflow_prompt = f"""
-                    You are Dental Buddy Doctor Mode, operating under a strict Soft-Tissue AI Clinical Decision Support Workflow. 
-                    Analyze the uploaded clinical photograph/radiograph along with patient details:
+                    combined_workflow_prompt = f"""
+                    You are Dental Buddy Doctor Mode, operating under an advanced clinical decision-support and radiographic assessment system. 
+                    Analyze the uploaded image (classified as: {radiograph_type}) along with patient details:
                     - Patient Profile: Age {doc_age}, Sex {doc_sex}
                     - Symptom Duration: {doc_duration}
                     - Symptoms: {doc_symptoms}
                     - History: {doc_history}
                     - Risk Factors: {doc_risk}
+                    - Ceph/Facial Sub-analysis if applicable: {ceph_analysis} / {facial_analysis}
 
                     Execute and output structured report following:
-                    1. IMAGE QUALITY GATE
-                    2. LESION LOCALIZATION
-                    3. VISUAL FEATURE EXTRACTION
-                    4. INITIAL DIFFERENTIAL
-                    5. TARGETED CLINICAL QUESTIONS
-                    6. MULTIMODAL EVIDENCE FUSION
-                    7. EVIDENCE + CONTRADICTION ENGINE
-                    8. RED-FLAG / SAFETY ENGINE
-                    9. PROVISIONAL ASSESSMENT
+                    1. IMAGE QUALITY GATE (Check sharpness, exposure, positioning, or soft-tissue visibility. If poor, request better capture).
+                    2. OBSERVABLE FINDINGS (For radiographs: coronal, pulpal, periapical, periodontal structures. For soft tissue: lesion localization & visual feature extraction).
+                    3. INITIAL DIFFERENTIAL DIAGNOSES (3-5 plausible possibilities).
+                    4. DYNAMIC EVIDENCE TRACE (Supporting evidence vs Contradictory evidence vs Unknown information).
+                    5. CONTRADICTION CHECKING & UNCERTAINTY ASSESSMENT.
+                    6. RED-FLAG / SAFETY ENGINE (Check for concerning features, recommend biopsy/specialist referral when indicated).
+                    7. PROVISIONAL ASSESSMENT & NEXT-BEST CLINICAL STEPS.
                     """
                     
                     contents_payload = []
                     if doc_file is not None:
                         contents_payload.append({"inline_data": {"mime_type": doc_file.type, "data": doc_file.getvalue()}})
-                    contents_payload.append(soft_tissue_workflow_prompt)
+                    contents_payload.append(combined_workflow_prompt)
 
                     response = client.models.generate_content(model=MODEL_NAME, contents=contents_payload)
                     
@@ -530,13 +541,13 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                         st.session_state.analysis_count += 1
                         st.session_state.last_report = response.text
                         st.session_state.last_patient = doc_patient_name if doc_patient_name else "Patient"
-                        st.success("✅ Soft-Tissue Clinical Workflow assessment completed.")
+                        st.success("✅ Radiograph & Soft-Tissue Clinical Workflow assessment completed.")
                 except Exception as e:
                     st.error(f"❌ Analysis failed: {e}")
 
     if st.session_state.last_report:
         st.markdown("---")
-        st.markdown("### 📋 Soft-Tissue Clinical Decision Support Report")
+        st.markdown("### 📋 Clinical Decision Support & Radiographic Assessment Report")
         st.markdown(st.session_state.last_report)
         
         # Download / PDF Print Widget for Doctor Report
@@ -560,4 +571,6 @@ elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
         if submitted:
             st.session_state.feedback_submitted = True
             st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.")
-                              
+                                
+                                
+        
