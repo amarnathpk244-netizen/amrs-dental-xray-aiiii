@@ -137,7 +137,7 @@ st.markdown(
 st.sidebar.markdown("### 🦷 Dental Buddy Navigation")
 selected_nav = st.sidebar.radio(
     "Go to", 
-    ["Home / Dashboard", "Student Mode", "Doctor Mode (X-ray AI)", "Review & Feedback"],
+    ["Home / Dashboard", "Student Mode", "Doctor Mode (Clinical Decision Support)", "Review & Feedback"],
     index=0 if st.session_state.app_mode == "Home / Dashboard" else (1 if st.session_state.app_mode == "Student Mode" else 2)
 )
 
@@ -159,7 +159,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-student">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, Mock Exam, Spotter AI, and Phase 7 Smart Essay Generator.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, Mock Exam, Spotter AI, Smart Essay, and Treatment Planning.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -170,26 +170,26 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-doctor">
             <h3>🩺 Doctor Mode</h3>
-            <p>Clinical decision-support platform & AMRs Dental X-ray AI module. Input radiographs, photos, and symptoms for structured evidence analysis and differential refinement.</p>
+            <p>Advanced clinical decision-support & multimodal evidence engine. Features dynamic evidence tracing, contradiction checking, uncertainty assessment, and professional referral pathways.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Doctor Mode", use_container_width=True):
-            st.session_state.app_mode = "Doctor Mode (X-ray AI)"
+            st.session_state.app_mode = "Doctor Mode (Clinical Decision Support)"
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (PHASE 7 SMART ESSAY GENERATOR UPGRADED)
+# STUDENT MODE INTERFACE
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva, Mock, Spotter & Phase 7 Essay Generator</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva, Mock, Spotter, Essay & Treatment Planning</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
         st.success(f"Loaded academic curriculum and learning modules for: **{topic}**")
         
-        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_spotter, tab_essay, tab_refs = st.tabs([
+        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_spotter, tab_essay, tab_treatment, tab_refs = st.tabs([
             "📚 Core Theory", 
             "📝 Exam Corner", 
             "🧠 Clinical Reasoning", 
@@ -197,7 +197,8 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             "🎤 10+ Viva Qs", 
             "🚀 Phase 5 Mock", 
             "🔬 Phase 6 Spotter", 
-            "✍️ Phase 7 Smart Essay", 
+            "✍️ Phase 7 Essay", 
+            "🛠️ Phase 8 Treatment", 
             "📖 Textbook Refs"
         ])
         
@@ -402,6 +403,25 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             else:
                 st.info("Configure GEMINI_API_KEY to generate smart essay answer sheets.")
 
+        with tab_treatment:
+            st.markdown(f"### 🛠️ Phase 8: Clinical Case Simulation & Treatment Planning Engine")
+            st.markdown("Build a comprehensive management and treatment protocol for **" + topic + "** based on clinical severity:")
+            
+            case_stage = st.selectbox("Select Case Severity / Stage", ["Early / Mild Presentation", "Moderate Stage with Cortical Involvement", "Advanced / Aggressive / Recurrent Presentation"])
+            
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("⚙️ Generate Comprehensive Treatment & Management Protocol"):
+                    with st.spinner("Formulating evidence-based treatment plan..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            treat_prompt = f"Act as an expert oral and maxillofacial surgeon and professor. Formulate a complete treatment and management protocol for '{topic}' for a patient presenting with '{case_stage}'. Include: 1. Pre-operative investigations, 2. Treatment of Choice (Conservative vs Radical), 3. Surgical steps / technique outline, 4. Post-operative care & medications, and 5. Follow-up and recurrence monitoring protocol."
+                            treat_resp = client.models.generate_content(model=MODEL_NAME, contents=treat_prompt)
+                            st.markdown(treat_resp.text)
+                        except Exception as e:
+                            st.error(f"Error generating treatment plan: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY to use the Treatment Planning Engine.")
+
         with tab_refs:
             st.markdown(f"### 📖 Standard Textbook Recommendations")
             st.markdown("""
@@ -413,11 +433,11 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (AMRs Dental X-ray AI Integrated)
+# DOCTOR MODE INTERFACE (ADVANCED CLINICAL DECISION SUPPORT & DYNAMIC EVIDENCE ENGINE)
 # ------------------------------------------------------------
-elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "Doctor Mode (X-ray AI)":
+elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Clinical Decision Support & Radiographic Assessment</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Clinical Decision Support, Dynamic Evidence Engine & Radiographic Assessment</div>', unsafe_allow_html=True)
 
     remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
     col_m1, col_m2 = st.columns(2)
@@ -427,17 +447,20 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
     if remaining <= 0:
         st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
 
-    with st.expander("👤 Patient Information & Record Details", expanded=True):
-        patient_name = st.text_input("Patient Name", placeholder="Enter patient name")
-        col1, col2 = st.columns(2)
-        with col1:
-            age = st.number_input("Age", min_value=0, max_value=120, value=0, step=1)
-        with col2:
-            sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
-        op_number = st.text_input("OP Number", placeholder="Enter OP number")
-        examination_date = st.date_input("Examination Date", value=date.today())
+    with st.expander("👤 Patient Clinical Profile & Examination Details", expanded=True):
+        doc_patient_name = st.text_input("Patient Name / Identifier", placeholder="Enter patient name or ID")
+        col_d1, col_d2 = st.columns(2)
+        with col_d1:
+            doc_age = st.number_input("Age", min_value=0, max_value=120, value=30, step=1)
+        with col_d2:
+            doc_sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
+        
+        doc_duration = st.text_input("Symptom Duration", placeholder="e.g., 3 months")
+        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Dull aching pain, swelling, mobility in lower left posterior region.")
+        doc_history = st.text_area("Relevant Medical & Dental History", placeholder="e.g., No systemic illness, history of local trauma 1 year ago.")
+        doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Smokeless tobacco user, chronic smoker")
 
-    st.markdown('<div class="section">🩻 Radiograph & Calibration</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section">🩻 Radiographic Assessment & Calibration</div>', unsafe_allow_html=True)
     radiograph_type = st.selectbox("Select radiograph type", ["IOPA", "Lateral Cephalogram (Ceph)", "OPG", "Bitewing", "Occlusal", "Facial radiograph", "Other / Not reliably classifiable"])
     
     ceph_analysis = "Combined / All Analyses"
@@ -445,47 +468,70 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
     scale_factor = 1.0
 
     if radiograph_type == "Lateral Cephalogram (Ceph)":
-        ceph_analysis = st.selectbox("Select Cephalometric Analysis", CEPH_ANALYSES, key="ceph_analysis_selector")
+        ceph_analysis = st.selectbox("Select Cephalometric Analysis", CEPH_ANALYSES, key="ceph_analysis_selector_doc")
     elif radiograph_type == "Facial radiograph":
-        facial_analysis = st.selectbox("Select Facial Radiograph Analysis", FACIAL_ANALYSES, key="facial_analysis_selector")
+        facial_analysis = st.selectbox("Select Facial Radiograph Analysis", FACIAL_ANALYSES, key="facial_analysis_selector_doc")
 
-    SAFETY_RULES = """You are Dental Buddy, an expert clinical decision-support and radiographic assessment system."""
-    
-    def build_prompt(rad_type, ceph_an, facial_an, scale_fac):
-        return SAFETY_RULES + f"\n[Scale: {scale_fac} mm/pixel]\nAnalyze this {rad_type} thoroughly with confidence levels and clinical treatment considerations."
+    st.markdown('<div class="section">📤 Upload Clinical Photograph or Radiograph</div>', unsafe_allow_html=True)
+    doc_file = st.file_uploader("📷 Choose image file", type=["jpg", "jpeg", "png"], key="doctor_multimodal_upload")
 
-    st.markdown('<div class="section">📤 Upload Dental Radiograph</div>', unsafe_allow_html=True)
-    xray = st.file_uploader("📷 Choose X-ray image", type=["jpg", "jpeg", "png"], key="dental_xray_upload")
-
-    if xray is not None:
-        if xray.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+    if doc_file is not None:
+        if doc_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
             st.error(f"❌ File size exceeds {MAX_FILE_SIZE_MB}MB limit.")
             st.stop()
 
-        st.image(xray, caption="Uploaded radiograph", use_container_width=True)
-        analyze = st.button("🔍 Analyze X-ray with Dental Buddy", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT))
+        st.image(doc_file, caption="Uploaded Clinical/Radiographic Record", use_container_width=True)
 
-        if analyze:
-            if "GEMINI_API_KEY" not in st.secrets:
-                st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
-                st.stop()
-            try:
-                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                response = client.models.generate_content(
-                    model=MODEL_NAME,
-                    contents=[{"inline_data": {"mime_type": xray.type, "data": xray.getvalue()}}, build_prompt(radiograph_type, ceph_analysis, facial_analysis, scale_factor)]
-                )
-                if response.text:
-                    st.session_state.analysis_count += 1
-                    st.session_state.last_report = response.text
-                    st.session_state.last_patient = patient_name if patient_name else "Patient"
-                    st.success("✅ Assessment completed.")
-            except Exception as e:
-                st.error(f"❌ Analysis failed: {e}")
+    if st.button("🔍 Run Clinical Decision Support & Evidence Analysis", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
+        if "GEMINI_API_KEY" not in st.secrets:
+            st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
+        else:
+            with st.spinner("Running dynamic evidence engine, contradiction checking, and differential refinement..."):
+                try:
+                    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                    
+                    doc_prompt = f"""
+                    You are Dental Buddy Doctor Mode, an advanced clinical decision-support system. 
+                    Analyze the following multimodal case details carefully:
+                    - Patient Profile: Age {doc_age}, Sex {doc_sex}
+                    - Duration: {doc_duration}
+                    - Symptoms: {doc_symptoms}
+                    - History: {doc_history}
+                    - Risk Factors: {doc_risk}
+                    - Radiograph Type: {radiograph_type}
+
+                    Provide a structured clinical decision support report containing:
+                    1. Observable Findings & Image Quality Assessment
+                    2. Initial Differential Diagnoses
+                    3. Dynamic Evidence Trace (Supporting evidence vs Contradictory evidence vs Unknown information for top candidates)
+                    4. Contradiction Checking & Uncertainty Assessment
+                    5. Provisional Assessment (Clearly distinguishing observed findings from inferred possibilities)
+                    6. Next-Best Clinical Questions to ask or Recommended Next Clinical Steps / Referral.
+                    
+                    Disclaimer: Do not provide a definitive diagnosis. Recommend professional clinical evaluation.
+                    """
+                    
+                    contents_payload = []
+                    if doc_file is not None:
+                        contents_payload.append({"inline_data": {"mime_type": doc_file.type, "data": doc_file.getvalue()}})
+                    contents_payload.append(doc_prompt)
+
+                    response = client.models.generate_content(
+                        model=MODEL_NAME,
+                        contents=contents_payload
+                    )
+                    
+                    if response.text:
+                        st.session_state.analysis_count += 1
+                        st.session_state.last_report = response.text
+                        st.session_state.last_patient = doc_patient_name if doc_patient_name else "Patient"
+                        st.success("✅ Clinical decision support assessment completed.")
+                except Exception as e:
+                    st.error(f"❌ Analysis failed: {e}")
 
     if st.session_state.last_report:
         st.markdown("---")
-        st.markdown("### 📋 Clinical Assessment Report")
+        st.markdown("### 📋 Professional Clinical Decision Support Report")
         st.markdown(st.session_state.last_report)
 
 # ------------------------------------------------------------
