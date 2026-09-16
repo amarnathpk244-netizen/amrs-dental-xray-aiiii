@@ -138,7 +138,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, interactive clinical reasoning, and extensive viva voce questions.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, extended viva, and Phase 4 Adaptive Quiz Engine.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -157,21 +157,22 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (UPGRADED VIVA SECTION)
+# STUDENT MODE INTERFACE (PHASE 4 ADAPTIVE QUIZ ENGINE UPGRADED)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning & Extended Viva Bank</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Viva & Adaptive Quiz Engine</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
-        st.success(f"Loaded academic curriculum and viva question bank for: **{topic}**")
+        st.success(f"Loaded academic curriculum and adaptive learning engine for: **{topic}**")
         
-        tab_theory, tab_exam, tab_reasoning, tab_viva, tab_refs = st.tabs([
+        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_refs = st.tabs([
             "📚 Core Theory", 
             "📝 Exam Corner (15-Yr Qs)", 
-            "🧠 Clinical Reasoning (Phase 3)", 
+            "🧠 Clinical Reasoning", 
+            "🎯 Adaptive Quiz (Phase 4)", 
             "🎤 Extended Viva Bank", 
             "📖 Textbook Refs"
         ])
@@ -245,6 +246,23 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             st.error(f"Error in clinical reasoning engine: {e}")
             else:
                 st.info("Configure GEMINI_API_KEY to use the Clinical Reasoning Engine.")
+
+        with tab_quiz:
+            st.markdown(f"### 🎯 Phase 4: Adaptive Quiz & Targeted Weakness Trainer")
+            st.markdown("Test your mastery on **" + topic + "** with high-yield university multiple-choice questions (MCQs) and receive targeted concept explanations:")
+            
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("✨ Generate Targeted Adaptive Quiz"):
+                    with st.spinner("Generating high-yield MCQ practice set..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            quiz_prompt = f"Act as an examiner. Create 3 high-yield university-level MCQs regarding '{topic}' with options (A, B, C, D), correct answers, and brief clinical/pathological rationales to target common student misconceptions."
+                            q_res = client.models.generate_content(model=MODEL_NAME, contents=quiz_prompt)
+                            st.markdown(q_res.text)
+                        except Exception as e:
+                            st.error(f"Error generating quiz: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY to generate adaptive quizzes.")
 
         with tab_viva:
             st.markdown(f"### 🎤 Extended Viva Voce Question Bank for {topic}")
@@ -364,6 +382,4 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
 elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review & Feedback":
     st.markdown('<div class="app-title">📝 Review & Feedback</div>', unsafe_allow_html=True)
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
-    if st.button("Submit Feedback"):
-        st.success("Thank you! Your feedback has been recorded.")
-                
+    if st.butt
