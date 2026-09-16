@@ -138,7 +138,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, extended viva, and Phase 4 Adaptive Quiz Engine.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, 10+ viva questions, and Interactive Adaptive Quiz Engine.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -157,23 +157,23 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (PHASE 4 ADAPTIVE QUIZ ENGINE UPGRADED)
+# STUDENT MODE INTERFACE (INTERACTIVE ADAPTIVE QUIZ & PHASES)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Viva & Adaptive Quiz Engine</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, 10+ Viva & Adaptive Quiz Engine</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
-        st.success(f"Loaded academic curriculum and adaptive learning engine for: **{topic}**")
+        st.success(f"Loaded academic curriculum and learning modules for: **{topic}**")
         
         tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_refs = st.tabs([
             "📚 Core Theory", 
             "📝 Exam Corner (15-Yr Qs)", 
             "🧠 Clinical Reasoning", 
-            "🎯 Adaptive Quiz (Phase 4)", 
-            "🎤 Extended Viva Bank", 
+            "🎯 Interactive Adaptive Quiz", 
+            "🎤 10+ Viva Questions", 
             "📖 Textbook Refs"
         ])
         
@@ -248,46 +248,57 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                 st.info("Configure GEMINI_API_KEY to use the Clinical Reasoning Engine.")
 
         with tab_quiz:
-            st.markdown(f"### 🎯 Phase 4: Adaptive Quiz & Targeted Weakness Trainer")
-            st.markdown("Test your mastery on **" + topic + "** with high-yield university multiple-choice questions (MCQs) and receive targeted concept explanations:")
+            st.markdown(f"### 🎯 Phase 4: Interactive Adaptive Quiz & Weakness Trainer")
+            st.markdown("Test your mastery on **" + topic + "** with high-yield university multiple-choice questions (MCQs), interactive option selection, and targeted rationales:")
             
             if "GEMINI_API_KEY" in st.secrets:
-                if st.button("✨ Generate Targeted Adaptive Quiz"):
+                if st.button("✨ Generate Interactive Adaptive Quiz Set"):
                     with st.spinner("Generating high-yield MCQ practice set..."):
                         try:
                             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            quiz_prompt = f"Act as an examiner. Create 3 high-yield university-level MCQs regarding '{topic}' with options (A, B, C, D), correct answers, and brief clinical/pathological rationales to target common student misconceptions."
+                            quiz_prompt = f"Act as an examiner. Create 3 high-yield university-level MCQs regarding '{topic}'. Format each question clearly with options A, B, C, D, the Correct Answer, and a detailed clinical/pathological Rationale explaining why the answer is correct."
                             q_res = client.models.generate_content(model=MODEL_NAME, contents=quiz_prompt)
-                            st.markdown(q_res.text)
+                            st.session_state.current_quiz = q_res.text
                         except Exception as e:
                             st.error(f"Error generating quiz: {e}")
+
+                if "current_quiz" in st.session_state and st.session_state.current_quiz:
+                    st.markdown("---")
+                    st.markdown(st.session_state.current_quiz)
+                    st.markdown("---")
+                    st.markdown("#### ✍️ Answer Evaluation Practice")
+                    user_ans = st.radio("Select your overall confidence / trial option for this set:", ["Select Option", "Option A", "Option B", "Option C", "Option D"])
+                    if user_ans != "Select Option":
+                        st.info(f"You selected **{user_ans}**. Cross-verify your choice with the detailed rationales provided in the AI breakdown above!")
             else:
                 st.info("Configure GEMINI_API_KEY to generate adaptive quizzes.")
 
         with tab_viva:
-            st.markdown(f"### 🎤 Extended Viva Voce Question Bank for {topic}")
-            st.markdown("Crucial spotter, diagnostic, and examiner viva questions tailored for final-year BDS practicals:")
+            st.markdown(f"### 🎤 10+ Essential Viva Voce Questions for {topic}")
+            st.markdown("Complete set of examiner spotters, diagnostic clinical queries, and technical viva questions for final-year BDS practicals:")
             
             st.markdown(f"""
-            #### 1. Clinical & Diagnosis Spotters
-            * **Q1:** What is the classic clinical presentation and age/sex predilection for **{topic}**?
-            * **Q2:** What are the extra-oral and intra-oral findings you would check during inspection and palpation?
-            * **Q3:** Is there any associated paresthesia, pain, or lymphadenopathy? What does it indicate if present?
-            * **Q4:** What are the primary clinical differential diagnoses you must rule out first?
-            
-            #### 2. Radiographic Interpretation
-            * **Q5:** Which radiographic view is best suited to evaluate this lesion, and what are the classic borders (well-defined vs ill-defined)?
-            * **Q6:** Does it cause root resorption, displacement, or cortical expansion/perforation?
-            * **Q7:** Describe the internal structure (radiolucent, radiopaque, or mixed/soap-bubble appearance).
-            
-            #### 3. Histopathology & Microscopy
-            * **Q8:** What are the pathognomonic microscopic features or cell layers seen under H&E staining?
-            * **Q9:** What special stains or immunohistochemistry (IHC) markers can be used for confirmation if required?
-            
-            #### 4. Management, Prognosis & Complications
-            * **Q10:** What is the treatment of choice (conservative enucleation vs radical resection)? Explain the rationale.
-            * **Q11:** What is the recurrence rate, and what factors influence prognosis?
-            * **Q12:** How would you plan the post-operative follow-up schedule for this patient?
+            #### 1. Clinical Presentation & Etiology (Q1 - Q3)
+            * **Q1:** What is the classic clinical presentation, peak age incidence, and sex predilection for **{topic}**?
+            * **Q2:** What are the major etiological factors or genetic mutations associated with this condition?
+            * **Q3:** How do you differentiate between an early asymptomatic presentation versus an advanced symptomatic stage?
+
+            #### 2. Clinical Examination & Diagnostics (Q4 - Q6)
+            * **Q4:** What extra-oral and intra-oral signs would you specifically look for during physical examination?
+            * **Q5:** Is 'egg-shell crackling' or fluid fluctuation present? What does it signify clinically?
+            * **Q6:** What are the top 3 clinical differential diagnoses you must consider during case discussion?
+
+            #### 3. Radiographic & Imaging Features (Q7 - Q8)
+            * **Q7:** Which radiographic investigation is considered the gold standard, and what are the classic border characteristics (well-defined vs corticated vs ragged)?
+            * **Q8:** Does this lesion cause root resorption, tooth displacement, or inferior alveolar nerve canal displacement?
+
+            #### 4. Histopathology & Microscopy (Q9 - Q10)
+            * **Q9:** What are the pathognomonic histopathological hallmarks seen under light microscopy with H&E staining?
+            * **Q10:** Are there any special stains, immunohistochemical (IHC) markers, or biopsy techniques required for confirmation?
+
+            #### 5. Management & Prognosis (Q11 - Q12)
+            * **Q11:** What is the standard treatment protocol (conservative enucleation, curettage, or radical resection) and why?
+            * **Q12:** What is the recurrence rate of **{topic}**, and what factors dictate the long-term prognosis?
             """)
 
         with tab_refs:
@@ -384,3 +395,4 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
+              
