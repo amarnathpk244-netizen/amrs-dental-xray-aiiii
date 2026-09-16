@@ -458,11 +458,11 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (RADIOGRAPH MODULE + SOFT-TISSUE AI WORKFLOW)
+# DOCTOR MODE INTERFACE (RADIOGRAPH MODULE + CALIBRATION + SOFT-TISSUE)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Radiograph Module, Soft-Tissue AI Workflow, Dynamic Evidence & Contradiction Engine</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Radiograph Module, Smart Calibration, Soft-Tissue AI Workflow & Contradiction Engine</div>', unsafe_allow_html=True)
 
     remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
     col_m1, col_m2 = st.columns(2)
@@ -490,12 +490,17 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
     
     ceph_analysis = "Combined / All Analyses"
     facial_analysis = "General Facial Screening / All Views"
-    scale_factor = 1.0
-
+    
     if radiograph_type == "Lateral Cephalogram (Ceph)":
         ceph_analysis = st.selectbox("Select Cephalometric Analysis", CEPH_ANALYSES, key="ceph_analysis_selector_doc")
     elif radiograph_type == "Facial radiograph":
         facial_analysis = st.selectbox("Select Facial Radiograph Analysis", FACIAL_ANALYSES, key="facial_analysis_selector_doc")
+
+    # Smart Calibration Selection
+    calibration_mode = st.radio("Select Scale Calibration Mode", ["🤖 Auto-Calculate / AI Estimation (Unknown Calibration)", "✏️ Enter Known Calibration Scale (mm/pixel or known landmark)"])
+    scale_value_input = "Auto-estimated by AI based on anatomical proportions"
+    if calibration_mode == "✏️ Enter Known Calibration Scale (mm/pixel or known landmark)":
+        scale_value_input = st.text_input("Enter known scale value (e.g., 0.15 mm/pixel or reference length)", value="1.0 mm/pixel")
 
     st.markdown('<div class="section">📤 Upload Clinical Photograph or Dental Radiograph (JPG, PNG, WEBP)</div>', unsafe_allow_html=True)
     doc_file = st.file_uploader("📷 Choose image file", type=["jpg", "jpeg", "png", "webp"], key="doctor_multimodal_upload")
@@ -510,27 +515,29 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         if "GEMINI_API_KEY" not in st.secrets:
             st.error("❌ GEMINI_API_KEY missing from secrets.")
         else:
-            with st.spinner("Running Image Quality Gate, Radiographic/Soft-Tissue Assessment, Evidence & Contradiction Engine..."):
+            with st.spinner("Running Image Quality Gate, Smart Calibration, Evidence & Contradiction Engine..."):
                 try:
                     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                     combined_workflow_prompt = f"""
                     You are Dental Buddy Doctor Mode, operating under an advanced clinical decision-support and radiographic assessment system. 
-                    Analyze the uploaded image (classified as: {radiograph_type}) along with patient details:
+                    Analyze the uploaded image (classified as: {radiograph_type}) along with patient details and calibration setting:
                     - Patient Profile: Age {doc_age}, Sex {doc_sex}
                     - Symptom Duration: {doc_duration}
                     - Symptoms: {doc_symptoms}
                     - History: {doc_history}
                     - Risk Factors: {doc_risk}
-                    - Ceph/Facial Sub-analysis if applicable: {ceph_analysis} / {facial_analysis}
+                    - Ceph/Facial Sub-analysis: {ceph_analysis} / {facial_analysis}
+                    - Calibration Setting: {scale_value_input} (If auto-calculated, estimate scale using standard anatomical proportions).
 
                     Execute and output structured report following:
                     1. IMAGE QUALITY GATE (Check sharpness, exposure, positioning, or soft-tissue visibility. If poor, request better capture).
-                    2. OBSERVABLE FINDINGS (For radiographs: coronal, pulpal, periapical, periodontal structures. For soft tissue: lesion localization & visual feature extraction).
-                    3. INITIAL DIFFERENTIAL DIAGNOSES (3-5 plausible possibilities).
-                    4. DYNAMIC EVIDENCE TRACE (Supporting evidence vs Contradictory evidence vs Unknown information).
-                    5. CONTRADICTION CHECKING & UNCERTAINTY ASSESSMENT.
-                    6. RED-FLAG / SAFETY ENGINE (Check for concerning features, recommend biopsy/specialist referral when indicated).
-                    7. PROVISIONAL ASSESSMENT & NEXT-BEST CLINICAL STEPS.
+                    2. CALIBRATION & MEASUREMENT REPORT (Explain how the scale was handled: known input vs AI auto-estimated anatomical proportion).
+                    3. OBSERVABLE FINDINGS (For radiographs: coronal, pulpal, periapical, periodontal structures, cephalometric/skeletal relations. For soft tissue: lesion localization & visual feature extraction).
+                    4. INITIAL DIFFERENTIAL DIAGNOSES (3-5 plausible possibilities).
+                    5. DYNAMIC EVIDENCE TRACE (Supporting evidence vs Contradictory evidence vs Unknown information).
+                    6. CONTRADICTION CHECKING & UNCERTAINTY ASSESSMENT.
+                    7. RED-FLAG / SAFETY ENGINE (Check for concerning features, recommend biopsy/specialist referral when indicated).
+                    8. PROVISIONAL ASSESSMENT & NEXT-BEST CLINICAL STEPS.
                     """
                     
                     contents_payload = [
