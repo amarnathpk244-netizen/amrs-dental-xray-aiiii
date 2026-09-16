@@ -170,7 +170,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-doctor">
             <h3>🩺 Doctor Mode</h3>
-            <p>Advanced clinical decision-support & multimodal evidence engine. Features dynamic evidence tracing, contradiction checking, uncertainty assessment, and professional referral pathways.</p>
+            <p>Advanced Soft-Tissue AI Workflow with Image Quality Gate, Lesion Localization, Visual Feature Extraction, Dynamic Evidence & Contradiction Engine, and Red-Flag Safety Checks.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Doctor Mode", use_container_width=True):
@@ -373,7 +373,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                     else:
                         with st.spinner("Analyzing spotter image for practical viva examination..."):
                             try:
-
                                 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                                 spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide: 1. Identification / Probable Diagnosis, 2. Key Visual Findings / Hallmark Features, 3. Two potential Differential Diagnoses, and 4. Three rapid-fire viva examiner questions regarding this image."
                                 spot_resp = client.models.generate_content(
@@ -434,11 +433,11 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (ADVANCED CLINICAL DECISION SUPPORT & DYNAMIC EVIDENCE ENGINE)
+# DOCTOR MODE INTERFACE (SOFT-TISSUE AI WORKFLOW & DYNAMIC EVIDENCE ENGINE)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Clinical Decision Support, Dynamic Evidence Engine & Multimodal Assessment</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Soft-Tissue AI Clinical Workflow, Dynamic Evidence & Contradiction Engine</div>', unsafe_allow_html=True)
 
     remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
     col_m1, col_m2 = st.columns(2)
@@ -457,8 +456,8 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
             doc_sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
         
         doc_duration = st.text_input("Symptom Duration", placeholder="e.g., 1 week")
-        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Painful ulcer on lower lip mucosa, burning sensation on eating spicy food.")
-        doc_history = st.text_array if "doc_history" in locals() else st.text_area("Relevant Medical & Dental History", placeholder="e.g., Recurrent episodes, no systemic illness.")
+        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Painful ulcer on lower lip mucosa, burning sensation.")
+        doc_history = st.text_area("Relevant Medical & Dental History", placeholder="e.g., Recurrent episodes, no systemic illness.")
         doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Stress, minor trauma, no tobacco")
 
     st.markdown('<div class="section">📤 Upload Clinical Photograph or Radiograph (JPG, PNG, WEBP)</div>', unsafe_allow_html=True)
@@ -469,40 +468,41 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
             st.error(f"❌ File size exceeds {MAX_FILE_SIZE_MB}MB limit.")
             st.stop()
 
-        st.image(doc_file, caption="Uploaded Clinical/Radiographic Record", use_container_width=True)
+        st.image(doc_file, caption="Uploaded Clinical Record", use_container_width=True)
 
-    if st.button("🔍 Run Clinical Decision Support & Evidence Analysis", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
+    if st.button("🔍 Run Soft-Tissue AI Clinical Workflow", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
         if "GEMINI_API_KEY" not in st.secrets:
             st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
         else:
-            with st.spinner("Analyzing uploaded clinical photograph/radiograph with symptoms using Dynamic Evidence Engine..."):
+            with st.spinner("Running Image Quality Gate, Lesion Localization, Evidence & Contradiction Engine..."):
                 try:
                     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                     
-                    doc_prompt = f"""
-                    You are Dental Buddy Doctor Mode, an advanced clinical decision-support system. 
-                    Analyze the uploaded image (clinical photograph or radiograph) along with the following case details:
+                    soft_tissue_workflow_prompt = f"""
+                    You are Dental Buddy Doctor Mode, operating under a strict Soft-Tissue AI Clinical Decision Support Workflow. 
+                    Analyze the uploaded clinical photograph/radiograph along with the following patient details:
                     - Patient Profile: Age {doc_age}, Sex {doc_sex}
                     - Symptom Duration: {doc_duration}
                     - Symptoms/Chief Complaint: {doc_symptoms}
                     - Medical/Dental History: {doc_history}
                     - Risk Factors/Habits: {doc_risk}
 
-                    Provide a structured clinical decision support report containing:
-                    1. Observable Findings from the Image & Quality Assessment
-                    2. Initial Differential Diagnoses (directly matching the visual lesion/signs and symptoms provided)
-                    3. Dynamic Evidence Trace (Supporting evidence vs Contradictory evidence vs Unknown information for top candidate conditions)
-                    4. Contradiction Checking & Uncertainty Assessment
-                    5. Provisional Assessment (Clearly distinguishing observed visual/clinical findings from inferred possibilities)
-                    6. Next-Best Clinical Questions to ask or Recommended Next Clinical Steps / Referral.
-                    
-                    Disclaimer: Do not provide a definitive diagnosis. Recommend professional in-person clinical evaluation.
+                    Execute and output the structured report following these exact sequential steps:
+                    1. **IMAGE QUALITY GATE**: Check focus/sharpness, lighting, color distortion, lesion visibility, and anatomical site. If image quality is poor or uninterpretable, stop diagnostic attempt and output: "Please capture a better image." Otherwise, proceed.
+                    2. **LESION LOCALIZATION**: Identify exact anatomical site (e.g., Lip, Buccal mucosa, Tongue, Floor of mouth, Gingiva, Palate, Oropharyngeal region).
+                    3. **VISUAL FEATURE EXTRACTION**: Explicitly extract observable features: color (white/red/mixed/pigmented), morphology (macule, papule, plaque, nodule, ulcer, vesicle), surface, border, size, shape, number, distribution, and surrounding tissue changes.
+                    4. **INITIAL DIFFERENTIAL**: Generate 3-5 plausible possibilities using image-only evidence (e.g., "Current visual findings are compatible with A, B, and C" rather than definitive diagnosis).
+                    5. **TARGETED CLINICAL QUESTIONS**: Identify the most critical unanswered features/questions (e.g., scrapable, pain, bleeding, duration, solitary/multiple, bilateral, trauma/irritation, tobacco/alcohol exposure, induration on palpation) that best separate the remaining differentials.
+                    6. **MULTIMODAL EVIDENCE FUSION**: Combine photo + symptoms + history + duration, explicitly tagging each piece as [Observed], [Patient-reported], [Clinician-observed], or [Unknown].
+                    7. **EVIDENCE + CONTRADICTION ENGINE**: For each candidate condition, list Supports (supporting findings), Against (contradictory findings), and Unknown (missing information).
+                    8. **RED-FLAG / SAFETY ENGINE**: Check for suspicious/concerning features. If suspicious, explicitly output: "This lesion requires professional examination and appropriate diagnostic evaluation. AI cannot exclude serious disease." Emphasize conventional visual/tactile examination and prompt biopsy/specialist referral when indicated.
+                    9. **PROVISIONAL ASSESSMENT**: Provide the most compatible condition, other possibilities, confidence level (Low/Moderate/High), and recommended next clinical steps (noting that histopathology/biopsy remains the diagnostic confirmation pathway, not AI).
                     """
                     
                     contents_payload = []
                     if doc_file is not None:
                         contents_payload.append({"inline_data": {"mime_type": doc_file.type, "data": doc_file.getvalue()}})
-                    contents_payload.append(doc_prompt)
+                    contents_payload.append(soft_tissue_workflow_prompt)
 
                     response = client.models.generate_content(
                         model=MODEL_NAME,
@@ -513,13 +513,13 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                         st.session_state.analysis_count += 1
                         st.session_state.last_report = response.text
                         st.session_state.last_patient = doc_patient_name if doc_patient_name else "Patient"
-                        st.success("✅ Clinical decision support assessment completed.")
+                        st.success("✅ Soft-Tissue Clinical Workflow assessment completed.")
                 except Exception as e:
                     st.error(f"❌ Analysis failed: {e}")
 
     if st.session_state.last_report:
         st.markdown("---")
-        st.markdown("### 📋 Professional Clinical Decision Support Report")
+        st.markdown("### 📋 Soft-Tissue Clinical Decision Support Report")
         st.markdown(st.session_state.last_report)
 
 # ------------------------------------------------------------
@@ -530,4 +530,3 @@ elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
-                                
