@@ -371,12 +371,15 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                     else:
                         with st.spinner("Analyzing spotter image for practical viva examination..."):
                             try:
-                                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                                 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                                 spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide: 1. Identification / Probable Diagnosis, 2. Key Visual Findings / Hallmark Features, 3. Two potential Differential Diagnoses, and 4. Three rapid-fire viva examiner questions regarding this image."
                                 spot_resp = client.models.generate_content(
                                     model=MODEL_NAME,
-                                    contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
-                                ]
+                                    contents=[
+                                        {"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}},
+                                        spotter_prompt
+                                    ]
+                                )
                                 st.markdown(spot_resp.text)
                             except Exception as e:
                                 st.error(f"Spotter analysis failed: {e}")
