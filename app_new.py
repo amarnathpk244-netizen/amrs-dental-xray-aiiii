@@ -60,7 +60,7 @@ if "app_mode" not in st.session_state:
     st.session_state.app_mode = "Home / Dashboard"
 
 # ------------------------------------------------------------
-# UI STYLES & MEDICAL THEME
+# UI STYLES & COLORFUL MEDICAL THEME
 # ------------------------------------------------------------
 st.markdown(
     """
@@ -68,15 +68,18 @@ st.markdown(
     .main { padding-top: 1rem; }
     .app-title {
         text-align: center;
-        font-size: 32px;
-        font-weight: 700;
-        color: #1e3d59;
+        font-size: 34px;
+        font-weight: 800;
+        background: linear-gradient(90deg, #1e3d59, #17b978);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 2px;
     }
     .subtitle {
         text-align: center;
-        color: #666;
+        color: #008891;
         font-size: 15px;
+        font-weight: 600;
         margin-bottom: 20px;
     }
     .section {
@@ -86,23 +89,41 @@ st.markdown(
         margin-bottom: 8px;
         color: #17b978;
     }
-    .card {
-        padding: 20px;
-        border-radius: 10px;
-        background-color: #F3F4F6;
-        border: 1px solid #E5E7EB;
+    .card-student {
+        padding: 22px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #e0f7fa, #80deea);
+        border: 2px solid #00acc1;
         margin-bottom: 15px;
+        color: #004d40;
+        box-shadow: 0 4px 10px rgba(0, 151, 167, 0.2);
+    }
+    .card-student h3, .card-student p {
+        color: #004d40 !important;
+    }
+    .card-doctor {
+        padding: 22px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #e8f5e9, #a5d6a7);
+        border: 2px solid #43a047;
+        margin-bottom: 15px;
+        color: #1b5e20;
+        box-shadow: 0 4px 10px rgba(67, 160, 71, 0.2);
+    }
+    .card-doctor h3, .card-doctor p {
+        color: #1b5e20 !important;
     }
     .stButton>button {
-        border-radius: 10px;
-        font-weight: 600;
-        background-color: #1e3d59;
+        border-radius: 12px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #1e3d59, #17b978);
         color: white;
         border: none;
         transition: 0.3s;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     }
     .stButton>button:hover {
-        background-color: #17b978;
+        background: linear-gradient(90deg, #17b978, #1e3d59);
         color: white;
     }
     </style>
@@ -136,9 +157,9 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("""
-        <div class="card">
+        <div class="card-student">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, and Phase 5 Mock Exam & Flashcards Engine.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, and Phase 5 Mock Exam & Flashcards.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -147,7 +168,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             
     with col2:
         st.markdown("""
-        <div class="card">
+        <div class="card-doctor">
             <h3>🩺 Doctor Mode</h3>
             <p>Clinical decision-support platform & AMRs Dental X-ray AI module. Input radiographs, photos, and symptoms for structured evidence analysis and differential refinement.</p>
         </div>
@@ -369,6 +390,7 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
             sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
         op_number = st.text_input("OP Number", placeholder="Enter OP number")
         examination_date = st.date_input("Examination Date", value=date.today())
+
     st.markdown('<div class="section">🩻 Radiograph & Calibration</div>', unsafe_allow_html=True)
     radiograph_type = st.selectbox("Select radiograph type", ["IOPA", "Lateral Cephalogram (Ceph)", "OPG", "Bitewing", "Occlusal", "Facial radiograph", "Other / Not reliably classifiable"])
     
@@ -428,4 +450,3 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
-    
