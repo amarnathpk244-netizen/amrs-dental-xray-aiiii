@@ -138,7 +138,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, interactive clinical reasoning, and viva questions.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, interactive clinical reasoning, and extensive viva voce questions.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -157,23 +157,22 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (PHASE 2 & PHASE 3 UPGRADED)
+# STUDENT MODE INTERFACE (UPGRADED VIVA SECTION)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner & Interactive Clinical Reasoning</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning & Extended Viva Bank</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
-        st.success(f"Loaded academic curriculum and clinical reasoning engine for: **{topic}**")
+        st.success(f"Loaded academic curriculum and viva question bank for: **{topic}**")
         
-        # Tabs including Phase 3 Interactive Clinical Reasoning Engine
         tab_theory, tab_exam, tab_reasoning, tab_viva, tab_refs = st.tabs([
             "📚 Core Theory", 
             "📝 Exam Corner (15-Yr Qs)", 
             "🧠 Clinical Reasoning (Phase 3)", 
-            "🎤 Viva Questions", 
+            "🎤 Extended Viva Bank", 
             "📖 Textbook Refs"
         ])
         
@@ -248,11 +247,29 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                 st.info("Configure GEMINI_API_KEY to use the Clinical Reasoning Engine.")
 
         with tab_viva:
-            st.markdown(f"### 🎤 Viva Voce Spotters & Quick Questions")
+            st.markdown(f"### 🎤 Extended Viva Voce Question Bank for {topic}")
+            st.markdown("Crucial spotter, diagnostic, and examiner viva questions tailored for final-year BDS practicals:")
+            
             st.markdown("""
-            * **Q1:** What is the most common diagnostic pitfall when diagnosing this condition clinically?
-            * **Q2:** What are the pathognomonic features seen under the microscope?
-            * **Q3:** What is your primary line of management for an early-stage presentation versus a late-stage presentation?
+            #### 1. Clinical & Diagnosis Spotters
+            * **Q1:** What is the classic clinical presentation and age/sex predilection for **""" + topic + """**?
+            * **Q2:** What are the extra-oral and intra-oral findings you would check during inspection and palpation?
+            * **Q3:** Is there any associated paresthesia, pain, or lymphadenopathy? What does it indicate if present?
+            * **Q4:** What are the primary clinical differential diagnoses you must rule out first?
+            
+            #### 2. Radiographic Interpretation
+            * **Q5:** Which radiographic view is best suited to evaluate this lesion, and what are the classic borders (well-defined vs ill-defined)?
+            * **Q6:** Does it cause root resorption, displacement, or cortical expansion/perforation?
+            * **Q7:** Describe the internal structure (radiolucent, radiopaque, or mixed/soap-bubble appearance).
+            
+            #### 3. Histopathology & Microscopy
+            * **Q8:** What are the pathognomonic microscopic features or cell layers seen under H&E staining?
+            * **Q9:** What special stains or immunohistochemistry (IHC) markers can be used for confirmation if required?
+            
+            #### 4. Management, Prognosis & Complications
+            * **Q10:** What is the treatment of choice (conservative enucleation vs radical resection)? Explain the rationale.
+            * **Q11:** What is the recurrence rate, and what factors influence prognosis?
+            * **Q12:** How would you plan the post-operative follow-up schedule for this patient?
             """)
 
         with tab_refs:
@@ -349,4 +366,4 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
-            
+                
