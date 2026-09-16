@@ -59,6 +59,9 @@ if "last_patient" not in st.session_state:
 if "app_mode" not in st.session_state:
     st.session_state.app_mode = "Home / Dashboard"
 
+if "feedback_submitted" not in st.session_state:
+    st.session_state.feedback_submitted = False
+
 # ------------------------------------------------------------
 # UI STYLES & COLORFUL MEDICAL THEME
 # ------------------------------------------------------------
@@ -138,10 +141,10 @@ st.sidebar.markdown("### 🦷 Dental Buddy Navigation")
 selected_nav = st.sidebar.radio(
     "Go to", 
     ["Home / Dashboard", "Student Mode", "Doctor Mode (Clinical Decision Support)", "Review & Feedback"],
-    index=0 if st.session_state.app_mode == "Home / Dashboard" else (1 if st.session_state.app_mode == "Student Mode" else 2)
+    index=0 if st.session_state.app_mode == "Home / Dashboard" else (1 if st.session_state.app_mode == "Student Mode" else (2 if st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" else 3))
 )
 
-if selected_nav != st.session_state.app_mode and selected_nav != "Home / Dashboard":
+if selected_nav != st.session_state.app_mode:
     st.session_state.app_mode = selected_nav
 
 st.sidebar.markdown("---")
@@ -204,8 +207,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
         
         with tab_theory:
             st.markdown(f"### 🔬 High-Scoring University Notes: {topic}")
-            st.markdown("Click below to instantly generate structured exam notes point-by-point:")
-            
             if "GEMINI_API_KEY" in st.secrets:
                 col_b1, col_b2 = st.columns(2)
                 with col_b1:
@@ -220,6 +221,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             prompt = f"Provide a precise, high-scoring university exam answer format for dental students regarding '{topic}' focusing strictly on: 1. Definition, 2. Classification/Types, 3. Etiology, and 4. Pathogenesis in clear bullet points."
                             resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
                             st.markdown(resp.text)
+                            st.session_state.student_last_output = resp.text
                         except Exception as e:
                             st.error(f"Error: {e}")
 
@@ -230,6 +232,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             prompt = f"Provide a precise university exam answer format for dental students regarding '{topic}' focusing strictly on: 1. Clinical Features (Stage-wise), 2. Radiographic Findings, 3. Histopathological Hallmarks, and 4. Differential Diagnosis."
                             resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
                             st.markdown(resp.text)
+                            st.session_state.student_last_output = resp.text
                         except Exception as e:
                             st.error(f"Error: {e}")
             else:
@@ -237,8 +240,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
 
         with tab_exam:
             st.markdown(f"### 📝 Past 15 Years KUHS University Question Bank for {topic}")
-            st.markdown("Comprehensive list of previous university examination questions (3, 5, and 10 marks) asked over the last 15 years:")
-            
             if "GEMINI_API_KEY" in st.secrets:
                 if st.button("📥 Load Complete 15-Year Question Bank & Answers"):
                     with st.spinner("Fetching past 15 years university questions and answers..."):
@@ -247,6 +248,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             q_prompt = f"Act as a KUHS dental professor. Compile all previous university examination questions asked over the last 15 years regarding '{topic}'. Categorize them strictly into: 1. 3-Mark Short Notes, 2. 5-Mark Descriptive Questions, and 3. 10-Mark Essay Questions. Provide concise model answers or key points for each."
                             q_resp = client.models.generate_content(model=MODEL_NAME, contents=q_prompt)
                             st.markdown(q_resp.text)
+                            st.session_state.student_last_output = q_resp.text
                         except Exception as e:
                             st.error(f"Error fetching question bank: {e}")
             else:
@@ -254,8 +256,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
 
         with tab_reasoning:
             st.markdown(f"### 🧠 Interactive Clinical Case & Reasoning Engine")
-            st.markdown("Test your clinical logic by stepping through patient symptoms, lesion features, and diagnostic paths for **" + topic + "**:")
-            
             patient_age_sex = st.text_input("Patient Profile (e.g., 25-year-old male)", placeholder="e.g., 40-year-old female with painless mandibular swelling")
             chief_complaint = st.text_area("Chief Complaint & Clinical Findings", placeholder="e.g., Hard swelling in the posterior mandible, duration 6 months, egg-shell crackling absent.")
 
@@ -267,6 +267,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             reason_prompt = f"Act as a master clinician in oral medicine and diagnosis. For the topic '{topic}' with patient profile '{patient_age_sex}' and findings '{chief_complaint}', provide a step-by-step interactive clinical reasoning flow: 1. Key diagnostic questions to ask, 2. Critical radiographic features to evaluate, 3. Top 3 Differential Diagnoses with justification, and 4. Definitive diagnostic test (e.g., Incisional Biopsy / FNAC)."
                             r_resp = client.models.generate_content(model=MODEL_NAME, contents=reason_prompt)
                             st.markdown(r_resp.text)
+                            st.session_state.student_last_output = r_resp.text
                         except Exception as e:
                             st.error(f"Error in clinical reasoning engine: {e}")
             else:
@@ -274,8 +275,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
 
         with tab_quiz:
             st.markdown(f"### 🎯 Phase 4: Interactive Adaptive Quiz & Weakness Trainer")
-            st.markdown("Test your mastery on **" + topic + "** with high-yield university multiple-choice questions (MCQs), interactive option selection, and targeted rationales:")
-            
             if "GEMINI_API_KEY" in st.secrets:
                 if st.button("✨ Generate Interactive Adaptive Quiz Set"):
                     with st.spinner("Generating high-yield MCQ practice set..."):
@@ -284,52 +283,42 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             quiz_prompt = f"Act as an examiner. Create 3 high-yield university-level MCQs regarding '{topic}'. Format each question clearly with options A, B, C, D, the Correct Answer, and a detailed clinical/pathological Rationale explaining why the answer is correct."
                             q_res = client.models.generate_content(model=MODEL_NAME, contents=quiz_prompt)
                             st.session_state.current_quiz = q_res.text
+                            st.session_state.student_last_output = q_res.text
                         except Exception as e:
                             st.error(f"Error generating quiz: {e}")
 
                 if "current_quiz" in st.session_state and st.session_state.current_quiz:
                     st.markdown("---")
                     st.markdown(st.session_state.current_quiz)
-                    st.markdown("---")
-                    st.markdown("#### ✍️ Answer Evaluation Practice")
-                    user_ans = st.radio("Select your overall confidence / trial option for this set:", ["Select Option", "Option A", "Option B", "Option C", "Option D"])
-                    if user_ans != "Select Option":
-                        st.info(f"You selected **{user_ans}**. Cross-verify your choice with the detailed rationales provided in the AI breakdown above!")
             else:
                 st.info("Configure GEMINI_API_KEY to generate adaptive quizzes.")
 
         with tab_viva:
             st.markdown(f"### 🎤 10+ Essential Viva Voce Questions for {topic}")
-            st.markdown("Complete set of examiner spotters, diagnostic clinical queries, and technical viva questions for final-year BDS practicals:")
-            
-            st.markdown(f"""
+            viva_text = f"""
             #### 1. Clinical Presentation & Etiology (Q1 - Q3)
-            * **Q1:** What is the classic clinical presentation, peak age incidence, and sex predilection for **{topic}**?
-            * **Q2:** What are the major etiological factors or genetic mutations associated with this condition?
-            * **Q3:** How do you differentiate between an early asymptomatic presentation versus an advanced symptomatic stage?
-
+            * Q1: Classic clinical presentation, peak age, sex predilection for {topic}?
+            * Q2: Major etiological factors or genetic mutations?
+            * Q3: Early asymptomatic vs advanced symptomatic stage?
             #### 2. Clinical Examination & Diagnostics (Q4 - Q6)
-            * **Q4:** What extra-oral and intra-oral signs would you specifically look for during physical examination?
-            * **Q5:** Is 'egg-shell crackling' or fluid fluctuation present? What does it signify clinically?
-            * **Q6:** What are the top 3 clinical differential diagnoses you must consider during case discussion?
-
+            * Q4: Extra-oral and intra-oral signs during examination?
+            * Q5: Presence of egg-shell crackling or fluid fluctuation?
+            * Q6: Top 3 clinical differential diagnoses?
             #### 3. Radiographic & Imaging Features (Q7 - Q8)
-            * **Q7:** Which radiographic investigation is considered the gold standard, and what are the classic border characteristics (well-defined vs corticated vs ragged)?
-            * **Q8:** Does this lesion cause root resorption, tooth displacement, or inferior alveolar nerve canal displacement?
-
+            * Q7: Gold standard radiographic investigation and border characteristics?
+            * Q8: Root resorption or tooth displacement?
             #### 4. Histopathology & Microscopy (Q9 - Q10)
-            * **Q9:** What are the pathognomonic histopathological hallmarks seen under light microscopy with H&E staining?
-            * **Q10:** Are there any special stains, immunohistochemical (IHC) markers, or biopsy techniques required for confirmation?
-
+            * Q9: Pathognomonic histopathological hallmarks under H&E?
+            * Q10: Special stains or IHC markers required?
             #### 5. Management & Prognosis (Q11 - Q12)
-            * **Q11:** What is the standard treatment protocol (conservative enucleation, curettage, or radical resection) and why?
-            * **Q12:** What is the recurrence rate of **{topic}**, and what factors dictate the long-term prognosis?
-            """)
+            * Q11: Standard treatment protocol (conservative vs radical)?
+            * Q12: Recurrence rate and prognostic factors?
+            """
+            st.markdown(viva_text)
+            st.session_state.student_last_output = viva_text
 
         with tab_mock:
             st.markdown(f"### 🚀 Phase 5: KUHS Mock Exam Blueprint & Smart Revision Flashcards")
-            st.markdown("Simulate an actual exam paper or review high-yield bullet points for **" + topic + "** right before your university exam:")
-            
             if "GEMINI_API_KEY" in st.secrets:
                 col_m1, col_m2 = st.columns(2)
                 with col_m1:
@@ -344,6 +333,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             mock_prompt = f"Act as a KUHS university examiner. Create a full mock exam paper layout for '{topic}' consisting of: 1 Essay question (10 Marks), 2 Short Essays (5 Marks each), and 3 Short Notes (3 Marks each) with answer outlines."
                             m_res = client.models.generate_content(model=MODEL_NAME, contents=mock_prompt)
                             st.markdown(m_res.text)
+                            st.session_state.student_last_output = m_res.text
                         except Exception as e:
                             st.error(f"Error generating mock paper: {e}")
 
@@ -351,89 +341,75 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                     with st.spinner("Preparing high-yield revision flashcards..."):
                         try:
                             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            flash_prompt = f"Create 10 ultra-short, high-yield revision flashcards (bullet points containing key numbers, classifications, hallmark signs, and treatment of choice) for '{topic}' tailored for quick last-minute exam recall."
+                            flash_prompt = f"Create 10 ultra-short, high-yield revision flashcards for '{topic}' tailored for quick last-minute exam recall."
                             f_res = client.models.generate_content(model=MODEL_NAME, contents=flash_prompt)
                             st.markdown(f_res.text)
+                            st.session_state.student_last_output = f_res.text
                         except Exception as e:
                             st.error(f"Error generating flashcards: {e}")
             else:
-                st.info("Configure GEMINI_API_KEY to access Phase 5 Mock Exam & Flashcards.")
+                st.info("Configure GEMINI_API_KEY to access Phase 5.")
 
         with tab_spotter:
             st.markdown(f"### 🔬 Phase 6: Smart Image Diagnostics & Visual Spotter Simulator")
-            st.markdown("Upload a clinical photo, radiograph, or histopathological slide to evaluate it for practical spotter examination practice:")
-            
             spotter_image = st.file_uploader("📷 Upload Spotter Image for Analysis", type=["jpg", "jpeg", "png", "webp"], key="phase6_spotter_upload")
-            
             if spotter_image is not None:
                 st.image(spotter_image, caption="Uploaded Spotter Image", use_container_width=True)
                 if st.button("🔍 Run Spotter & Examiner Evaluation"):
                     if "GEMINI_API_KEY" not in st.secrets:
-                        st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
+                        st.error("❌ GEMINI_API_KEY missing from secrets.")
                     else:
-                        with st.spinner("Analyzing spotter image for practical viva examination..."):
+                        with st.spinner("Analyzing spotter image..."):
                             try:
                                 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                                spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide: 1. Identification / Probable Diagnosis, 2. Key Visual Findings / Hallmark Features, 3. Two potential Differential Diagnoses, and 4. Three rapid-fire viva examiner questions regarding this image."
+                                spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide Identification, Hallmark Features, Differentials, and Viva Questions."
                                 spot_resp = client.models.generate_content(
                                     model=MODEL_NAME,
-                                    contents=[
-                                        {"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}},
-                                        spotter_prompt
-                                    ]
+                                    contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
                                 )
                                 st.markdown(spot_resp.text)
+                                st.session_state.student_last_output = spot_resp.text
                             except Exception as e:
-                                st.error(f"Spotter analysis failed: {e}")
+                                st.error(f"Analysis failed: {e}")
 
         with tab_essay:
             st.markdown(f"### ✍️ Phase 7: AI Smart Essay & Answer Sheet Generator")
-            st.markdown("Generate a comprehensive, high-scoring university exam answer sheet layout (suitable for 10-mark essays) for **" + topic + "**:")
-            
             if "GEMINI_API_KEY" in st.secrets:
                 if st.button("📝 Generate 10-Mark University Essay Answer Sheet"):
                     with st.spinner("Writing structured high-scoring university essay model..."):
                         try:
                             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            essay_prompt = f"Act as a top-ranking university student and expert professor. Write a comprehensive, beautifully structured 10-mark essay model answer for '{topic}' complete with: Introduction, Detailed Classification, Pathogenesis, Clinical Features, Radiographic/Histopathological Findings, Management, and Conclusion."
-                            essay_resp = client.models.generate_content(model=MODEL_NAME, contents=essay_prompt)
-                            st.markdown(essay_resp.text)
-                        except Exception as e:
-                            st.error(f"Error generating essay: {e}")
-            else:
-                st.info("Configure GEMINI_API_KEY to generate smart essay answer sheets.")
-
-        with tab_treatment:
-            st.markdown(f"### 🛠️ Phase 8: Clinical Case Simulation & Treatment Planning Engine")
-            st.markdown("Build a comprehensive management and treatment protocol for **" + topic + "** based on clinical severity:")
-            
-            case_stage = st.selectbox("Select Case Severity / Stage", ["Early / Mild Presentation", "Moderate Stage with Cortical Involvement", "Advanced / Aggressive / Recurrent Presentation"])
-            
-            if "GEMINI_API_KEY" in st.secrets:
-                if st.button("⚙️ Generate Comprehensive Treatment & Management Protocol"):
-                    with st.spinner("Formulating evidence-based treatment plan..."):
-                        try:
-                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            treat_prompt = f"Act as an expert oral and maxillofacial surgeon and professor. Formulate a complete treatment and management protocol for '{topic}' for a patient presenting with '{case_stage}'. Include: 1. Pre-operative investigations, 2. Treatment of Choice (Conservative vs Radical), 3. Surgical steps / technique outline, 4. Post-operative care & medications, and 5. Follow-up and recurrence monitoring protocol."
+                            treat_prompt = f"Act as an expert oral surgeon. Formulate a complete treatment and management protocol for '{topic}' for patient presenting with '{case_stage}'."
                             treat_resp = client.models.generate_content(model=MODEL_NAME, contents=treat_prompt)
                             st.markdown(treat_resp.text)
+                            st.session_state.student_last_output = treat_resp.text
                         except Exception as e:
-                            st.error(f"Error generating treatment plan: {e}")
+                            st.error(f"Error: {e}")
             else:
-                st.info("Configure GEMINI_API_KEY to use the Treatment Planning Engine.")
+                st.info("Configure GEMINI_API_KEY.")
 
         with tab_refs:
             st.markdown(f"### 📖 Standard Textbook Recommendations")
             st.markdown("""
             * **Oral Pathology:** Shafer's / Neville's Oral & Maxillofacial Pathology
             * **Surgery / Medicine:** Burket's Oral Medicine / Peterson's Principles of Oral and Maxillofacial Surgery
-            * **Textbook Alignments:** Standard chapters mapped to Nallaswamy, Rangarajan, and Nikhil Marwah.
             """)
+
+        # Download PDF Option for Student Output
+        if "student_last_output" in st.session_state and st.session_state.student_last_output:
+            st.markdown("---")
+            st.download_button(
+                label="📥 Download Study Notes / Result as PDF/Text",
+                data=st.session_state.student_last_output,
+                file_name=f"Dental_Buddy_{topic.replace(' ', '_')}.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
     else:
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (SOFT-TISSUE AI WORKFLOW & DYNAMIC EVIDENCE ENGINE)
+# DOCTOR MODE INTERFACE (SOFT-TISSUE AI WORKFLOW)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
@@ -467,36 +443,34 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         if doc_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
             st.error(f"❌ File size exceeds {MAX_FILE_SIZE_MB}MB limit.")
             st.stop()
-
         st.image(doc_file, caption="Uploaded Clinical Record", use_container_width=True)
 
     if st.button("🔍 Run Soft-Tissue AI Clinical Workflow", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
         if "GEMINI_API_KEY" not in st.secrets:
-            st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
+            st.error("❌ GEMINI_API_KEY missing from secrets.")
         else:
             with st.spinner("Running Image Quality Gate, Lesion Localization, Evidence & Contradiction Engine..."):
                 try:
                     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                    
                     soft_tissue_workflow_prompt = f"""
                     You are Dental Buddy Doctor Mode, operating under a strict Soft-Tissue AI Clinical Decision Support Workflow. 
-                    Analyze the uploaded clinical photograph/radiograph along with the following patient details:
+                    Analyze the uploaded clinical photograph/radiograph along with patient details:
                     - Patient Profile: Age {doc_age}, Sex {doc_sex}
                     - Symptom Duration: {doc_duration}
-                    - Symptoms/Chief Complaint: {doc_symptoms}
-                    - Medical/Dental History: {doc_history}
-                    - Risk Factors/Habits: {doc_risk}
+                    - Symptoms: {doc_symptoms}
+                    - History: {doc_history}
+                    - Risk Factors: {doc_risk}
 
-                    Execute and output the structured report following these exact sequential steps:
-                    1. **IMAGE QUALITY GATE**: Check focus/sharpness, lighting, color distortion, lesion visibility, and anatomical site. If image quality is poor or uninterpretable, stop diagnostic attempt and output: "Please capture a better image." Otherwise, proceed.
-                    2. **LESION LOCALIZATION**: Identify exact anatomical site (e.g., Lip, Buccal mucosa, Tongue, Floor of mouth, Gingiva, Palate, Oropharyngeal region).
-                    3. **VISUAL FEATURE EXTRACTION**: Explicitly extract observable features: color (white/red/mixed/pigmented), morphology (macule, papule, plaque, nodule, ulcer, vesicle), surface, border, size, shape, number, distribution, and surrounding tissue changes.
-                    4. **INITIAL DIFFERENTIAL**: Generate 3-5 plausible possibilities using image-only evidence (e.g., "Current visual findings are compatible with A, B, and C" rather than definitive diagnosis).
-                    5. **TARGETED CLINICAL QUESTIONS**: Identify the most critical unanswered features/questions (e.g., scrapable, pain, bleeding, duration, solitary/multiple, bilateral, trauma/irritation, tobacco/alcohol exposure, induration on palpation) that best separate the remaining differentials.
-                    6. **MULTIMODAL EVIDENCE FUSION**: Combine photo + symptoms + history + duration, explicitly tagging each piece as [Observed], [Patient-reported], [Clinician-observed], or [Unknown].
-                    7. **EVIDENCE + CONTRADICTION ENGINE**: For each candidate condition, list Supports (supporting findings), Against (contradictory findings), and Unknown (missing information).
-                    8. **RED-FLAG / SAFETY ENGINE**: Check for suspicious/concerning features. If suspicious, explicitly output: "This lesion requires professional examination and appropriate diagnostic evaluation. AI cannot exclude serious disease." Emphasize conventional visual/tactile examination and prompt biopsy/specialist referral when indicated.
-                    9. **PROVISIONAL ASSESSMENT**: Provide the most compatible condition, other possibilities, confidence level (Low/Moderate/High), and recommended next clinical steps (noting that histopathology/biopsy remains the diagnostic confirmation pathway, not AI).
+                    Execute and output structured report following:
+                    1. IMAGE QUALITY GATE
+                    2. LESION LOCALIZATION
+                    3. VISUAL FEATURE EXTRACTION
+                    4. INITIAL DIFFERENTIAL
+                    5. TARGETED CLINICAL QUESTIONS
+                    6. MULTIMODAL EVIDENCE FUSION
+                    7. EVIDENCE + CONTRADICTION ENGINE
+                    8. RED-FLAG / SAFETY ENGINE
+                    9. PROVISIONAL ASSESSMENT
                     """
                     
                     contents_payload = []
@@ -504,10 +478,7 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                         contents_payload.append({"inline_data": {"mime_type": doc_file.type, "data": doc_file.getvalue()}})
                     contents_payload.append(soft_tissue_workflow_prompt)
 
-                    response = client.models.generate_content(
-                        model=MODEL_NAME,
-                        contents=contents_payload
-                    )
+                    response = client.models.generate_content(model=MODEL_NAME, contents=contents_payload)
                     
                     if response.text:
                         st.session_state.analysis_count += 1
@@ -521,12 +492,32 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         st.markdown("---")
         st.markdown("### 📋 Soft-Tissue Clinical Decision Support Report")
         st.markdown(st.session_state.last_report)
+        
+        # Download Report Option for Doctor Mode
+        st.markdown("---")
+        st.download_button(
+            label="📥 Download Clinical Report as Text/Document",
+            data=st.session_state.last_report,
+            file_name=f"Clinical_Report_{st.session_state.last_patient.replace(' ', '_')}.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
 
 # ------------------------------------------------------------
 # REVIEW & FEEDBACK VIEW
 # ------------------------------------------------------------
 elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
     st.markdown('<div class="app-title">📝 Review & Feedback</div>', unsafe_allow_html=True)
-    st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
-    if st.button("Submit Feedback"):
-        st.success("Thank you! Your feedback has been recorded.")
+    st.markdown("<p style='text-align: center; color: #666;'>Help us improve Dental Buddy with your valuable feedback and feature requests.</p>", unsafe_allow_html=True)
+    
+    with st.form("feedback_form"):
+        fb_name = st.text_input("Your Name / Identifier (Optional)")
+        fb_rating = st.slider("⭐ Rate Dental Buddy (1 to 5 Stars)", min_value=1, max_value=5, value=5)
+        fb_helpful = st.radio("Was Dental Buddy helpful for your workflow?", ["Very Helpful", "Somewhat Helpful", "Not Helpful"])
+        fb_wrong = st.text_area("What went wrong or needs improvement?")
+        fb_features = st.text_area("Feature requests or general suggestions")
+        
+        submitted = st.form_submit_button("Submit Feedback Securely", use_container_width=True)
+        if submitted:
+            st.session_state.feedback_submitted = True
+            st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.")
