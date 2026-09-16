@@ -200,7 +200,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             
             with st.expander("📌 2-Mark Short Notes"):
                 st.write(f"- Define {topic} and state two primary clinical features.")
-                st.write(- "Mention the classic histopathological hallmark of this condition.")
+                st.write("- Mention the classic histopathological hallmark of this condition.")
                 
             with st.expander("📌 5-Mark Descriptive Questions"):
                 st.write(f"1. Discuss the etiology and pathogenesis of {topic}.")
@@ -242,7 +242,7 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
     if remaining <= 0:
         st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
 
-    # Patient Information & Upload Code (Preserved from previous implementation)
+    # Patient Information & Upload Code
     with st.expander("👤 Patient Information & Record Details", expanded=True):
         patient_name = st.text_input("Patient Name", placeholder="Enter patient name")
         col1, col2 = st.columns(2)
