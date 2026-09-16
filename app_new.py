@@ -138,7 +138,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, 10+ viva questions, and Interactive Adaptive Quiz Engine.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, and Phase 5 Mock Exam & Flashcards Engine.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -157,23 +157,24 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE (INTERACTIVE ADAPTIVE QUIZ & PHASES)
+# STUDENT MODE INTERFACE (PHASE 5 MOCK EXAM & FLASHCARDS UPGRADED)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, 10+ Viva & Adaptive Quiz Engine</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva & Phase 5 Mock Exam</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
         st.success(f"Loaded academic curriculum and learning modules for: **{topic}**")
         
-        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_refs = st.tabs([
+        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_refs = st.tabs([
             "📚 Core Theory", 
-            "📝 Exam Corner (15-Yr Qs)", 
+            "📝 Exam Corner", 
             "🧠 Clinical Reasoning", 
-            "🎯 Interactive Adaptive Quiz", 
-            "🎤 10+ Viva Questions", 
+            "🎯 Adaptive Quiz", 
+            "🎤 10+ Viva Qs", 
+            "🚀 Phase 5 Mock & Flash", 
             "📖 Textbook Refs"
         ])
         
@@ -301,6 +302,39 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             * **Q12:** What is the recurrence rate of **{topic}**, and what factors dictate the long-term prognosis?
             """)
 
+        with tab_mock:
+            st.markdown(f"### 🚀 Phase 5: KUHS Mock Exam Blueprint & Smart Revision Flashcards")
+            st.markdown("Simulate an actual exam paper or review high-yield bullet points for **" + topic + "** right before your university exam:")
+            
+            if "GEMINI_API_KEY" in st.secrets:
+                col_m1, col_m2 = st.columns(2)
+                with col_m1:
+                    gen_mock = st.button("📝 Generate Timed KUHS Mock Paper")
+                with col_m2:
+                    gen_flash = st.button("⚡ Generate Night-Before Flashcards")
+
+                if gen_mock:
+                    with st.spinner("Compiling university mock paper layout..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            mock_prompt = f"Act as a KUHS university examiner. Create a full mock exam paper layout for '{topic}' consisting of: 1 Essay question (10 Marks), 2 Short Essays (5 Marks each), and 3 Short Notes (3 Marks each) with answer outlines."
+                            m_res = client.models.generate_content(model=MODEL_NAME, contents=mock_prompt)
+                            st.markdown(m_res.text)
+                        except Exception as e:
+                            st.error(f"Error generating mock paper: {e}")
+
+                if gen_flash:
+                    with st.spinner("Preparing high-yield revision flashcards..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            flash_prompt = f"Create 10 ultra-short, high-yield revision flashcards (bullet points containing key numbers, classifications, hallmark signs, and treatment of choice) for '{topic}' tailored for quick last-minute exam recall."
+                            f_res = client.models.generate_content(model=MODEL_NAME, contents=flash_prompt)
+                            st.markdown(f_res.text)
+                        except Exception as e:
+                            st.error(f"Error generating flashcards: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY to access Phase 5 Mock Exam & Flashcards.")
+
         with tab_refs:
             st.markdown(f"### 📖 Standard Textbook Recommendations")
             st.markdown("""
@@ -335,7 +369,6 @@ elif st.session_state.app_mode == "Doctor Mode (X-ray AI)" or selected_nav == "D
             sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
         op_number = st.text_input("OP Number", placeholder="Enter OP number")
         examination_date = st.date_input("Examination Date", value=date.today())
-
     st.markdown('<div class="section">🩻 Radiograph & Calibration</div>', unsafe_allow_html=True)
     radiograph_type = st.selectbox("Select radiograph type", ["IOPA", "Lateral Cephalogram (Ceph)", "OPG", "Bitewing", "Occlusal", "Facial radiograph", "Other / Not reliably classifiable"])
     
@@ -395,4 +428,4 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
-              
+    
