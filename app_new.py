@@ -138,7 +138,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner (2, 5, 10-mark answers), and viva questions mapped to KUHS guidelines.</p>
+            <p>Learn dental topics, lesions, and radiographs. Features comprehensive curriculum breakdowns, exam corner (3, 5, 10-mark answers), and viva questions mapped to KUHS guidelines.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -161,14 +161,14 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Clinical Theory & Exam Corner</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Clinical Theory & Exam Corner (KUHS Pattern)</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
         st.success(f"Loaded academic curriculum and exam bank for: **{topic}**")
         
-        tab_theory, tab_exam, tab_viva, tab_refs = st.tabs(["📚 Core Theory & Pathology", "📝 Exam Corner (2, 5, 10 Marks)", "🎤 Viva Questions", "📖 Textbook References"])
+        tab_theory, tab_exam, tab_viva, tab_refs = st.tabs(["📚 Core Theory & Pathology", "📝 Exam Corner (3, 5, 10 Marks)", "🎤 Viva Questions", "📖 Textbook References"])
         
         with tab_theory:
             st.markdown(f"### 🔬 High-Scoring University Notes: {topic}")
@@ -204,17 +204,21 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                 st.info("Configure GEMINI_API_KEY in secrets to generate real-time AI study notes.")
 
         with tab_exam:
-            st.markdown(f"### 📝 University Exam Corner for {topic}")
-            with st.expander("📌 2-Mark Short Notes"):
-                st.write(f"- Define {topic} and state two primary clinical features.")
-                st.write("- Mention the classic histopathological hallmark of this condition.")
-                
-            with st.expander("📌 5-Mark Descriptive Questions"):
-                st.write(f"1. Discuss the etiology and pathogenesis of {topic}.")
-                st.write(f"2. Enumerate the clinical features and differential diagnosis of {topic}.")
-                
-            with st.expander("📌 10-Mark Essay Question"):
-                st.write(f"Classify {topic}. Discuss in detail its clinical manifestations, radiographic findings, investigations, and management principles.")
+            st.markdown(f"### 📝 Past 15 Years KUHS University Question Bank for {topic}")
+            st.markdown("Comprehensive list of previous university examination questions (3, 5, and 10 marks) asked over the last 15 years:")
+            
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("📥 Load Complete 15-Year Question Bank & Answers"):
+                    with st.spinner("Fetching past 15 years university questions and answers..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            q_prompt = f"Act as a KUHS dental professor. Compile all previous university examination questions asked over the last 15 years regarding '{topic}'. Categorize them strictly into: 1. 3-Mark Short Notes, 2. 5-Mark Descriptive Questions, and 3. 10-Mark Essay Questions. Provide concise model answers or key points for each."
+                            q_resp = client.models.generate_content(model=MODEL_NAME, contents=q_prompt)
+                            st.markdown(q_resp.text)
+                        except Exception as e:
+                            st.error(f"Error fetching question bank: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY to load the full 15-year question bank.")
 
         with tab_viva:
             st.markdown(f"### 🎤 Viva Voce Spotters & Quick Questions")
@@ -318,3 +322,4 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
+            
