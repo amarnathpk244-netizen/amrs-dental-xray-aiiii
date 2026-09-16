@@ -65,6 +65,9 @@ if "feedback_submitted" not in st.session_state:
 if "student_last_output" not in st.session_state:
     st.session_state.student_last_output = ""
 
+if "saved_cases" not in st.session_state:
+    st.session_state.saved_cases = []
+
 # ------------------------------------------------------------
 # UI STYLES & COLORFUL MEDICAL THEME
 # ------------------------------------------------------------
@@ -150,7 +153,6 @@ def display_pdf_download_button(content_text, filename_prefix):
             use_container_width=True
         )
     with col_d2:
-        b64 = base64.b64encode(content_text.encode()).decode()
         html_pdf_link = f"""
         <a href="data:text/html;base64,{base64.b64encode(f'''
             <html>
@@ -176,8 +178,8 @@ def display_pdf_download_button(content_text, filename_prefix):
 st.sidebar.markdown("### 🦷 Dental Buddy Navigation")
 selected_nav = st.sidebar.radio(
     "Go to", 
-    ["Home / Dashboard", "Student Mode", "Doctor Mode (Clinical Decision Support)", "Review & Feedback"],
-    index=0 if st.session_state.app_mode == "Home / Dashboard" else (1 if st.session_state.app_mode == "Student Mode" else (2 if st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" else 3))
+    ["Home / Dashboard", "Student Mode", "Doctor Mode (Clinical Decision Support)", "Case History Archive", "Review & Feedback"],
+    index=0 if st.session_state.app_mode == "Home / Dashboard" else (1 if st.session_state.app_mode == "Student Mode" else (2 if st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" else (3 if st.session_state.app_mode == "Case History Archive" else 4)))
 )
 
 if selected_nav != st.session_state.app_mode:
@@ -198,7 +200,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-student">
             <h3>🎓 Student Mode</h3>
-            <p>Learn dental topics, lesions, and radiographs. Features curriculum breakdowns, exam corner, 15-year KUHS question bank, clinical reasoning, adaptive quiz, viva bank, Mock Exam, Spotter AI, Smart Essay, and Treatment Planning.</p>
+            <p>Learn dental topics, exams, 15-year KUHS question bank, clinical reasoning, adaptive quiz, interactive flashcards, essay generator, and treatment planning.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Student Mode", use_container_width=True):
@@ -209,7 +211,7 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
         st.markdown("""
         <div class="card-doctor">
             <h3>🩺 Doctor Mode</h3>
-            <p>Advanced Radiograph & Soft-Tissue AI Clinical Workflow with Image Quality Gate, Lesion Localization, Visual Feature Extraction, Dynamic Evidence & Contradiction Engine, and Red-Flag Safety Checks.</p>
+            <p>Advanced Soft-Tissue AI Workflow, Radiograph module, Smart calibration, Prescription Generator, Treatment Cost Estimator, and Case Database Archive.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Enter Doctor Mode", use_container_width=True):
@@ -217,28 +219,29 @@ if st.session_state.app_mode == "Home / Dashboard" and selected_nav == "Home / D
             st.rerun()
 
 # ------------------------------------------------------------
-# STUDENT MODE INTERFACE
+# STUDENT MODE INTERFACE (WITH INTERACTIVE FLASHCARDS)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mode":
     st.markdown('<div class="app-title">🎓 Dental Buddy - Student Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Viva, Mock, Spotter, Essay & Treatment Planning</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Advanced Curriculum, Exam Corner, Clinical Reasoning, Adaptive Quiz, Flashcards, Essay & Treatment Planning</div>', unsafe_allow_html=True)
     
     topic = st.text_input("🔍 Search a dental topic, lesion, disease, or radiographic finding:", placeholder="e.g., Oral Submucous Fibrosis, Ameloblastoma, Dentigerous Cyst")
     
     if topic:
         st.success(f"Loaded academic curriculum and learning modules for: **{topic}**")
         
-        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_viva, tab_mock, tab_spotter, tab_essay, tab_treatment, tab_refs = st.tabs([
+        tab_theory, tab_exam, tab_reasoning, tab_quiz, tab_flashcards, tab_viva, tab_mock, tab_spotter, tab_essay, tab_treatment, tab_refs = st.tabs([
             "📚 Core Theory", 
             "📝 Exam Corner", 
             "🧠 Clinical Reasoning", 
             "🎯 Adaptive Quiz", 
-            "🎤 10+ Viva Qs", 
-            "🚀 Phase 5 Mock", 
-            "🔬 Phase 6 Spotter", 
-            "✍️ Phase 7 Essay", 
-            "🛠️ Phase 8 Treatment", 
-            "📖 Textbook Refs"
+            "⚡ Flashcards", 
+            "🎤 Viva Qs", 
+            "🚀 Mock Exam", 
+            "🔬 Spotter", 
+            "✍️ Essay", 
+            "🛠️ Treatment", 
+            "📖 Refs"
         ])
         
         with tab_theory:
@@ -329,6 +332,23 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             else:
                 st.info("Configure GEMINI_API_KEY to generate adaptive quizzes.")
 
+        with tab_flashcards:
+            st.markdown(f"### ⚡ Interactive Flashcards & Spaced Repetition for {topic}")
+            st.markdown("Test your fast-recall memory with high-yield revision flashcards:")
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("🗂️ Generate High-Yield Flashcards"):
+                    with st.spinner("Generating flashcards..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            fc_prompt = f"Create 5 high-yield flashcard Q&A pairs for '{topic}' focusing on key numbers, classifications, histological hallmarks, and treatment of choice. Format clearly as Question / Answer."
+                            fc_resp = client.models.generate_content(model=MODEL_NAME, contents=fc_prompt)
+                            st.markdown(fc_resp.text)
+                            st.session_state.student_last_output = fc_resp.text
+                        except Exception as e:
+                            st.error(f"Error: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY.")
+
         with tab_viva:
             st.markdown(f"### 🎤 10+ Essential Viva Voce Questions for {topic}")
             viva_text = f"""
@@ -354,15 +374,9 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             st.session_state.student_last_output = viva_text
 
         with tab_mock:
-            st.markdown(f"### 🚀 Phase 5: KUHS Mock Exam Blueprint & Smart Revision Flashcards")
+            st.markdown(f"### 🚀 Phase 5: KUHS Mock Exam Blueprint")
             if "GEMINI_API_KEY" in st.secrets:
-                col_m1, col_m2 = st.columns(2)
-                with col_m1:
-                    gen_mock = st.button("📝 Generate Timed KUHS Mock Paper")
-                with col_m2:
-                    gen_flash = st.button("⚡ Generate Night-Before Flashcards")
-
-                if gen_mock:
+                if st.button("📝 Generate Timed KUHS Mock Paper"):
                     with st.spinner("Compiling university mock paper layout..."):
                         try:
                             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
@@ -372,17 +386,6 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                             st.session_state.student_last_output = m_res.text
                         except Exception as e:
                             st.error(f"Error generating mock paper: {e}")
-
-                if gen_flash:
-                    with st.spinner("Preparing high-yield revision flashcards..."):
-                        try:
-                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            flash_prompt = f"Create 10 ultra-short, high-yield revision flashcards for '{topic}' tailored for quick last-minute exam recall."
-                            f_res = client.models.generate_content(model=MODEL_NAME, contents=flash_prompt)
-                            st.markdown(f_res.text)
-                            st.session_state.student_last_output = f_res.text
-                        except Exception as e:
-                            st.error(f"Error generating flashcards: {e}")
             else:
                 st.info("Configure GEMINI_API_KEY to access Phase 5.")
 
@@ -393,7 +396,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                 st.image(spotter_image, caption="Uploaded Spotter Image", use_container_width=True)
                 if st.button("🔍 Run Spotter & Examiner Evaluation"):
                     if "GEMINI_API_KEY" not in st.secrets:
-                        st.error("❌ GEMINI_API_KEY missing from secrets.")
+                       st.error("❌ GEMINI_API_KEY missing from secrets.")
                     else:
                         with st.spinner("Analyzing spotter image..."):
                             try:
@@ -401,10 +404,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                                 spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide Identification, Hallmark Features, Differentials, and Viva Questions."
                                 spot_resp = client.models.generate_content(
                                     model=MODEL_NAME,
-                                    contents=[
-                                        {"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}},
-                                        spotter_prompt
-                                    ]
+                                    contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
                                 )
                                 st.markdown(spot_resp.text)
                                 st.session_state.student_last_output = spot_resp.text
@@ -458,11 +458,11 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
         st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
 
 # ------------------------------------------------------------
-# DOCTOR MODE INTERFACE (RADIOGRAPH MODULE + CALIBRATION + SOFT-TISSUE)
+# DOCTOR MODE INTERFACE (WITH PRESCRIPTION, COST ESTIMATOR & DB)
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Radiograph Module, Smart Calibration, Soft-Tissue AI Workflow & Contradiction Engine</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Radiograph Module, Smart Calibration, Prescription Generator, Cost Estimator & Soft-Tissue AI</div>', unsafe_allow_html=True)
 
     remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
     col_m1, col_m2 = st.columns(2)
@@ -496,7 +496,6 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
     elif radiograph_type == "Facial radiograph":
         facial_analysis = st.selectbox("Select Facial Radiograph Analysis", FACIAL_ANALYSES, key="facial_analysis_selector_doc")
 
-    # Smart Calibration Selection
     calibration_mode = st.radio("Select Scale Calibration Mode", ["🤖 Auto-Calculate / AI Estimation (Unknown Calibration)", "✏️ Enter Known Calibration Scale (mm/pixel or known landmark)"])
     scale_value_input = "Auto-estimated by AI based on anatomical proportions"
     if calibration_mode == "✏️ Enter Known Calibration Scale (mm/pixel or known landmark)":
@@ -527,17 +526,18 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                     - History: {doc_history}
                     - Risk Factors: {doc_risk}
                     - Ceph/Facial Sub-analysis: {ceph_analysis} / {facial_analysis}
-                    - Calibration Setting: {scale_value_input} (If auto-calculated, estimate scale using standard anatomical proportions).
+                    - Calibration Setting: {scale_value_input}
 
                     Execute and output structured report following:
-                    1. IMAGE QUALITY GATE (Check sharpness, exposure, positioning, or soft-tissue visibility. If poor, request better capture).
-                    2. CALIBRATION & MEASUREMENT REPORT (Explain how the scale was handled: known input vs AI auto-estimated anatomical proportion).
-                    3. OBSERVABLE FINDINGS (For radiographs: coronal, pulpal, periapical, periodontal structures, cephalometric/skeletal relations. For soft tissue: lesion localization & visual feature extraction).
-                    4. INITIAL DIFFERENTIAL DIAGNOSES (3-5 plausible possibilities).
-                    5. DYNAMIC EVIDENCE TRACE (Supporting evidence vs Contradictory evidence vs Unknown information).
-                    6. CONTRADICTION CHECKING & UNCERTAINTY ASSESSMENT.
-                    7. RED-FLAG / SAFETY ENGINE (Check for concerning features, recommend biopsy/specialist referral when indicated).
-                    8. PROVISIONAL ASSESSMENT & NEXT-BEST CLINICAL STEPS.
+                    1. IMAGE QUALITY GATE
+                    2. CALIBRATION & MEASUREMENT REPORT
+                    3. OBSERVABLE FINDINGS
+                    4. INITIAL DIFFERENTIAL DIAGNOSES
+                    5. DYNAMIC EVIDENCE TRACE
+                    6. CONTRADICTION CHECKING & UNCERTAINTY ASSESSMENT
+                    7. RED-FLAG / SAFETY ENGINE
+                    8. PROVISIONAL ASSESSMENT & NEXT-BEST CLINICAL STEPS
+                    9. RECOMMENDED PRESCRIPTION & TREATMENT COST ESTIMATOR (Provide standard evidence-based medication prescription breakdown and estimated treatment cost range).
                     """
                     
                     contents_payload = [
@@ -551,7 +551,18 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
                         st.session_state.analysis_count += 1
                         st.session_state.last_report = response.text
                         st.session_state.last_patient = doc_patient_name if doc_patient_name else "Patient"
-                        st.success("✅ Radiograph & Soft-Tissue Clinical Workflow assessment completed.")
+                        
+                        # Save to Case Archive Database
+                        case_record = {
+                            "date": str(date.today()),
+                            "patient": doc_patient_name if doc_patient_name else "Anonymous",
+                            "age": doc_age,
+                            "sex": doc_sex,
+                            "symptoms": doc_symptoms,
+                            "report": response.text
+                        }
+                        st.session_state.saved_cases.append(case_record)
+                        st.success("✅ Assessment completed & securely saved to Case History Database.")
                 except Exception as e:
                     st.error(f"❌ Analysis failed: {e}")
 
@@ -560,8 +571,24 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         st.markdown("### 📋 Clinical Decision Support & Radiographic Assessment Report")
         st.markdown(st.session_state.last_report)
         
-        # Download / PDF Print Widget for Doctor Report
         display_pdf_download_button(st.session_state.last_report, f"Clinical_Report_{st.session_state.last_patient.replace(' ', '_')}")
+
+# ------------------------------------------------------------
+# CASE HISTORY ARCHIVE VIEW (DATABASE STORAGE)
+# ------------------------------------------------------------
+elif selected_nav == "Case History Archive" or st.session_state.app_mode == "Case History Archive":
+    st.markdown('<div class="app-title">📂 Case History Archive & Database</div>', unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #666;'>Review previously analyzed patient records and clinical decision support reports stored in your session database.</p>", unsafe_allow_html=True)
+    
+    if len(st.session_state.saved_cases) == 0:
+        st.info("📂 No saved cases found in the archive yet. Run an analysis in Doctor Mode to automatically store records here.")
+    else:
+        for idx, case in enumerate(reversed(st.session_state.saved_cases)):
+            with st.expander(f"📁 Case #{len(st.session_state.saved_cases) - idx} - Patient: {case['patient']} (Age: {case['age']}, Sex: {case['sex']}) | Date: {case['date']}"):
+                st.markdown(f"**Chief Complaints:** {case['symptoms']}")
+                st.markdown("---")
+                st.markdown(case['report'])
+                display_pdf_download_button(case['report'], f"Archive_Case_{case['patient'].replace(' ', '_')}_{case['date']}")
 
 # ------------------------------------------------------------
 # REVIEW & FEEDBACK VIEW
@@ -580,5 +607,4 @@ elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
         submitted = st.form_submit_button("Submit Feedback Securely", use_container_width=True)
         if submitted:
             st.session_state.feedback_submitted = True
-            st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.")
-        
+            st.success("🌟 Thank you! Your feedback has been securely recorded without patient-identifying medical details.") 
