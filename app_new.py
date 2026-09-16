@@ -398,6 +398,106 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                         with st.spinner("Analyzing spotter image..."):
                             try:
                                 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                                spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide Identification, Hallmark Features, Differentials, and Viva Questions."
+                                spot_resp = client.models.generate_content(
+                                    model=MODEL_NAME,
+                                    contents=[{"inline_data": {"mime_type": spotter_image.type, "data": spotter_image.getvalue()}}, spotter_prompt]
+                                )
+                                st.markdown(spot_resp.text)
+                                st.session_state.student_last_output = spot_resp.text
+                            except Exception as e:
+                                st.error(f"Analysis failed: {e}")
+
+        with tab_essay:
+            st.markdown(f"### ✍️ Phase 7: AI Smart Essay & Answer Sheet Generator")
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("📝 Generate 10-Mark University Essay Answer Sheet"):
+                    with st.spinner("Writing structured high-scoring university essay model..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            essay_prompt = f"Act as a top-ranking university student and expert professor. Write a comprehensive, beautifully structured 10-mark essay model answer for '{topic}'."
+                            essay_resp = client.models.generate_content(model=MODEL_NAME, contents=essay_prompt)
+                            st.markdown(essay_resp.text)
+                            st.session_state.student_last_output = essay_resp.text
+                        except Exception as e:
+                            st.error(f"Error: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY.")
+
+        with tab_treatment:
+            st.markdown(f"### 🛠️ Phase 8: Clinical Case Simulation & Treatment Planning Engine")
+            case_stage = st.selectbox("Select Case Severity / Stage", ["Early / Mild Presentation", "Moderate Stage with Cortical Involvement", "Advanced / Aggressive / Recurrent Presentation"])
+            if "GEMINI_API_KEY" in st.secrets:
+                if st.button("⚙️ Generate Comprehensive Treatment & Management Protocol"):
+                    with st.spinner("Formulating evidence-based treatment plan..."):
+                        try:
+                            client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                            treat_prompt = f"Act as an expert oral surgeon. Formulate a complete treatment and management protocol for '{topic}' for patient presenting with '{case_stage}'."
+                            treat_resp = client.models.generate_content(model=MODEL_NAME, contents=treat_prompt)
+                            st.markdown(treat_resp.text)
+                            st.session_state.student_last_output = treat_resp.text
+                        except Exception as e:
+                            st.error(f"Error: {e}")
+            else:
+                st.info("Configure GEMINI_API_KEY.")
+
+        with tab_refs:
+            st.markdown(f"### 📖 Standard Textbook Recommendations")
+            st.markdown("""
+            * **Oral Pathology:** Shafer's / Neville's Oral & Maxillofacial Pathology
+            * **Surgery / Medicine:** Burket's Oral Medicine / Peterson's Principles of Oral and Maxillofacial Surgery
+            """)
+
+        # Download / PDF Print Widget for Student Output
+        if "student_last_output" in st.session_state and st.session_state.student_last_output:
+            display_pdf_download_button(st.session_state.student_last_output, f"Dental_Buddy_{topic.replace(' ', '_')}")
+    else:
+        st.info("💡 Type any dental subject or lesion above to access structured academic notes, exam question banks, and viva questions.")
+
+# ------------------------------------------------------------
+# DOCTOR MODE INTERFACE (SOFT-TISSUE AI WORKFLOW)
+# ------------------------------------------------------------
+elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
+    st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Soft-Tissue AI Clinical Workflow, Dynamic Evidence & Contradiction Engine</div>', unsafe_allow_html=True)
+
+    remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
+    col_m1, col_m2 = st.columns(2)
+    with col_m1:
+        st.metric(label="🧪 Daily Quota Left", value=f"{remaining} / {DAILY_ANALYSIS_LIMIT}")
+
+    if remaining <= 0:
+        st.warning("⏳ Your 3 AI analyses for today have been used. Please try again tomorrow.")
+
+    with st.expander("👤 Patient Clinical Profile & Examination Details", expanded=True):
+        doc_patient_name = st.text_input("Patient Name / Identifier", placeholder="Enter patient name or ID")
+        col_d1, col_d2 = st.columns(2)
+        with col_d1:
+            doc_age = st.number_input("Age", min_value=0, max_value=120, value=30, step=1)
+        with col_d2:
+            doc_sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
+        
+        doc_duration = st.text_input("Symptom Duration", placeholder="e.g., 1 week")
+        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Painful ulcer on lower lip mucosa, burning sensation.")
+        doc_history = st.text_area("Relevant Medical & Dental History", placeholder="e.g., Recurrent episodes, no systemic illness.")
+        doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Stress, minor trauma, no tobacco")
+
+    st.markdown('<div class="section">📤 Upload Clinical Photograph or Radiograph (JPG, PNG, WEBP)</div>', unsafe_allow_html=True)
+    doc_file = st.file_uploader("📷 Choose image file", type=["jpg", "jpeg", "png", "webp"], key="doctor_multimodal_upload")
+
+    if doc_file is not None:
+        if doc_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+            st.error(f"❌ File size exceeds {MAX_FILE_SIZE_MB}MB limit.")
+            st.stop()
+        st.image(doc_file, caption="Uploaded Clinical Record", use_container_width=True)
+
+    if st.button("🔍 Run Soft-Tissue AI Clinical Workflow", use_container_width=True, disabled=(st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT)):
+        if "GEMINI_API_KEY" not in st.secrets:
+            st.error("❌ GEMINI_API_KEY missing from secrets.")
+        else:
+            with st.spinner("Running Image Quality Gate, Lesion Localization, Evidence & Contradiction Engine..."):
+                try:
+                    client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                     soft_tissue_workflow_prompt = f"""
                     You are Dental Buddy Doctor Mode, operating under a strict Soft-Tissue AI Clinical Decision Support Workflow. 
                     Analyze the uploaded clinical photograph/radiograph along with patient details:
