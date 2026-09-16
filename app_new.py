@@ -363,7 +363,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             st.markdown(f"### 🔬 Phase 6: Smart Image Diagnostics & Visual Spotter Simulator")
             st.markdown("Upload a clinical photo, radiograph, or histopathological slide to evaluate it for practical spotter examination practice:")
             
-            spotter_image = st.file_uploader("📷 Upload Spotter Image for Analysis", type=["jpg", "jpeg", "png"], key="phase6_spotter_upload")
+            spotter_image = st.file_uploader("📷 Upload Spotter Image for Analysis", type=["jpg", "jpeg", "png", "webp"], key="phase6_spotter_upload")
             
             if spotter_image is not None:
                 st.image(spotter_image, caption="Uploaded Spotter Image", use_container_width=True)
@@ -373,6 +373,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                     else:
                         with st.spinner("Analyzing spotter image for practical viva examination..."):
                             try:
+
                                 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                                 spotter_prompt = f"Act as a strict university practical examiner. Analyze this uploaded spotter image in the context of '{topic}'. Provide: 1. Identification / Probable Diagnosis, 2. Key Visual Findings / Hallmark Features, 3. Two potential Differential Diagnoses, and 4. Three rapid-fire viva examiner questions regarding this image."
                                 spot_resp = client.models.generate_content(
@@ -437,7 +438,7 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
 # ------------------------------------------------------------
 elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or selected_nav == "Doctor Mode (Clinical Decision Support)":
     st.markdown('<div class="app-title">🩺 Dental Buddy - Doctor Mode</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Clinical Decision Support, Dynamic Evidence Engine & Radiographic Assessment</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Clinical Decision Support, Dynamic Evidence Engine & Multimodal Assessment</div>', unsafe_allow_html=True)
 
     remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
     col_m1, col_m2 = st.columns(2)
@@ -455,25 +456,13 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         with col_d2:
             doc_sex = st.selectbox("Sex", ["Select", "Male", "Female", "Other"])
         
-        doc_duration = st.text_input("Symptom Duration", placeholder="e.g., 3 months")
-        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Dull aching pain, swelling, mobility in lower left posterior region.")
-        doc_history = st.text_area("Relevant Medical & Dental History", placeholder="e.g., No systemic illness, history of local trauma 1 year ago.")
-        doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Smokeless tobacco user, chronic smoker")
+        doc_duration = st.text_input("Symptom Duration", placeholder="e.g., 1 week")
+        doc_symptoms = st.text_area("Chief Complaints & Symptoms", placeholder="e.g., Painful ulcer on lower lip mucosa, burning sensation on eating spicy food.")
+        doc_history = st.text_array if "doc_history" in locals() else st.text_area("Relevant Medical & Dental History", placeholder="e.g., Recurrent episodes, no systemic illness.")
+        doc_risk = st.text_input("Risk Factors / Habits", placeholder="e.g., Stress, minor trauma, no tobacco")
 
-    st.markdown('<div class="section">🩻 Radiographic Assessment & Calibration</div>', unsafe_allow_html=True)
-    radiograph_type = st.selectbox("Select radiograph type", ["IOPA", "Lateral Cephalogram (Ceph)", "OPG", "Bitewing", "Occlusal", "Facial radiograph", "Other / Not reliably classifiable"])
-    
-    ceph_analysis = "Combined / All Analyses"
-    facial_analysis = "General Facial Screening / All Views"
-    scale_factor = 1.0
-
-    if radiograph_type == "Lateral Cephalogram (Ceph)":
-        ceph_analysis = st.selectbox("Select Cephalometric Analysis", CEPH_ANALYSES, key="ceph_analysis_selector_doc")
-    elif radiograph_type == "Facial radiograph":
-        facial_analysis = st.selectbox("Select Facial Radiograph Analysis", FACIAL_ANALYSES, key="facial_analysis_selector_doc")
-
-    st.markdown('<div class="section">📤 Upload Clinical Photograph or Radiograph</div>', unsafe_allow_html=True)
-    doc_file = st.file_uploader("📷 Choose image file", type=["jpg", "jpeg", "png"], key="doctor_multimodal_upload")
+    st.markdown('<div class="section">📤 Upload Clinical Photograph or Radiograph (JPG, PNG, WEBP)</div>', unsafe_allow_html=True)
+    doc_file = st.file_uploader("📷 Choose image file", type=["jpg", "jpeg", "png", "webp"], key="doctor_multimodal_upload")
 
     if doc_file is not None:
         if doc_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
@@ -486,29 +475,28 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
         if "GEMINI_API_KEY" not in st.secrets:
             st.error("❌ GEMINI_API_KEY missing from Streamlit secrets.")
         else:
-            with st.spinner("Running dynamic evidence engine, contradiction checking, and differential refinement..."):
+            with st.spinner("Analyzing uploaded clinical photograph/radiograph with symptoms using Dynamic Evidence Engine..."):
                 try:
                     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                     
                     doc_prompt = f"""
                     You are Dental Buddy Doctor Mode, an advanced clinical decision-support system. 
-                    Analyze the following multimodal case details carefully:
+                    Analyze the uploaded image (clinical photograph or radiograph) along with the following case details:
                     - Patient Profile: Age {doc_age}, Sex {doc_sex}
-                    - Duration: {doc_duration}
-                    - Symptoms: {doc_symptoms}
-                    - History: {doc_history}
-                    - Risk Factors: {doc_risk}
-                    - Radiograph Type: {radiograph_type}
+                    - Symptom Duration: {doc_duration}
+                    - Symptoms/Chief Complaint: {doc_symptoms}
+                    - Medical/Dental History: {doc_history}
+                    - Risk Factors/Habits: {doc_risk}
 
                     Provide a structured clinical decision support report containing:
-                    1. Observable Findings & Image Quality Assessment
-                    2. Initial Differential Diagnoses
-                    3. Dynamic Evidence Trace (Supporting evidence vs Contradictory evidence vs Unknown information for top candidates)
+                    1. Observable Findings from the Image & Quality Assessment
+                    2. Initial Differential Diagnoses (directly matching the visual lesion/signs and symptoms provided)
+                    3. Dynamic Evidence Trace (Supporting evidence vs Contradictory evidence vs Unknown information for top candidate conditions)
                     4. Contradiction Checking & Uncertainty Assessment
-                    5. Provisional Assessment (Clearly distinguishing observed findings from inferred possibilities)
+                    5. Provisional Assessment (Clearly distinguishing observed visual/clinical findings from inferred possibilities)
                     6. Next-Best Clinical Questions to ask or Recommended Next Clinical Steps / Referral.
                     
-                    Disclaimer: Do not provide a definitive diagnosis. Recommend professional clinical evaluation.
+                    Disclaimer: Do not provide a definitive diagnosis. Recommend professional in-person clinical evaluation.
                     """
                     
                     contents_payload = []
@@ -537,7 +525,7 @@ elif st.session_state.app_mode == "Doctor Mode (Clinical Decision Support)" or s
 # ------------------------------------------------------------
 # REVIEW & FEEDBACK VIEW
 # ------------------------------------------------------------
-elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review & Feedback":
+elif selected_nav == "Review & Feedback" or selected_nav == "Review & Feedback":
     st.markdown('<div class="app-title">📝 Review & Feedback</div>', unsafe_allow_html=True)
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
