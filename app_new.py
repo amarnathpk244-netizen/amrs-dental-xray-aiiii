@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 DAILY_ANALYSIS_LIMIT = 3
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.6-flash"
 MAX_FILE_SIZE_MB = 10
 
 CEPH_ANALYSES = [
@@ -318,4 +318,3 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
-                
