@@ -183,11 +183,15 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
             
             if "GEMINI_API_KEY" in st.secrets:
                 if st.button("✨ Generate AI Detailed Study Notes for this Topic"):
-                    with st.spinner("Generating structured textbook-aligned notes..."):
+                    with st.spinner("Preparing comprehensive university-level exam notes..."):
                         try:
                             client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                            prompt = f"Act as an expert dental professor. Provide a detailed, highly structured academic explanation for dental students regarding '{topic}', covering Definition, Etiology, Clinical Features, Histopathology, and Differential Diagnosis."
-                            resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+                            prompt = f"Act as an expert dental professor and senior examiner. Provide a comprehensive, high-scoring university examination answer layout for dental students regarding '{topic}'. Cover: 1. Definition & Classification, 2. Etiology & Pathogenesis, 3. Clinical Features (Stage-wise), 4. Radiographic & Histopathological Hallmarks, 5. Differential Diagnosis, and 6. Management Principles. Make it structured, detailed, and easy to memorize for exams."
+                            
+                            resp = client.models.generate_content(
+                                model=MODEL_NAME, 
+                                contents=prompt
+                            )
                             st.markdown(resp.text)
                         except Exception as e:
                             st.error(f"Error generating notes: {e}")
@@ -312,4 +316,4 @@ elif selected_nav == "Review & Feedback" or st.session_state.app_mode == "Review
     st.text_area("Help us improve Dental Buddy. What went wrong or what feature should be added?")
     if st.button("Submit Feedback"):
         st.success("Thank you! Your feedback has been recorded.")
-        
+                
