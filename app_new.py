@@ -117,8 +117,7 @@ def get_bds_references(query: str, loaded_subject: str = None) -> list:
         return BDS_CURRICULUM_REFERENCES["dental_materials"]
 
     return ["Standard University Medical & Dental Textbooks"]
-    
-)
+    )
 
 DAILY_ANALYSIS_LIMIT = 3
 MODEL_NAME = "gemini-3.6-flash"
