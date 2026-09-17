@@ -1,4 +1,4 @@
-import streamlit as st
+ import streamlit as st
 from datetime import date
 import json
 import math
@@ -250,7 +250,7 @@ def display_pdf_download_button(content_text, filename_prefix):
 
 
 # ============================================================
-# DYNAMIC TOPIC-BASED TEXTBOOK REFERENCE ENGINE
+# COMPREHENSIVE DYNAMIC TOPIC-BASED TEXTBOOK REFERENCE ENGINE
 # ============================================================
 
 REFERENCE_DATABASE = {
@@ -258,101 +258,113 @@ REFERENCE_DATABASE = {
     # --------------------------------------------------------
     # ORAL MEDICINE / ORAL PATHOLOGY
     # --------------------------------------------------------
-
     "oral pathology": [
         "Shafer's Textbook of Oral Pathology",
         "Neville's Oral and Maxillofacial Pathology",
     ],
-
     "oral medicine": [
         "Burket's Oral Medicine",
         "Neville's Oral and Maxillofacial Pathology",
     ],
-
     "oral ulcer": [
         "Burket's Oral Medicine",
         "Neville's Oral and Maxillofacial Pathology",
         "Shafer's Textbook of Oral Pathology",
     ],
-
     "aphthous ulcer": [
         "Burket's Oral Medicine",
         "Neville's Oral and Maxillofacial Pathology",
         "Shafer's Textbook of Oral Pathology",
     ],
-
     "leukoplakia": [
         "Shafer's Textbook of Oral Pathology",
         "Neville's Oral and Maxillofacial Pathology",
         "Burket's Oral Medicine",
     ],
-
     "oral cancer": [
         "Shafer's Textbook of Oral Pathology",
         "Neville's Oral and Maxillofacial Pathology",
         "Burket's Oral Medicine",
     ],
-
     "squamous cell carcinoma": [
         "Neville's Oral and Maxillofacial Pathology",
         "Shafer's Textbook of Oral Pathology",
         "Burket's Oral Medicine",
     ],
-
     "lichen planus": [
         "Burket's Oral Medicine",
         "Neville's Oral and Maxillofacial Pathology",
         "Shafer's Textbook of Oral Pathology",
     ],
+    "oral submucous fibrosis": [
+        "Shafer's Textbook of Oral Pathology",
+        "Neville's Oral and Maxillofacial Pathology",
+        "Burket's Oral Medicine",
+    ],
+    "candidiasis": [
+        "Burket's Oral Medicine",
+        "Shafer's Textbook of Oral Pathology",
+    ],
+    "salivary gland": [
+        "Shafer's Textbook of Oral Pathology",
+        "Neville's Oral and Maxillofacial Pathology",
+    ],
 
     # --------------------------------------------------------
     # CYSTS / TUMOURS / ORAL SURGERY
     # --------------------------------------------------------
-
     "cyst": [
         "Shafer's Textbook of Oral Pathology",
         "Neville's Oral and Maxillofacial Pathology",
         "Peterson's Principles of Oral and Maxillofacial Surgery",
     ],
-
     "odontogenic cyst": [
         "Neville's Oral and Maxillofacial Pathology",
         "Shafer's Textbook of Oral Pathology",
         "Peterson's Principles of Oral and Maxillofacial Surgery",
     ],
-
     "ameloblastoma": [
         "Neville's Oral and Maxillofacial Pathology",
         "Shafer's Textbook of Oral Pathology",
         "Peterson's Principles of Oral and Maxillofacial Surgery",
     ],
-
+    "dentigerous cyst": [
+        "Neville's Oral and Maxillofacial Pathology",
+        "Shafer's Textbook of Oral Pathology",
+    ],
+    "radicular cyst": [
+        "Neville's Oral and Maxillofacial Pathology",
+        "Shafer's Textbook of Oral Pathology",
+    ],
     "oral surgery": [
         "Peterson's Principles of Oral and Maxillofacial Surgery",
         "Contemporary Oral and Maxillofacial Surgery",
     ],
-
     "extraction": [
         "Contemporary Oral and Maxillofacial Surgery",
         "Peterson's Principles of Oral and Maxillofacial Surgery",
     ],
-
     "impacted tooth": [
         "Peterson's Principles of Oral and Maxillofacial Surgery",
         "Contemporary Oral and Maxillofacial Surgery",
     ],
-
     "impacted third molar": [
         "Peterson's Principles of Oral and Maxillofacial Surgery",
         "Contemporary Oral and Maxillofacial Surgery",
     ],
-
     "wisdom tooth": [
         "Peterson's Principles of Oral and Maxillofacial Surgery",
         "Contemporary Oral and Maxillofacial Surgery",
     ],
-
     "fracture": [
+        "Peterson's Principles of Oral and Maxillofacial Surgery",
+        "Contemporary Oral and Maxillofacial Surgery",
+    ],
+    "local anesthesia": [
+        "Malamed's Handbook of Local Anesthesia",
+        "Peterson's Principles of Oral and Maxillofacial Surgery",
+    ],
+    "exodontia": [
         "Peterson's Principles of Oral and Maxillofacial Surgery",
         "Contemporary Oral and Maxillofacial Surgery",
     ],
@@ -360,57 +372,75 @@ REFERENCE_DATABASE = {
     # --------------------------------------------------------
     # PERIODONTICS
     # --------------------------------------------------------
-
     "periodontics": [
         "Carranza's Clinical Periodontology",
         "Newman and Carranza's Clinical Periodontology",
     ],
-
     "gingivitis": [
         "Carranza's Clinical Periodontology",
         "Newman and Carranza's Clinical Periodontology",
     ],
-
     "periodontitis": [
         "Carranza's Clinical Periodontology",
         "Newman and Carranza's Clinical Periodontology",
     ],
-
     "periodontal pocket": [
         "Carranza's Clinical Periodontology",
         "Newman and Carranza's Clinical Periodontology",
     ],
-
     "bone loss": [
         "Carranza's Clinical Periodontology",
         "Newman and Carranza's Clinical Periodontology",
     ],
-
     "gingival enlargement": [
+        "Carranza's Clinical Periodontology",
+        "Newman and Carranza's Clinical Periodontology",
+    ],
+    "scaling and root planing": [
+        "Carranza's Clinical Periodontology",
+        "Newman and Carranza's Clinical Periodontology",
+    ],
+    "flap surgery": [
+        "Carranza's Clinical Periodontology",
+        "Newman and Carranza's Clinical Periodontology",
+    ],
+    "dental plaque": [
         "Carranza's Clinical Periodontology",
         "Newman and Carranza's Clinical Periodontology",
     ],
 
     # --------------------------------------------------------
-    # CONSERVATIVE DENTISTRY
+    # CONSERVATIVE DENTISTRY & OPERATIVE DENTISTRY
     # --------------------------------------------------------
-
     "caries": [
         "Sturdevant's Art and Science of Operative Dentistry",
         "Summitt's Fundamentals of Operative Dentistry",
     ],
-
     "dental caries": [
         "Sturdevant's Art and Science of Operative Dentistry",
         "Summitt's Fundamentals of Operative Dentistry",
     ],
-
     "restoration": [
         "Sturdevant's Art and Science of Operative Dentistry",
         "Summitt's Fundamentals of Operative Dentistry",
     ],
-
     "operative dentistry": [
+        "Sturdevant's Art and Science of Operative Dentistry",
+        "Summitt's Fundamentals of Operative Dentistry",
+    ],
+    "composite": [
+        "Sturdevant's Art and Science of Operative Dentistry",
+        "Phillips' Science of Dental Materials",
+    ],
+    "amalgam": [
+        "Sturdevant's Art and Science of Operative Dentistry",
+        "Phillips' Science of Dental Materials",
+    ],
+    "glass ionomer cement": [
+        "Sturdevant's Art and Science of Operative Dentistry",
+        "Phillips' Science of Dental Materials",
+    ],
+    "cavity preparation": [
         "Sturdevant's Art and Science of Operative Dentistry",
         "Summitt's Fundamentals of Operative Dentistry",
     ],
@@ -418,194 +448,273 @@ REFERENCE_DATABASE = {
     # --------------------------------------------------------
     # ENDODONTICS
     # --------------------------------------------------------
-
     "endodontics": [
         "Cohen's Pathways of the Pulp",
         "Ingle's Endodontics",
     ],
-
     "root canal": [
         "Cohen's Pathways of the Pulp",
         "Ingle's Endodontics",
     ],
-
     "pulpitis": [
         "Cohen's Pathways of the Pulp",
         "Ingle's Endodontics",
     ],
-
     "periapical lesion": [
         "Cohen's Pathways of the Pulp",
         "Ingle's Endodontics",
         "Shafer's Textbook of Oral Pathology",
     ],
+    "obturation": [
+        "Cohen's Pathways of the Pulp",
+        "Ingle's Endodontics",
+    ],
+    "access cavity": [
+        "Cohen's Pathways of the Pulp",
+        "Ingle's Endodontics",
+    ],
+    "apexification": [
+        "Cohen's Pathways of the Pulp",
+        "Ingle's Endodontics",
+    ],
 
     # --------------------------------------------------------
-    # PROSTHODONTICS
+    # PROSTHODONTICS (FIXED, REMOVABLE & CLINICAL)
     # --------------------------------------------------------
-
     "prosthodontics": [
         "Boucher's Prosthodontic Treatment for Edentulous Patients",
         "Zarb's Prosthodontic Treatment for Edentulous Patients",
     ],
-
     "complete denture": [
         "Boucher's Prosthodontic Treatment for Edentulous Patients",
         "Zarb's Prosthodontic Treatment for Edentulous Patients",
     ],
-
     "partial denture": [
         "McCracken's Removable Partial Prosthodontics",
     ],
-
     "fixed partial denture": [
         "Contemporary Fixed Prosthodontics – Rosenstiel",
     ],
-
     "crown": [
         "Contemporary Fixed Prosthodontics – Rosenstiel",
+    ],
+    "bridge": [
+        "Contemporary Fixed Prosthodontics – Rosenstiel",
+    ],
+    "facebow": [
+        "Boucher's Prosthodontic Treatment for Edentulous Patients",
+        "Zarb's Prosthodontic Treatment for Edentulous Patients",
+    ],
+    "jaw relation": [
+        "Boucher's Prosthodontic Treatment for Edentulous Patients",
+        "Zarb's Prosthodontic Treatment for Edentulous Patients",
+    ],
+    "articulator": [
+        "Boucher's Prosthodontic Treatment for Edentulous Patients",
+        "Zarb's Prosthodontic Treatment for Edentulous Patients",
+    ],
+    "implant": [
+        "Contemporary Implant Dentistry – Misch",
+        "Boucher's Prosthodontic Treatment for Edentulous Patients",
+    ],
+    "maxillofacial prosthesis": [
+        "Boucher's Prosthodontic Treatment for Edentulous Patients",
     ],
 
     # --------------------------------------------------------
     # ORTHODONTICS / CEPHALOMETRICS
     # --------------------------------------------------------
-
     "orthodontics": [
         "Contemporary Orthodontics – Proffit",
         "Graber's Orthodontics",
     ],
-
     "malocclusion": [
         "Contemporary Orthodontics – Proffit",
         "Graber's Orthodontics",
     ],
-
     "cephalometric": [
         "Contemporary Orthodontics – Proffit",
         "Graber's Orthodontics",
     ],
-
     "cephalometry": [
         "Contemporary Orthodontics – Proffit",
         "Graber's Orthodontics",
     ],
-
     "functional appliance": [
         "Contemporary Orthodontics – Proffit",
         "Graber's Orthodontics",
     ],
-
     "leeway space": [
         "Contemporary Orthodontics – Proffit",
         "Graber's Orthodontics",
     ],
-
     "deep bite": [
+        "Contemporary Orthodontics – Proffit",
+        "Graber's Orthodontics",
+    ],
+    "crossbite": [
+        "Contemporary Orthodontics – Proffit",
+        "Graber's Orthodontics",
+    ],
+    "open bite": [
+        "Contemporary Orthodontics – Proffit",
+        "Graber's Orthodontics",
+    ],
+    "braces": [
+        "Contemporary Orthodontics – Proffit",
+        "Graber's Orthodontics",
+    ],
+    "wire bending": [
+        "Contemporary Orthodontics – Proffit",
+        "Graber's Orthodontics",
+    ],
+    "anchorage": [
         "Contemporary Orthodontics – Proffit",
         "Graber's Orthodontics",
     ],
 
     # --------------------------------------------------------
-    # PEDIATRIC DENTISTRY
+    # PEDIATRIC DENTISTRY / PEDODONTICS
     # --------------------------------------------------------
-
     "pedodontics": [
         "McDonald and Avery's Dentistry for the Child and Adolescent",
         "Nikhil Marwa – Textbook of Pediatric Dentistry",
     ],
-
     "pediatric dentistry": [
         "McDonald and Avery's Dentistry for the Child and Adolescent",
         "Nikhil Marwa – Textbook of Pediatric Dentistry",
     ],
-
+    "behavioural management": [
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Nikhil Marwa – Textbook of Pediatric Dentistry",
+    ],
+    "behavioral management": [
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Nikhil Marwa – Textbook of Pediatric Dentistry",
+    ],
     "fluoride": [
         "McDonald and Avery's Dentistry for the Child and Adolescent",
         "Nikhil Marwa – Textbook of Pediatric Dentistry",
     ],
-
     "space maintainer": [
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Nikhil Marwa – Textbook of Pediatric Dentistry",
+    ],
+    "pulp therapy in children": [
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Nikhil Marwa – Textbook of Pediatric Dentistry",
+    ],
+    "pulpotomy": [
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Nikhil Marwa – Textbook of Pediatric Dentistry",
+    ],
+    "pulpectomy": [
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Nikhil Marwa – Textbook of Pediatric Dentistry",
+    ],
+    "mixed dentition": [
         "McDonald and Avery's Dentistry for the Child and Adolescent",
         "Nikhil Marwa – Textbook of Pediatric Dentistry",
     ],
 
     # --------------------------------------------------------
-    # PUBLIC HEALTH DENTISTRY
+    # PUBLIC HEALTH DENTISTRY / COMMUNITY DENTISTRY
     # --------------------------------------------------------
-
     "public health dentistry": [
         "Soben Peter – Essentials of Preventive and Community Dentistry",
     ],
-
     "epidemiology": [
         "Soben Peter – Essentials of Preventive and Community Dentistry",
     ],
-
     "dmft": [
         "Soben Peter – Essentials of Preventive and Community Dentistry",
     ],
-
     "dmfs": [
         "Soben Peter – Essentials of Preventive and Community Dentistry",
     ],
-
     "ohis": [
         "Soben Peter – Essentials of Preventive and Community Dentistry",
     ],
-
     "randomized controlled trial": [
+        "Soben Peter – Essentials of Preventive and Community Dentistry",
+    ],
+    "fluoridation": [
+        "Soben Peter – Essentials of Preventive and Community Dentistry",
+    ],
+    "dental index": [
+        "Soben Peter – Essentials of Preventive and Community Dentistry",
+    ],
+    "school dental health": [
         "Soben Peter – Essentials of Preventive and Community Dentistry",
     ],
 
     # --------------------------------------------------------
     # DENTAL MATERIALS
     # --------------------------------------------------------
-
     "dental materials": [
         "Phillips' Science of Dental Materials",
         "Craig's Restorative Dental Materials",
     ],
-
     "impression material": [
         "Phillips' Science of Dental Materials",
         "Craig's Restorative Dental Materials",
     ],
-
     "gypsum": [
         "Phillips' Science of Dental Materials",
         "Craig's Restorative Dental Materials",
     ],
+    "agar": [
+        "Phillips' Science of Dental Materials",
+        "Craig's Restorative Dental Materials",
+    ],
+    "alginate": [
+        "Phillips' Science of Dental Materials",
+        "Craig's Restorative Dental Materials",
+    ],
+    "elastomer": [
+        "Phillips' Science of Dental Materials",
+        "Craig's Restorative Dental Materials",
+    ],
+    "dental wax": [
+        "Phillips' Science of Dental Materials",
+        "Craig's Restorative Dental Materials",
+    ],
+    "bonding agent": [
+        "Phillips' Science of Dental Materials",
+        "Sturdevant's Art and Science of Operative Dentistry",
+    ],
 
     # --------------------------------------------------------
-    # ORAL RADIOLOGY
+    # ORAL RADIOLOGY & IMAGING
     # --------------------------------------------------------
-
     "radiology": [
         "White and Pharoah's Oral Radiology",
         "Langlais' Diagnostic Imaging of the Jaws",
     ],
-
     "opg": [
         "White and Pharoah's Oral Radiology",
         "Langlais' Diagnostic Imaging of the Jaws",
     ],
-
     "iopa": [
         "White and Pharoah's Oral Radiology",
         "Langlais' Diagnostic Imaging of the Jaws",
     ],
-
     "bitewing": [
         "White and Pharoah's Oral Radiology",
         "Langlais' Diagnostic Imaging of the Jaws",
     ],
-
     "cbct": [
         "White and Pharoah's Oral Radiology",
         "Langlais' Diagnostic Imaging of the Jaws",
     ],
-
     "tmj imaging": [
+        "White and Pharoah's Oral Radiology",
+        "Langlais' Diagnostic Imaging of the Jaws",
+    ],
+    "radiation protection": [
+        "White and Pharoah's Oral Radiology",
+    ],
+    "panoramic": [
         "White and Pharoah's Oral Radiology",
         "Langlais' Diagnostic Imaging of the Jaws",
     ],
@@ -613,40 +722,62 @@ REFERENCE_DATABASE = {
 
 
 # ============================================================
-# TOPIC ALIASES
+# TOPIC ALIASES (EXPANDED FOR MAXIMUM MATCHING)
 # ============================================================
 
 REFERENCE_ALIASES = {
-
     "carious lesion": "caries",
     "cavity": "caries",
     "tooth decay": "caries",
+    "restorative dentistry": "operative dentistry",
 
     "rct": "root canal",
     "endodontic": "endodontics",
     "root canal treatment": "root canal",
+    "pulp therapy": "endodontics",
 
     "gum disease": "periodontitis",
     "periodontal disease": "periodontitis",
+    "scaling": "scaling and root planing",
+    "root planing": "scaling and root planing",
 
     "wisdom teeth": "wisdom tooth",
     "third molar": "impacted third molar",
     "impaction": "impacted tooth",
+    "tooth extraction": "extraction",
 
     "oral carcinoma": "oral cancer",
     "oscc": "squamous cell carcinoma",
+    "smf": "oral submucous fibrosis",
+    "submucous fibrosis": "oral submucous fibrosis",
 
     "white lesion": "leukoplakia",
+    "fungal infection": "candidiasis",
 
     "community dentistry": "public health dentistry",
+    "preventive dentistry": "public health dentistry",
 
     "panoramic radiograph": "opg",
     "panoramic xray": "opg",
+    "orthopantomogram": "opg",
 
     "intraoral periapical": "iopa",
+    "periapical x-ray": "iopa",
 
     "lateral cephalogram": "cephalometric",
     "ceph": "cephalometric",
+    "cephalometry": "cephalometric",
+
+    "behavior management": "behavioural management",
+    "child management": "behavioural management",
+    "pedo": "pedodontics",
+    "paedo": "pedodontics",
+
+    "perio": "periodontics",
+    "endo": "endodontics",
+    "ortho": "orthodontics",
+    "prostho": "prosthodontics",
+    "omr": "oral medicine",
 }
 
 
@@ -661,39 +792,33 @@ def get_topic_references(search_text):
 
     search = search_text.strip().lower()
 
-    # Exact topic
+    # Exact topic match
     if search in REFERENCE_DATABASE:
         return search, REFERENCE_DATABASE[search]
 
-    # Exact alias
+    # Exact alias match
     if search in REFERENCE_ALIASES:
-
         matched_topic = REFERENCE_ALIASES[search]
-
         return (
             matched_topic,
             REFERENCE_DATABASE.get(matched_topic)
         )
 
-    # Keyword / phrase matching
+    # Keyword / phrase substring matching (longest key first)
     for key in sorted(
         REFERENCE_DATABASE.keys(),
         key=len,
         reverse=True
     ):
-
         if key in search:
-
             return (
                 key,
                 REFERENCE_DATABASE[key]
             )
 
-    # Alias contained inside search
+    # Alias substring matching
     for alias, mapped_topic in REFERENCE_ALIASES.items():
-
         if alias in search:
-
             return (
                 mapped_topic,
                 REFERENCE_DATABASE.get(mapped_topic)
@@ -714,13 +839,11 @@ def show_dynamic_references(search_text):
     st.markdown("## 📚 References")
 
     if not books:
-
         st.info(
             "No topic-specific textbook reference was found for this search. "
             "Try a specific dental topic, lesion, disease, radiographic finding, "
             "or procedure."
         )
-
         return
 
     st.markdown(
@@ -732,7 +855,6 @@ def show_dynamic_references(search_text):
     )
 
     for book in books:
-
         st.markdown(
             f"📕 **{book}**"
         )
@@ -776,7 +898,6 @@ selected_nav = st.sidebar.radio(
 )
 
 if selected_nav != st.session_state.app_mode:
-
     st.session_state.app_mode = selected_nav
 
 st.sidebar.markdown("---")
@@ -833,7 +954,6 @@ if (
             "Enter Student Mode",
             use_container_width=True
         ):
-
             st.session_state.app_mode = "Student Mode"
             st.rerun()
 
@@ -861,11 +981,9 @@ if (
             "Enter Doctor Mode",
             use_container_width=True
         ):
-
             st.session_state.app_mode = (
                 "Doctor Mode (Clinical Decision Support)"
             )
-
             st.rerun()
 
 
