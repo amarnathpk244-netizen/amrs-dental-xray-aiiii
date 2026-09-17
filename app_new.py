@@ -997,10 +997,15 @@ elif (
 ):
 
     st.markdown(
-        '<div class="app-title">'
-        '🎓 Dental Buddy - Student Mode'
-        '</div>',
-        unsafe_allow_html=True
+"""<div class="card-student">
+<h3>🎓 Student Mode</h3>
+<p>
+Learn dental topics, exams, 15-year KUHS question bank,
+clinical reasoning, adaptive quiz, interactive flashcards,
+essay generator, and treatment planning.
+</p>
+</div>""",
+unsafe_allow_html=True
     )
 
     st.markdown(
@@ -1863,20 +1868,17 @@ elif (
 ):
 
     st.markdown(
-        '<div class="app-title">'
-        '🩺 Dental Buddy - Doctor Mode'
-        '</div>',
-        unsafe_allow_html=True
+"""<div class="card-doctor">
+<h3>🩺 Doctor Mode</h3>
+<p>
+Advanced Soft-Tissue AI Workflow, Radiograph module,
+Smart calibration, Prescription Generator,
+Kerala-based Treatment Cost Estimator (₹),
+and Case Database Archive.
+</p>
+</div>""",
+unsafe_allow_html=True
     )
-
-    st.markdown(
-        '<div class="subtitle">'
-        'Radiograph Module, Smart Calibration, Prescription, '
-        'Kerala Cost Estimator (₹) & Soft-Tissue AI'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
     remaining = (
         DAILY_ANALYSIS_LIMIT
         - st.session_state.analysis_count
