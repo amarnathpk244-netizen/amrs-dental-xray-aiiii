@@ -551,17 +551,15 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                 st.info("Configure GEMINI_API_KEY.")
 
         with tab_refs:
-                    with tab_refs:
+                            with tab_refs:
             st.markdown(f"### 📖 Standard Textbook Recommendations")
             
-            # Determine active subject module dynamically based on query
-            active_module = topic if topic else "General"
-            textbooks = get_bds_references(topic, loaded_subject=active_module)
+            # Dynamically fetch correct textbooks based on the search query
+            textbooks = get_bds_references(topic, loaded_subject=topic)
             
             for book in textbooks:
                 st.markdown(f"- 📖 **{book}**")
                 
-
         if "student_last_output" in st.session_state and st.session_state.student_last_output:
             display_pdf_download_button(st.session_state.student_last_output, f"Dental_Buddy_{topic.replace(' ', '_')}")
     else:
