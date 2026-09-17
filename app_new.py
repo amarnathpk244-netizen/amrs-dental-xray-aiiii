@@ -11,6 +11,113 @@ st.set_page_config(
     page_title="Dental Buddy - AI Clinical & Learning Platform",
     page_icon="🦷",
     layout="centered",
+    # --- BDS CURRICULUM REFERENCE DATABASE & ROUTER ---
+BDS_CURRICULUM_REFERENCES = {
+    "periodontics": [
+        "Carranza's Clinical Periodontology",
+        "Newman and Carranza's Clinical Periodontology",
+        "Shantipriya Reddy - Essentials of Clinical Periodontology"
+    ],
+    "pedodontics": [
+        "Nikhil Marwah - Textbook of Pediatric Dentistry",
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Shobha Tandon - Textbook of Pedodontics"
+    ],
+    "conservative_dentistry_and_endodontics": [
+        "Sturdevant's Art and Science of Operative Dentistry",
+        "Nisha Garg - Textbook of Operative Dentistry",
+        "Ingle's Endodontics",
+        "Louis J. Grossman - Endodontic Practice"
+    ],
+    "orthodontics": [
+        "Proffit - Contemporary Orthodontics",
+        "S.I. Bhalajhi - Orthodontics: The Art and Science",
+        "Graber - Orthodontics: Current Principles and Techniques"
+    ],
+    "oral_and_maxillofacial_surgery": [
+        "Peterson's Principles of Oral and Maxillofacial Surgery",
+        "Milner - Contemporary Oral and Maxillofacial Surgery",
+        "Laskin - Textbook of Oral and Maxillofacial Surgery"
+    ],
+    "oral_pathology_and_microbiology": [
+        "Shafer's Textbook of Oral Pathology",
+        "Neville's Oral and Maxillofacial Pathology",
+        "Soames & Southam - Oral Pathology"
+    ],
+    "public_health_dentistry": [
+        "Denenbek - Principles of Dental Public Health",
+        "Soben Peter - Essentials of Preventive and Community Dentistry",
+        "Hiremath - Textbook of Preventive and Community Dentistry"
+    ],
+    "prosthodontics": [
+        "Nallaswamy - Textbook of Prosthodontics",
+        "Rangarajan - Textbook of Removable Partial Prosthodontics",
+        "Boucher's Prosthodontic Treatment for Edentulous Patients",
+        "Shillinburg - Fundamentals of Fixed Prosthodontics"
+    ],
+    "oral_medicine_and_radiology": [
+        "Burket's Oral Medicine",
+        "White and Pharoah - Oral Radiology: Principles and Interpretation",
+        "Greenberg and Glick - Burket's Oral Medicine"
+    ],
+    "general_human_anatomy": [
+        "BD Chaurasia's Human Anatomy",
+        "Snell's Clinical Anatomy"
+    ],
+    "general_human_physiology": [
+        "Guyton and Hall Textbook of Medical Physiology",
+        "Sembulingam - Essentials of Medical Physiology"
+    ],
+    "biochemistry": [
+        "U. Satyanarayana - Biochemistry",
+        "Vasudevan - Textbook of Biochemistry for Medical Students"
+    ],
+    "general_pathology_and_microbiology": [
+        "Harsh Mohan - Textbook of Pathology",
+        "Ananthanarayan and Paniker's Textbook of Microbiology"
+    ],
+    "general_and_dental_pharmacology": [
+        "K.D. Tripathi - Essentials of Medical Pharmacology",
+        "Padma L. Deshmukh - Pharmacology for Dental Students"
+    ],
+    "dental_materials": [
+        "Anusavice - Phillips' Science of Dental Materials",
+        "J. Power - Restorative Dental Materials",
+        "Shobha Rodrigues - Dental Materials"
+    ]
+}
+
+def get_bds_references(query: str, loaded_subject: str = None) -> list:
+    if loaded_subject:
+        norm_subject = loaded_subject.strip().lower().replace(" ", "_")
+        for key in BDS_CURRICULUM_REFERENCES:
+            if key in norm_subject:
+                return BDS_CURRICULUM_REFERENCES[key]
+
+    q = query.lower()
+    if any(k in q for k in ["pedo", "child", "behavioural", "behavioral", "pulp therapy", "mixed dentition"]):
+        return BDS_CURRICULUM_REFERENCES["pedodontics"]
+    elif any(k in q for k in ["perio", "gingiva", "pocket", "scaling", "cemento"]):
+        return BDS_CURRICULUM_REFERENCES["periodontics"]
+    elif any(k in q for k in ["endo", "conservative", "cavity", "composite", "root canal"]):
+        return BDS_CURRICULUM_REFERENCES["conservative_dentistry_and_endodontics"]
+    elif any(k in q for k in ["ortho", "malocclusion", "bracket", "cephalometric"]):
+        return BDS_CURRICULUM_REFERENCES["orthodontics"]
+    elif any(k in q for k in ["surgery", "extraction", "implant", "maxillofacial"]):
+        return BDS_CURRICULUM_REFERENCES["oral_and_maxillofacial_surgery"]
+    elif any(k in q for k in ["pathology", "cyst", "tumor", "lesion", "biopsy"]):
+        return BDS_CURRICULUM_REFERENCES["oral_pathology_and_microbiology"]
+    elif any(k in q for k in ["public health", "epidemiology", "fluoride", "community"]):
+        return BDS_CURRICULUM_REFERENCES["public_health_dentistry"]
+    elif any(k in q for k in ["prostho", " denture", "crown", "bridge", "implant"]):
+        return BDS_CURRICULUM_REFERENCES["prosthodontics"]
+    elif any(k in q for k in ["medicine", "radiology", "lesion", "cbct"]):
+        return BDS_CURRICULUM_REFERENCES["oral_medicine_and_radiology"]
+    elif any(k in q for k in ["material", "agar", "alginate", "composite resin"]):
+        return BDS_CURRICULUM_REFERENCES["dental_materials"]
+
+    return ["Standard University Medical & Dental Textbooks"]
+    
 )
 
 DAILY_ANALYSIS_LIMIT = 3
@@ -444,11 +551,16 @@ elif st.session_state.app_mode == "Student Mode" or selected_nav == "Student Mod
                 st.info("Configure GEMINI_API_KEY.")
 
         with tab_refs:
+                    with tab_refs:
             st.markdown(f"### 📖 Standard Textbook Recommendations")
-            st.markdown("""
-            * **Oral Pathology:** Shafer's / Neville's Oral & Maxillofacial Pathology
-            * **Surgery / Medicine:** Burket's Oral Medicine / Peterson's Principles of Oral and Maxillofacial Surgery
-            """)
+            
+            # Determine active subject module dynamically based on query
+            active_module = topic if topic else "General"
+            textbooks = get_bds_references(topic, loaded_subject=active_module)
+            
+            for book in textbooks:
+                st.markdown(f"- 📖 **{book}**")
+                
 
         if "student_last_output" in st.session_state and st.session_state.student_last_output:
             display_pdf_download_button(st.session_state.student_last_output, f"Dental_Buddy_{topic.replace(' ', '_')}")
