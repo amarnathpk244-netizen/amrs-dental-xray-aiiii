@@ -2,7 +2,7 @@ import os
 import json
 import re
 from datetime import date, datetime
-import base64
+import time
 
 import streamlit as st
 from google import genai
@@ -114,14 +114,6 @@ st.markdown(
         margin-bottom: 0.5rem;
     }
 
-    .reader-box {
-        padding: 1rem;
-        border-radius: 14px;
-        border: 1px solid #b0bec5;
-        background: #f7f9fa;
-        margin-top: 1rem;
-    }
-
     div.stButton > button {
         border-radius: 12px;
         min-height: 2.8rem;
@@ -153,7 +145,6 @@ DEFAULT_STATE = {
     "analysis_count": 0,
     "last_report": "",
     "last_image_name": "",
-    "active_pdf_viewer": None,
     "selected_book": None,
     "selected_subject": None,
     "selected_chapter": None,
@@ -172,7 +163,7 @@ if st.session_state.analysis_date != str(date.today()):
 
 
 # ============================================================
-# GEMINI
+# GEMINI (WITH 503 AUTO-RETRY)
 # ============================================================
 
 def get_api_key():
@@ -215,11 +206,23 @@ def run_image_analysis(uploaded_file, prompt):
         )
 
     image_part = image_to_part(uploaded_file)
+    contents_payload = [prompt, image_part]
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=[prompt, image_part],
-    )
+    response = None
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=contents_payload,
+            )
+            break
+        except Exception as api_err:
+            if "503" in str(api_err) and attempt < max_retries - 1:
+                time.sleep(2)
+                continue
+            else:
+                raise api_err
 
     text = getattr(response, "text", None)
 
@@ -239,10 +242,21 @@ def run_text_ai(prompt):
             "Gemini API key not found in Streamlit Secrets."
         )
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-    )
+    response = None
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt,
+            )
+            break
+        except Exception as api_err:
+            if "503" in str(api_err) and attempt < max_retries - 1:
+                time.sleep(2)
+                continue
+            else:
+                raise api_err
 
     text = getattr(response, "text", None)
 
@@ -588,16 +602,15 @@ TEXTBOOK_LIBRARY = {
     "Dental Materials": {
 
         "Phillips' Science of Dental Materials": [
-            "Properties of Materials",
+            "Structure of Matter",
+            "Physical Properties",
+            "Biocompatibility",
             "Impression Materials",
             "Gypsum Products",
-            "Waxes",
-            "Dental Polymers",
-            "Composites",
-            "Amalgam",
+            "Dental Waxes",
+            "Resin-Based Composites",
             "Dental Cements",
-            "Metals",
-            "Ceramics",
+            "Dental Amalgam",
         ],
 
         "Craig's Restorative Dental Materials": [
@@ -801,89 +814,6 @@ def find_relevant_chapters(search_text, subject):
 
 
 # ============================================================
-# PDF READER
-# ============================================================
-
-def show_pdf_reader():
-
-    if not st.session_state.active_pdf_viewer:
-        return
-
-    book = st.session_state.active_pdf_viewer
-
-    st.markdown("---")
-
-    st.markdown(
-        "### 📖 In-App Textbook Reader"
-    )
-
-    st.info(
-        f"Selected textbook: **{book}**"
-    )
-
-    st.markdown(
-        """
-        <div class="reader-box">
-        📌 Upload a PDF that you are legally allowed to use.
-        Dental Buddy will display it inside the app for convenient
-        study and reference.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    uploaded_pdf = st.file_uploader(
-        f"📤 Upload PDF for '{book}'",
-        type=["pdf"],
-        key=f"pdf_{book}",
-    )
-
-    if uploaded_pdf:
-
-        pdf_bytes = uploaded_pdf.getvalue()
-
-        encoded = base64.b64encode(
-            pdf_bytes
-        ).decode("utf-8")
-
-        pdf_html = f"""
-        <iframe
-            src="data:application/pdf;base64,{encoded}"
-            width="100%"
-            height="700"
-            style="
-                border:1px solid #b0bec5;
-                border-radius:12px;
-                background:white;
-            ">
-        </iframe>
-        """
-
-        st.markdown(
-            pdf_html,
-            unsafe_allow_html=True,
-        )
-
-        st.success(
-            "📖 PDF loaded successfully."
-        )
-
-    else:
-
-        st.warning(
-            "Upload a PDF to open the in-app reader."
-        )
-
-    if st.button(
-        "❌ Close Reader",
-        use_container_width=True,
-    ):
-
-        st.session_state.active_pdf_viewer = None
-        st.rerun()
-
-
-# ============================================================
 # DIGITAL TEXTBOOK LIBRARY
 # ============================================================
 
@@ -897,10 +827,6 @@ def textbook_library():
         "Find the relevant BDS subject, textbook and chapter instantly."
     )
 
-    # --------------------------------------------------------
-    # SEARCH
-    # --------------------------------------------------------
-
     search = st.text_input(
         "🔎 Search topic",
         placeholder=(
@@ -909,10 +835,6 @@ def textbook_library():
         ),
         key="digital_library_search",
     )
-
-    # --------------------------------------------------------
-    # SUBJECT
-    # --------------------------------------------------------
 
     default_subject = find_subject(search)
 
@@ -934,10 +856,6 @@ def textbook_library():
     st.session_state.selected_subject = selected_subject
 
     books = TEXTBOOK_LIBRARY[selected_subject]
-
-    # --------------------------------------------------------
-    # TOPIC RESULT
-    # --------------------------------------------------------
 
     if search.strip():
 
@@ -971,10 +889,6 @@ def textbook_library():
                 "You can still ask Dental Buddy about the topic."
             )
 
-    # --------------------------------------------------------
-    # BOOK SELECTION
-    # --------------------------------------------------------
-
     st.markdown(
         "#### 📕 Available Textbooks"
     )
@@ -999,22 +913,6 @@ def textbook_library():
         unsafe_allow_html=True,
     )
 
-    # --------------------------------------------------------
-    # READ PDF
-    # --------------------------------------------------------
-
-    if st.button(
-        "📖 Open My PDF In-App",
-        use_container_width=True,
-    ):
-
-        st.session_state.active_pdf_viewer = selected_book
-        st.rerun()
-
-    # --------------------------------------------------------
-    # CHAPTERS
-    # --------------------------------------------------------
-
     st.markdown(
         "#### 📑 Chapters / Topics"
     )
@@ -1038,10 +936,6 @@ def textbook_library():
         st.success(
             f"Selected chapter: {selected_chapter}"
         )
-
-        # ----------------------------------------------------
-        # ASK TEXTBOOK
-        # ----------------------------------------------------
 
         st.markdown(
             "#### 🤖 Ask About This Chapter"
@@ -1144,10 +1038,6 @@ If the exact edition/page is unknown, explicitly say:
                 st.session_state.library_answer
             )
 
-    # --------------------------------------------------------
-    # SMART TOPIC ASSISTANT
-    # --------------------------------------------------------
-
     if search.strip():
 
         st.markdown("---")
@@ -1207,38 +1097,6 @@ but do not fabricate page numbers.
                     st.code(
                         str(exc)
                     )
-
-    show_pdf_reader()
-
-
-# ============================================================
-# OPEN / AUTHORIZED REFERENCE SECTION
-# ============================================================
-
-def reference_information():
-
-    st.markdown(
-        "### 🔗 Open / Authorized Reference Resources"
-    )
-
-    st.info(
-        "Dental Buddy can also connect students to openly "
-        "accessible or authorized educational resources. "
-        "Copyrighted textbook PDFs should not be redistributed "
-        "without permission."
-    )
-
-    st.markdown(
-        """
-        **Useful resource categories**
-
-        🧬 Biomedical books and references  
-        🌐 Open educational resources  
-        🏥 Government / public-health publications  
-        🔬 Research literature  
-        📚 Publisher-authorized resources
-        """
-    )
 
 
 # ============================================================
@@ -1702,10 +1560,6 @@ def student_mode():
         ]
     )
 
-    # --------------------------------------------------------
-    # LEARN
-    # --------------------------------------------------------
-
     with tabs[0]:
 
         st.markdown(
@@ -1771,10 +1625,6 @@ Keep it BDS student friendly.
                         st.code(
                             str(exc)
                         )
-
-    # --------------------------------------------------------
-    # EXAM
-    # --------------------------------------------------------
 
     with tabs[1]:
 
@@ -1843,10 +1693,6 @@ Conclusion
                             str(exc)
                         )
 
-    # --------------------------------------------------------
-    # QUIZ
-    # --------------------------------------------------------
-
     with tabs[2]:
 
         st.markdown(
@@ -1909,10 +1755,6 @@ and explanation for each.
                             str(exc)
                         )
 
-    # --------------------------------------------------------
-    # DIGITAL LIBRARY
-    # --------------------------------------------------------
-
     with tabs[3]:
 
         textbook_library()
@@ -1937,17 +1779,9 @@ def doctor_mode():
         ]
     )
 
-    # --------------------------------------------------------
-    # X-RAY
-    # --------------------------------------------------------
-
     with tabs[0]:
 
         radiograph_analyzer()
-
-    # --------------------------------------------------------
-    # SOFT TISSUE
-    # --------------------------------------------------------
 
     with tabs[1]:
 
@@ -2025,10 +1859,6 @@ This is decision support, not a definitive diagnosis.
                         str(exc)
                     )
 
-    # --------------------------------------------------------
-    # CLINICAL LIBRARY
-    # --------------------------------------------------------
-
     with tabs[2]:
 
         textbook_library()
@@ -2072,8 +1902,7 @@ def sidebar():
 • BDS Quiz  
 • Digital Textbook Library  
 • Chapter Search  
-• Ask the Textbook  
-• In-App PDF Reader
+• Ask the Textbook
 """
         )
 
