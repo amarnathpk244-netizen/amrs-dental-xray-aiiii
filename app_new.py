@@ -163,7 +163,7 @@ if st.session_state.analysis_date != str(date.today()):
 
 
 # ============================================================
-# GEMINI (WITH 503 AUTO-RETRY)
+# GEMINI CLIENT (CLEAN SDK CALL)
 # ============================================================
 
 def get_api_key():
@@ -197,23 +197,10 @@ def run_image_analysis(uploaded_file, prompt):
         raise RuntimeError("Gemini API key not found in Streamlit Secrets.")
 
     image_part = image_to_part(uploaded_file)
-    contents_payload = [prompt, image_part]
-
-    response = None
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=contents_payload,
-            )
-            break
-        except Exception as api_err:
-            if "503" in str(api_err) and attempt < max_retries - 1:
-                time.sleep(2)
-                continue
-            else:
-                raise api_err
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=[prompt, image_part],
+    )
 
     text = getattr(response, "text", None)
     if not text:
@@ -226,21 +213,10 @@ def run_text_ai(prompt):
     if client is None:
         raise RuntimeError("Gemini API key not found in Streamlit Secrets.")
 
-    response = None
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=prompt,
-            )
-            break
-        except Exception as api_err:
-            if "503" in str(api_err) and attempt < max_retries - 1:
-                time.sleep(2)
-                continue
-            else:
-                raise api_err
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=prompt,
+    )
 
     text = getattr(response, "text", None)
     if not text:
@@ -545,7 +521,7 @@ def textbook_library():
             if not question.strip():
                 st.warning("Enter a question first.")
             else:
-                with st.spinner("Preparing textbook-oriented explanation (Auto-retrying if busy)..."):
+                with st.spinner("Preparing textbook-oriented explanation..."):
                     try:
                         prompt = f"""
 You are Pocket Dentistry, a BDS educational assistant.
@@ -810,7 +786,7 @@ def doctor_mode():
         )
 
         if st.button("🧠 Build Professional Clinical Reasoning", type="primary", use_container_width=True):
-            with st.spinner("Processing advanced clinical reasoning (Auto-retrying if busy)..."):
+            with st.spinner("Processing advanced clinical reasoning..."):
                 try:
                     prompt = f"""
 You are Pocket Dentistry Doctor Mode, an advanced clinical decision-support system.
