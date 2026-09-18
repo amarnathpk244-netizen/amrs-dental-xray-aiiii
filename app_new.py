@@ -10,12 +10,12 @@ from google.genai import types
 
 
 # ============================================================
-# DENTAL BUDDY
+# POCKET DENTISTRY
 # AI-Powered Dental Learning & Clinical Decision-Support
 # ============================================================
 
 st.set_page_config(
-    page_title="Dental Buddy",
+    page_title="Pocket Dentistry",
     page_icon="🦷",
     layout="centered",
     initial_sidebar_state="collapsed",
@@ -477,7 +477,7 @@ def find_relevant_chapters(search_text, subject):
 # ============================================================
 
 def textbook_library():
-    st.markdown("### 📚 Dental Buddy Digital Library")
+    st.markdown("### 📚 Pocket Dentistry Digital Library")
     st.caption("Find the relevant BDS subject, textbook and chapter instantly.")
 
     search = st.text_input(
@@ -509,7 +509,7 @@ def textbook_library():
                     unsafe_allow_html=True,
                 )
         else:
-            st.info("No exact chapter match found. You can still ask Dental Buddy about the topic.")
+            st.info("No exact chapter match found. You can still ask Pocket Dentistry about the topic.")
 
     st.markdown("#### 📕 Available Textbooks")
     selected_book = st.selectbox("Select textbook", list(books.keys()), key="digital_library_book")
@@ -548,7 +548,7 @@ def textbook_library():
                 with st.spinner("Preparing textbook-oriented explanation (Auto-retrying if busy)..."):
                     try:
                         prompt = f"""
-You are Dental Buddy, a BDS educational assistant.
+You are Pocket Dentistry, a BDS educational assistant.
 The student is referring to:
 Subject: {selected_subject}
 Textbook: {selected_book}
@@ -566,7 +566,7 @@ Format with definitions, classifications, clinical points, and exam-oriented viv
 
         if st.session_state.library_answer:
             st.markdown("---")
-            st.markdown("### 📚 Dental Buddy Explanation")
+            st.markdown("### 📚 Pocket Dentistry Explanation")
             st.markdown(st.session_state.library_answer)
 
 
@@ -575,7 +575,7 @@ Format with definitions, classifications, clinical points, and exam-oriented viv
 # ============================================================
 
 COMMON_SAFETY_RULES = """
-You are Dental Buddy, an AI-assisted dental learning and clinical decision-support system.
+You are Pocket Dentistry, an AI-assisted dental learning and clinical decision-support system.
 CORE SAFETY PRINCIPLE: Do good for the patient and never cause harm.
 """
 
@@ -593,7 +593,7 @@ RADIOGRAPH_PROMPTS = {
 # ============================================================
 
 def show_home():
-    st.markdown('<div class="hero-title">🦷 Dental Buddy</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-title">🦷 Pocket Dentistry</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="hero-subtitle">AI-Powered Dental Learning & Clinical Decision-Support Platform</div>',
         unsafe_allow_html=True,
@@ -603,7 +603,7 @@ def show_home():
         """
         <div class="mode-card">
         <h3>🎓 Student Mode</h3>
-        <p>Learn dental topics, prepare university answers, practice quizzes and access the Dental Buddy Digital Textbook Library.</p>
+        <p>Learn dental topics, prepare university answers, practice quizzes and access the Pocket Dentistry Digital Textbook Library.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -632,7 +632,7 @@ def show_home():
         """
         <div class="safety-box">
         <b>🛡️ Safety Principle</b><br>
-        Dental Buddy provides AI-assisted educational information and provisional radiographic assessment inside a secure web interface.
+        Pocket Dentistry provides AI-assisted educational information and provisional radiographic assessment inside a secure web interface.
         </div>
         """,
         unsafe_allow_html=True,
@@ -813,7 +813,7 @@ def doctor_mode():
             with st.spinner("Processing advanced clinical reasoning (Auto-retrying if busy)..."):
                 try:
                     prompt = f"""
-You are Dental Buddy Doctor Mode, an advanced clinical decision-support system.
+You are Pocket Dentistry Doctor Mode, an advanced clinical decision-support system.
 Analyze the following oral mucosal lesion case:
 - Lesion Type: {lesion_type}
 - Anatomical Site: {lesion_site}
@@ -849,7 +849,7 @@ Provide a structured clinical decision support report:
 
 def sidebar():
     with st.sidebar:
-        st.markdown("## 🦷 Dental Buddy")
+        st.markdown("## 🦷 Pocket Dentistry")
         if st.session_state.mode:
             st.write(f"Current mode: **{st.session_state.mode.title()}**")
         st.markdown("---")
