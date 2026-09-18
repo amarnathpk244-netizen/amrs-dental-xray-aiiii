@@ -25,7 +25,7 @@ DAILY_ANALYSIS_LIMIT = 3
 MODEL_NAME = "gemini-3.6-flash"
 
 # ------------------------------------------------------------
-# THEME / GLOBAL CSS (Colorful Medical Theme & Header Fix)
+# THEME / GLOBAL CSS
 # ------------------------------------------------------------
 st.markdown(
     """
@@ -78,14 +78,6 @@ st.markdown(
 
     .mode-card.doctor h3, .mode-card.doctor p {
         color: #1b5e20 !important;
-    }
-
-    .section-title {
-        font-size: 1.35rem;
-        font-weight: 750;
-        margin-top: 1.1rem;
-        margin-bottom: 0.55rem;
-        color: #17b978;
     }
 
     .safety-box {
@@ -184,19 +176,64 @@ def run_text_ai(prompt):
     return text
 
 # ------------------------------------------------------------
-# REFERENCE TEXTBOOK DATABASE & IN-APP PDF VIEWER ENGINE
+# COMPLETE BDS CURRICULUM TEXTBOOK REFERENCE DATABASE
 # ------------------------------------------------------------
 REFERENCE_DATABASE = {
-    "oral pathology": ["Shafer's Textbook of Oral Pathology", "Neville's Oral and Maxillofacial Pathology"],
-    "oral medicine": ["Burket's Oral Medicine", "Neville's Oral and Maxillofacial Pathology"],
-    "periodontics": ["Carranza's Clinical Periodontology", "Newman and Carranza's Clinical Periodontology"],
-    "endodontics": ["Cohen's Pathways of the Pulp", "Ingle's Endodontics"],
-    "prosthodontics": ["Boucher's Prosthodontic Treatment for Edentulous Patients", "Zarb's Prosthodontic Treatment for Edentulous Patients"],
-    "orthodontics": ["Contemporary Orthodontics – Proffit", "Graber's Orthodontics"],
-    "pedodontics": ["McDonald and Avery's Dentistry for the Child and Adolescent", "Nikhil Marwa – Textbook of Pediatric Dentistry"],
-    "public health dentistry": ["Soben Peter – Essentials of Preventive and Community Dentistry"],
-    "dental materials": ["Phillips' Science of Dental Materials", "Craig's Restorative Dental Materials"],
-    "radiology": ["White and Pharoah's Oral Radiology", "Langlais' Diagnostic Imaging of the Jaws"],
+    "oral pathology": [
+        "Shafer's Textbook of Oral Pathology",
+        "Neville's Oral and Maxillofacial Pathology",
+        "Soames & Southam - Oral Pathology"
+    ],
+    "oral medicine": [
+        "Burket's Oral Medicine",
+        "Greenberg and Glick - Burket's Oral Medicine",
+        "White and Pharoah - Oral Radiology"
+    ],
+    "periodontics": [
+        "Carranza's Clinical Periodontology",
+        "Newman and Carranza's Clinical Periodontology",
+        "Shantipriya Reddy - Essentials of Periodontology"
+    ],
+    "endodontics": [
+        "Sturdevant's Art and Science of Operative Dentistry",
+        "Cohen's Pathways of the Pulp",
+        "Ingle's Endodontics",
+        "Nisha Garg - Textbook of Operative Dentistry"
+    ],
+    "prosthodontics": [
+        "Nallaswamy - Textbook of Prosthodontics",
+        "Boucher's Prosthodontic Treatment for Edentulous Patients",
+        "McCracken's Removable Partial Prosthodontics",
+        "Rosenstiel - Contemporary Fixed Prosthodontics"
+    ],
+    "orthodontics": [
+        "Proffit - Contemporary Orthodontics",
+        "S.I. Bhalajhi - Orthodontics: The Art and Science",
+        "Graber's Orthodontics"
+    ],
+    "pedodontics": [
+        "McDonald and Avery's Dentistry for the Child and Adolescent",
+        "Nikhil Marwah – Textbook of Pediatric Dentistry",
+        "Shobha Tandon - Textbook of Pedodontics"
+    ],
+    "public health dentistry": [
+        "Soben Peter – Essentials of Preventive and Community Dentistry",
+        "Hiremath - Textbook of Public Health Dentistry"
+    ],
+    "dental materials": [
+        "Phillips' Science of Dental Materials",
+        "Craig's Restorative Dental Materials",
+        "Shobha Rodrigues - Dental Materials"
+    ],
+    "oral surgery": [
+        "Peterson's Principles of Oral and Maxillofacial Surgery",
+        "Milner - Contemporary Oral Surgery",
+        "Malamed's Handbook of Local Anesthesia"
+    ],
+    "radiology": [
+        "White and Pharoah's Oral Radiology",
+        "Langlais' Diagnostic Imaging of the Jaws"
+    ]
 }
 
 REFERENCE_ALIASES = {
@@ -209,11 +246,20 @@ REFERENCE_ALIASES = {
     "iopa": "radiology",
     "ceph": "orthodontics",
     "pedo": "pedodontics",
+    "paedo": "pedodontics",
+    "surgery": "oral surgery",
+    "extraction": "oral surgery",
+    "prostho": "prosthodontics",
+    "perio": "periodontics",
+    "endo": "endodontics",
+    "ortho": "orthodontics",
+    "omr": "oral medicine",
+    "pathology": "oral pathology"
 }
 
 def get_topic_references(search_text):
     if not search_text:
-        return None, None
+        return "oral pathology", REFERENCE_DATABASE["oral pathology"]
     search = search_text.strip().lower()
     if search in REFERENCE_DATABASE:
         return search, REFERENCE_DATABASE[search]
@@ -223,33 +269,48 @@ def get_topic_references(search_text):
     for key in sorted(REFERENCE_DATABASE.keys(), key=len, reverse=True):
         if key in search:
             return key, REFERENCE_DATABASE[key]
+    for alias, mapped in REFERENCE_ALIASES.items():
+        if alias in search:
+            return mapped, REFERENCE_DATABASE.get(mapped)
     return "oral pathology", REFERENCE_DATABASE["oral pathology"]
 
 def show_dynamic_references(search_text):
     matched_topic, books = get_topic_references(search_text)
-    st.markdown("### 📚 Standard Textbook References")
-    st.caption(f"References matched to: **{matched_topic.title()}**")
+    st.markdown("### 📚 Comprehensive BDS Textbook Library")
+    st.caption(f"Showing standard textbooks for: **{matched_topic.title()}** (Search any subject or topic above)")
 
     for idx, book in enumerate(books):
         col_r1, col_r2 = st.columns([3, 1])
         with col_r1:
             st.markdown(f"📕 **{book}**")
         with col_r2:
-            if st.button("📖 Read PDF In-App", key=f"read_pdf_{idx}_{book}"):
+            if st.button("📖 Open In-App Reader", key=f"read_pdf_{idx}_{book}_{search_text}"):
                 st.session_state.active_pdf_viewer = book
 
     if st.session_state.active_pdf_viewer:
         st.markdown("---")
-        st.markdown(f"### 📂 In-App PDF Reader: *{st.session_state.active_pdf_viewer}*")
-        pdf_html = f"""
-        <div style="border: 2px solid #17b978; border-radius: 14px; padding: 15px; background-color: #f0fdf4; text-align: center;">
-            <p style="color: #1e3d59; font-weight: bold; font-size: 16px;">📖 Currently Reading: {st.session_state.active_pdf_viewer}</p>
-            <p style="color: #666; font-size: 13px;">(In-App PDF Viewer active. Textbooks and reference documents load directly inside Dental Buddy without leaving the web app).</p>
-            <iframe src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" width="100%" height="450px" style="border: none; border-radius: 8px;"></iframe>
-        </div>
-        """
-        st.markdown(pdf_html, unsafe_allow_html=True)
-        if st.button("❌ Close In-App Reader"):
+        st.markdown(f"### 📂 In-App Reader & PDF Uploader: *{st.session_state.active_pdf_viewer}*")
+        
+        # In-app PDF uploader so you can upload your own chapter/book PDFs directly inside the web app
+        uploaded_pdf = st.file_uploader(f"Upload PDF file for '{st.session_state.active_pdf_viewer}'", type=["pdf"], key=f"uploader_{st.session_state.active_pdf_viewer}")
+        
+        if uploaded_pdf is not None:
+            bytes_data = uploaded_pdf.getvalue()
+            base64_pdf = base64.b64encode(bytes_data).decode('utf-8')
+            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600px" style="border: none; border-radius: 8px;"></iframe>'
+            st.markdown(pdf_display, unsafe_allow_html=True)
+        else:
+            st.info("💡 Upload your textbook chapter PDF above to read it directly inside Dental Buddy without leaving the app!")
+            # Sample fallback embedded viewer container
+            pdf_html = f"""
+            <div style="border: 2px dashed #17b978; border-radius: 14px; padding: 20px; background-color: #f0fdf4; text-align: center;">
+                <p style="color: #1e3d59; font-weight: bold; font-size: 16px;">📖 Active Reader Slot: {st.session_state.active_pdf_viewer}</p>
+                <p style="color: #666; font-size: 13px;">No local PDF uploaded yet. Use the uploader above to view your study materials instantly inside the app.</p>
+            </div>
+            """
+            st.markdown(pdf_html, unsafe_allow_html=True)
+
+        if st.button("❌ Close Reader"):
             st.session_state.active_pdf_viewer = None
             st.rerun()
 
@@ -276,7 +337,7 @@ CEPH_PROMPTS = COMMON_SAFETY_RULES + "Analyze the lateral cephalogram for orthod
 # ------------------------------------------------------------
 def show_home():
     st.markdown('<div class="hero-title">🦷 Dental Buddy</div>', unsafe_allow_html=True)
-    st.markdown('<div class="hero-subtitle">AI-Powered Dental Learning & Clinical Decision-Support Platform</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">AI-Powered Dental Learning & Clinical Decision-Support Platform</div>', unsafe_allow_html=True)
 
     st.markdown(
         """
@@ -410,8 +471,8 @@ def student_mode():
                     st.markdown(res)
 
     with tabs[3]:
-        st.markdown("### 📖 In-App Textbook Reference Library")
-        ref_query = st.text_input("Search subject or topic for textbooks", placeholder="Example: Periodontics, Caries, Oral Pathology")
+        st.markdown("### 📖 In-App Textbook Reference Library & PDF Reader")
+        ref_query = st.text_input("Search subject or topic for textbooks", placeholder="Example: Periodontics, Caries, Oral Pathology, Orthodontics")
         show_dynamic_references(ref_query if ref_query else "oral pathology")
 
 # ------------------------------------------------------------
@@ -433,7 +494,7 @@ def doctor_mode():
                 st.markdown(res)
 
     with tabs[2]:
-        st.markdown("### 📖 Clinical Reference Library")
+        st.markdown("### 📖 Clinical Reference Library & PDF Reader")
         ref_query_doc = st.text_input("Search clinical subject", placeholder="Example: Oral Surgery, Pharmacology, Endodontics", key="doc_ref")
         show_dynamic_references(ref_query_doc if ref_query_doc else "oral surgery")
 
