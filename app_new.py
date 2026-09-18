@@ -284,14 +284,13 @@ def show_dynamic_references(search_text):
         with col_r1:
             st.markdown(f"📕 **{book}**")
         with col_r2:
-            if st.button("📖 Open In-App Reader", key=f"read_pdf_{idx}_{book}_{search_text}"):
+            if st.button("📖 Read PDF In-App", key=f"read_pdf_{idx}_{book}_{search_text}"):
                 st.session_state.active_pdf_viewer = book
 
     if st.session_state.active_pdf_viewer:
         st.markdown("---")
-        st.markdown(f"### 📂 In-App Reader & PDF Uploader: *{st.session_state.active_pdf_viewer}*")
+        st.markdown(f"### 📂 In-App PDF Reader: *{st.session_state.active_pdf_viewer}*")
         
-        # In-app PDF uploader so you can upload your own chapter/book PDFs directly inside the web app
         uploaded_pdf = st.file_uploader(f"Upload PDF file for '{st.session_state.active_pdf_viewer}'", type=["pdf"], key=f"uploader_{st.session_state.active_pdf_viewer}")
         
         if uploaded_pdf is not None:
@@ -300,15 +299,7 @@ def show_dynamic_references(search_text):
             pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600px" style="border: none; border-radius: 8px;"></iframe>'
             st.markdown(pdf_display, unsafe_allow_html=True)
         else:
-            st.info("💡 Upload your textbook chapter PDF above to read it directly inside Dental Buddy without leaving the app!")
-            # Sample fallback embedded viewer container
-            pdf_html = f"""
-            <div style="border: 2px dashed #17b978; border-radius: 14px; padding: 20px; background-color: #f0fdf4; text-align: center;">
-                <p style="color: #1e3d59; font-weight: bold; font-size: 16px;">📖 Active Reader Slot: {st.session_state.active_pdf_viewer}</p>
-                <p style="color: #666; font-size: 13px;">No local PDF uploaded yet. Use the uploader above to view your study materials instantly inside the app.</p>
-            </div>
-            """
-            st.markdown(pdf_html, unsafe_allow_html=True)
+            st.warning(f"⚠️ Ningal '{st.session_state.active_pdf_viewer}' ennathinu ulla PDF ippol upload cheythitilla. Mukalilulla uploader vazhi ningalude padikkanulla real textbook PDF upload cheyyuka.")
 
         if st.button("❌ Close Reader"):
             st.session_state.active_pdf_viewer = None
@@ -515,14 +506,4 @@ def sidebar():
 # ------------------------------------------------------------
 # RUN APP
 # ------------------------------------------------------------
-sidebar()
-
-if st.session_state.mode is None:
-    show_home()
-elif st.session_state.mode == "student":
-    student_mode()
-elif st.session_state.mode == "doctor":
-    doctor_mode()
-else:
-    st.session_state.mode = None
-    st.rerun()
+End of code.
