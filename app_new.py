@@ -376,8 +376,8 @@ TEXTBOOK_LIBRARY = {
     },
     "Dental Materials": {
         "Phillips' Science of Dental Materials": [
-            "Properties of Materials", "Impression Materials", "Gypsum Products", "Waxes",
-            "Dental Polymers", "Composites", "Amalgam", "Dental Cements", "Metals", "Ceramics",
+            "Structure of Matter", "Physical Properties", "Biocompatibility", "Impression Materials",
+            "Gypsum Products", "Dental Waxes", "Resin-Based Composites", "Dental Cements", "Dental Amalgam",
         ],
         "Craig's Restorative Dental Materials": [
             "Mechanical Properties", "Impression Materials", "Resins", "Composites", "Cements", "Metals", "Ceramics",
@@ -617,7 +617,7 @@ def show_home():
         """
         <div class="mode-card doctor">
         <h3>🩺 Doctor Mode</h3>
-        <p>Radiographic AI, advanced Cephalometric Analysis selection, professional Soft-Tissue clinical reasoning workflow and clinical decision support.</p>
+        <p>Radiographic AI with Scale Calibration, Cephalometric Analysis selection, professional Soft-Tissue clinical reasoning workflow and clinical decision support.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -663,7 +663,7 @@ def show_usage():
 
 
 # ============================================================
-# RADIOGRAPH ANALYZER (WITH CEPH TYPES DROPDOWN)
+# RADIOGRAPH ANALYZER (WITH CALIBRATION & CEPH TYPES)
 # ============================================================
 
 def radiograph_analyzer():
@@ -679,6 +679,19 @@ def radiograph_analyzer():
     if radiograph_type == "Lateral Cephalogram (Ceph)":
         ceph_analysis_type = st.selectbox("Select Cephalometric Analysis Type", CEPH_ANALYSES)
 
+    st.markdown("#### 📏 Scale Calibration Settings")
+    calibration_mode = st.radio(
+        "Select Scale Calibration Mode",
+        [
+            "🤖 Auto-Calculate / AI Estimation",
+            "✏️ Enter Known Calibration Scale (mm/pixel)"
+        ],
+        key="calibration_mode_selector"
+    )
+    scale_value_input = "Auto-estimated by AI based on anatomical proportions"
+    if calibration_mode == "✏️ Enter Known Calibration Scale (mm/pixel)":
+        scale_value_input = st.text_input("Enter known scale value", value="1.0 mm/pixel", key="known_scale_val")
+
     uploaded = st.file_uploader("📤 Upload dental radiograph", type=["png", "jpg", "jpeg", "webp"])
 
     if uploaded:
@@ -687,22 +700,26 @@ def radiograph_analyzer():
     if radiograph_type == "Lateral Cephalogram (Ceph)":
         prompt = COMMON_SAFETY_RULES + f"""
 Analyze the uploaded lateral cephalogram specifically focusing on: {ceph_analysis_type}.
+Calibration Mode: {calibration_mode} (Scale Setting: {scale_value_input}).
 Provide:
 1. Image Quality & Landmark Visibility
-2. Skeletal & Dental Relationship Measurements
+2. Skeletal & Dental Relationship Measurements (scaled with calibration)
 3. Vertical & Soft Tissue Profile Findings
 4. Cephalometric Interpretation & Clinical Significance
 5. Uncertainty & Limitations
 """
     else:
-        prompt = RADIOGRAPH_PROMPTS.get(radiograph_type, COMMON_SAFETY_RULES)
+        prompt = RADIOGRAPH_PROMPTS.get(radiograph_type, COMMON_SAFETY_RULES) + f"""
+Calibration Mode: {calibration_mode} (Scale Setting: {scale_value_input}).
+Ensure spatial/measurement estimates incorporate this scale setting.
+"""
 
     if st.button("🔍 Analyze X-ray", type="primary", use_container_width=True, disabled=not can_analyze()):
         if uploaded is None:
             st.warning("Please upload a radiograph first.")
             return
 
-        with st.spinner("Analyzing radiograph (Auto-retrying if busy)..."):
+        with st.spinner("Analyzing radiograph with calibration..."):
             try:
                 report = run_image_analysis(uploaded, prompt)
                 record_analysis()
