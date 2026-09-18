@@ -24,7 +24,7 @@ st.set_page_config(
 DAILY_ANALYSIS_LIMIT = 3
 
 # Stable Gemini model
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.6-flash"
 
 
 # ============================================================
