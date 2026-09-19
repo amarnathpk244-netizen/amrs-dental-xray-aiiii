@@ -476,12 +476,50 @@ Generate a comprehensive Previous Year Question Bank layout containing Long Essa
 
 
 # ============================================================
-# INTRO TO DENTAL FAMILY (Feature 6)
+# INTRO TO DENTAL FAMILY & BRANCHES OF DENTISTRY (Enhanced)
 # ============================================================
 
 def intro_dental_family():
-    st.markdown("## 🦷 Intro to Dental Family")
-    st.write("Welcome to Pocket Dentistry — bridging undergraduate students and practicing clinicians.")
+    st.markdown("## 🦷 Intro to Dental Family & Basic Dentistry")
+    st.write("Welcome to **Pocket Dentistry & Medical Hub** — the ultimate AI-powered bridge uniting undergraduate dental students, medical trainees, and practicing clinicians.")
+    
+    st.markdown("### 📖 What is Basic Dentistry?")
+    st.write("""
+    **Basic Dentistry** encompasses the foundational sciences and clinical practices dedicated to the study, diagnosis, prevention, and treatment of diseases, disorders, and conditions of the oral cavity, maxillofacial area, and adjacent structures. It bridges core medical sciences (Anatomy, Physiology, Pathology, Pharmacology) with specialized dental mechanics and patient care.
+    """)
+    
+    st.markdown("### 🌟 Comprehensive Branches of Dentistry (Specialties)")
+    st.write("The dental profession is divided into several recognized clinical and academic specialties:")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        1. **Conservative Dentistry & Endodontics**  
+           * Focuses on the preservation of natural teeth, operative restorations (fillings), and root canal treatments (RCT) of diseased pulpal tissues.
+        2. **Periodontics (Periodontology)**  
+           * Deals with the supporting structures of teeth (gums, alveolar bone, periodontal ligament) and treatment of gum diseases (gingivitis, periodontitis).
+        3. **Orthodontics & Dentofacial Orthopedics**  
+           * Specializes in the diagnosis, prevention, and correction of malpositioned teeth and jaws (braces, aligners, growth modification).
+        4. **Prosthodontics (Prosthetic Dentistry)**  
+           * Involves the replacement of missing teeth and jaw structures using artificial devices such as crowns, bridges, dentures, and dental implants.
+        5. **Oral & Maxillofacial Surgery**  
+           * Surgical treatment of diseases, injuries, and defects in the head, neck, face, jaws, and oral tissues (including tooth extractions and trauma care).
+        """)
+    with col2:
+        st.markdown("""
+        6. **Oral Medicine & Radiology**  
+           * Focuses on oral mucosal diseases, systemic disease manifestations in the mouth, orofacial pain, and advanced dental imaging/diagnostics (X-rays, OPG, CBCT).
+        7. **Pediatric Dentistry (Pedodontics)**  
+           * Dedicated to the specialized oral health care of children from infancy through adolescence, including preventive and interceptive orthodontics.
+        8. **Oral & Maxillofacial Pathology**  
+           * Pathology dealing with the nature, identification, and management of diseases affecting the oral and maxillofacial regions (biopsy analysis).
+        9. **Public Health Dentistry**  
+           * Focuses on the prevention of dental diseases, dental epidemiology, community oral health programs, indices (CPITN, DMFT), and health education.
+        10. **Dental Materials Science**  
+           * The study of physical, chemical, and biological properties of materials used in dentistry (composites, cements, gypsum, impression materials).
+        """)
+
+    st.markdown("---")
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("### 🎓 Student Hub")
@@ -638,7 +676,7 @@ def textbook_library():
 
 
 # ============================================================
-# RADIOGRAPH & SOFT TISSUE (Restored Fully)
+# RADIOGRAPH & SOFT TISSUE
 # ============================================================
 
 COMMON_SAFETY_RULES = """
@@ -805,7 +843,7 @@ def show_home():
     st.markdown('<div class="hero-title">🦷 Pocket Dentistry & Medical Hub</div>', unsafe_allow_html=True)
     st.markdown('<div class="hero-subtitle">AI-Powered Dental & Medical Learning & Clinical Decision-Support Platform</div>', unsafe_allow_html=True)
     
-    if st.button("🦷 Intro to Dental Family", use_container_width=True):
+    if st.button("🦷 Intro to Dental Family & Branches", use_container_width=True):
         st.session_state.page = "intro"
         st.rerun()
 
