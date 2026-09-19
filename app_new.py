@@ -95,10 +95,6 @@ st.markdown(
         box-shadow: 0 8px 20px rgba(67,160,71,0.2);
     }
 
-    .mode-card.doctor h3, .mode-card.doctor p {
-        color: #e8f5e9 !important;
-    }
-
     .safety-box {
         padding: 1.2rem;
         border-radius: 15px;
@@ -476,47 +472,65 @@ Generate a comprehensive Previous Year Question Bank layout containing Long Essa
 
 
 # ============================================================
-# INTRO TO DENTAL FAMILY & BRANCHES OF DENTISTRY (Enhanced)
+# INTRO TO DENTAL FAMILY, BASIC DENTISTRY & DENTAL CHAIR PARTS
 # ============================================================
 
 def intro_dental_family():
     st.markdown("## 🦷 Intro to Dental Family & Basic Dentistry")
-    st.write("Welcome to **Pocket Dentistry & Medical Hub** — the ultimate AI-powered bridge uniting undergraduate dental students, medical trainees, and practicing clinicians.")
+    st.write("Welcome to **Pocket Dentistry & Medical Hub** — the ultimate AI-powered platform uniting undergraduate dental students, medical trainees, and practicing clinicians.")
     
     st.markdown("### 📖 What is Basic Dentistry?")
     st.write("""
-    **Basic Dentistry** encompasses the foundational sciences and clinical practices dedicated to the study, diagnosis, prevention, and treatment of diseases, disorders, and conditions of the oral cavity, maxillofacial area, and adjacent structures. It bridges core medical sciences (Anatomy, Physiology, Pathology, Pharmacology) with specialized dental mechanics and patient care.
+    **Basic Dentistry** encompasses the foundational sciences and clinical practices dedicated to the study, diagnosis, prevention, and treatment of diseases, disorders, and conditions of the oral cavity, maxillofacial area, and adjacent structures.
+    """)
+
+    st.markdown("### 💺 Anatomy of a Dental Chair & Unit (Parts & Functions)")
+    st.write("A standard dental unit is the core equipment used by dental professionals. Below are its primary components and their parts:")
+
+    st.info("""
+    **1. Patient Chair (Dental Chair):**
+    * **Headrest:** Supports the patient's head and neck, adjustable for various angles.
+    * **Backrest:** Supports the patient's back; can be reclined horizontally or vertically.
+    * **Seat & Armrests:** Provides patient seating comfort; armrests can often rotate or lower for easy entry/exit.
+    
+    **2. Delivery System (Doctor's Console):**
+    * **Handpiece Tubings:** Connects high-speed and low-speed handpieces (turbines, micromotors).
+    * **Three-Way Syringe (Water/Air/Spray):** Used for washing, drying, or cooling the surgical site.
+    * **Control Panel:** Touchpad or buttons to control chair movements, operating light, and cup filler.
+    
+    **3. Assistant's Instrumentation:**
+    * **Saliva Ejector:** Low-volume suction for continuous removal of saliva.
+    * **High-Volume Evacuator (HVE):** Powerful suction to remove debris, water, and blood.
+    * **Curing Light:** Used to polymerize (cure) light-cured composite resin fillings.
+    
+    **4. Operating Light (Dental Light):**
+    * Provides focused, shadow-free illumination of the oral cavity (LED or halogen).
+    
+    **5. Cuspidor (Spittoon) & Water Unit:**
+    * **Spittoon Bowl:** Ceramic or glass bowl where the patient rinses and spits.
+    * **Cup Filler:** Automated dispenser for rinsing water.
+    
+    **6. Foot Control (Foot Pedal / Rheostat):**
+    * Controls the speed and operation of dental handpieces and water spray hands-free.
     """)
     
     st.markdown("### 🌟 Comprehensive Branches of Dentistry (Specialties)")
-    st.write("The dental profession is divided into several recognized clinical and academic specialties:")
-
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("""
-        1. **Conservative Dentistry & Endodontics**  
-           * Focuses on the preservation of natural teeth, operative restorations (fillings), and root canal treatments (RCT) of diseased pulpal tissues.
-        2. **Periodontics (Periodontology)**  
-           * Deals with the supporting structures of teeth (gums, alveolar bone, periodontal ligament) and treatment of gum diseases (gingivitis, periodontitis).
-        3. **Orthodontics & Dentofacial Orthopedics**  
-           * Specializes in the diagnosis, prevention, and correction of malpositioned teeth and jaws (braces, aligners, growth modification).
-        4. **Prosthodontics (Prosthetic Dentistry)**  
-           * Involves the replacement of missing teeth and jaw structures using artificial devices such as crowns, bridges, dentures, and dental implants.
-        5. **Oral & Maxillofacial Surgery**  
-           * Surgical treatment of diseases, injuries, and defects in the head, neck, face, jaws, and oral tissues (including tooth extractions and trauma care).
+        1. **Conservative Dentistry & Endodontics** (Restorations & RCT)
+        2. **Periodontics** (Gums & Supporting Structures)
+        3. **Orthodontics** (Braces & Malocclusion Correction)
+        4. **Prosthodontics** (Crowns, Bridges, Dentures & Implants)
+        5. **Oral & Maxillofacial Surgery** (Extractions & Jaw Surgery)
         """)
     with col2:
         st.markdown("""
-        6. **Oral Medicine & Radiology**  
-           * Focuses on oral mucosal diseases, systemic disease manifestations in the mouth, orofacial pain, and advanced dental imaging/diagnostics (X-rays, OPG, CBCT).
-        7. **Pediatric Dentistry (Pedodontics)**  
-           * Dedicated to the specialized oral health care of children from infancy through adolescence, including preventive and interceptive orthodontics.
-        8. **Oral & Maxillofacial Pathology**  
-           * Pathology dealing with the nature, identification, and management of diseases affecting the oral and maxillofacial regions (biopsy analysis).
-        9. **Public Health Dentistry**  
-           * Focuses on the prevention of dental diseases, dental epidemiology, community oral health programs, indices (CPITN, DMFT), and health education.
-        10. **Dental Materials Science**  
-           * The study of physical, chemical, and biological properties of materials used in dentistry (composites, cements, gypsum, impression materials).
+        6. **Oral Medicine & Radiology** (Mucosal Diseases & X-Rays)
+        7. **Pediatric Dentistry** (Child Dental Care)
+        8. **Oral Pathology** (Biopsy & Disease Identification)
+        9. **Public Health Dentistry** (Community Programs & Indices)
+        10. **Dental Materials Science** (Biomaterials Study)
         """)
 
     st.markdown("---")
