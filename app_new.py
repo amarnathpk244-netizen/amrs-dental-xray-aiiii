@@ -89,12 +89,6 @@ st.markdown(
         color: #e0f7fa !important;
     }
 
-    .mode-card.doctor {
-        border-color: #43a047;
-        background: linear-gradient(135deg, rgba(67,160,71,0.15), rgba(165,214,167,0.1));
-        box-shadow: 0 8px 20px rgba(67,160,71,0.2);
-    }
-
     .safety-box {
         padding: 1.2rem;
         border-radius: 15px;
@@ -472,7 +466,7 @@ Generate a comprehensive Previous Year Question Bank layout containing Long Essa
 
 
 # ============================================================
-# INTRO TO DENTAL FAMILY, BASIC DENTISTRY & DENTAL CHAIR PARTS
+# INTRO TO DENTAL FAMILY, BASIC DENTISTRY & DENTAL CHAIR WITH PIC
 # ============================================================
 
 def intro_dental_family():
@@ -485,33 +479,41 @@ def intro_dental_family():
     """)
 
     st.markdown("### 💺 Anatomy of a Dental Chair & Unit (Parts & Functions)")
-    st.write("A standard dental unit is the core equipment used by dental professionals. Below are its primary components and their parts:")
+    
+    # Displaying a clear dental unit/chair diagram link or reference image
+    st.image(
+        "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80", 
+        caption="Modern Dental Unit & Operator Setup", 
+        use_container_width=True
+    )
+    
+    st.markdown("""
+    A standard dental unit is the core equipment used by dental professionals. Below are its primary components and their parts:
 
-    st.info("""
-    **1. Patient Chair (Dental Chair):**
-    * **Headrest:** Supports the patient's head and neck, adjustable for various angles.
-    * **Backrest:** Supports the patient's back; can be reclined horizontally or vertically.
-    * **Seat & Armrests:** Provides patient seating comfort; armrests can often rotate or lower for easy entry/exit.
+    * **1. Patient Chair (Dental Chair):**
+      * **Headrest:** Supports the patient's head and neck, adjustable for various angles.
+      * **Backrest:** Supports the patient's back; can be reclined horizontally or vertically.
+      * **Seat & Armrests:** Provides patient seating comfort; armrests rotate or lower for easy entry/exit.
     
-    **2. Delivery System (Doctor's Console):**
-    * **Handpiece Tubings:** Connects high-speed and low-speed handpieces (turbines, micromotors).
-    * **Three-Way Syringe (Water/Air/Spray):** Used for washing, drying, or cooling the surgical site.
-    * **Control Panel:** Touchpad or buttons to control chair movements, operating light, and cup filler.
+    * **2. Delivery System (Doctor's Console):**
+      * **Handpiece Tubings:** Connects high-speed and low-speed handpieces (turbines, micromotors).
+      * **Three-Way Syringe (Water/Air/Spray):** Used for washing, drying, or cooling the surgical site.
+      * **Control Panel:** Buttons to control chair movements, operating light, and cup filler.
     
-    **3. Assistant's Instrumentation:**
-    * **Saliva Ejector:** Low-volume suction for continuous removal of saliva.
-    * **High-Volume Evacuator (HVE):** Powerful suction to remove debris, water, and blood.
-    * **Curing Light:** Used to polymerize (cure) light-cured composite resin fillings.
+    * **3. Assistant's Instrumentation:**
+      * **Saliva Ejector:** Low-volume suction for continuous removal of saliva.
+      * **High-Volume Evacuator (HVE):** Powerful suction to remove debris, water, and blood.
+      * **Curing Light:** Used to polymerize (cure) light-cured composite resin fillings.
     
-    **4. Operating Light (Dental Light):**
-    * Provides focused, shadow-free illumination of the oral cavity (LED or halogen).
+    * **4. Operating Light (Dental Light):**
+      * Provides focused, shadow-free illumination of the oral cavity.
     
-    **5. Cuspidor (Spittoon) & Water Unit:**
-    * **Spittoon Bowl:** Ceramic or glass bowl where the patient rinses and spits.
-    * **Cup Filler:** Automated dispenser for rinsing water.
+    * **5. Cuspidor (Spittoon) & Water Unit:**
+      * **Spittoon Bowl:** Ceramic or glass bowl where the patient rinses and spits.
+      * **Cup Filler:** Automated dispenser for rinsing water.
     
-    **6. Foot Control (Foot Pedal / Rheostat):**
-    * Controls the speed and operation of dental handpieces and water spray hands-free.
+    * **6. Foot Control (Foot Pedal / Rheostat):**
+      * Controls the speed and operation of dental handpieces and water spray hands-free.
     """)
     
     st.markdown("### 🌟 Comprehensive Branches of Dentistry (Specialties)")
