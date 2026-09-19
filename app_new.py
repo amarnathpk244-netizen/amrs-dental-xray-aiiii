@@ -29,12 +29,15 @@ MODEL_NAME = "gemini-3.6-flash"
 
 
 # ============================================================
-# GLOBAL CSS
+# GLOBAL CSS (Fixed text color to prevent red text bugs)
 # ============================================================
 
 st.markdown(
     """
     <style>
+    body, .stMarkdown, p, span, label, div {
+        color: #1e3d59;
+    }
     .block-container {
         max-width: 900px;
         padding-top: 2.5rem;
@@ -346,7 +349,7 @@ def review_section(context="report"):
 
 
 # ============================================================
-# STUDENT PRACTICALS SECTION (Animated Photos, Videos & Notes)
+# STUDENT PRACTICALS & MEDIA SECTION (Animated Photos, Videos & Notes)
 # ============================================================
 
 def student_practicals_section():
@@ -615,6 +618,12 @@ REFERENCE_ALIASES = {
     "cpitn": "Public Health Dentistry", "opg": "Radiology", "iopa": "Radiology", "ceph": "Orthodontics",
     "pedo": "Pedodontics", "prostho": "Prosthodontics", "ulcer": "Oral Medicine & Radiology"
 }
+
+CEPH_ANALYSES = [
+    "Steiner Analysis", "Downs Analysis", "McNamara Analysis",
+    "Tweed Analysis", "Wits Appraisal", "Jarabak Analysis",
+    "Soft Tissue Profile Analysis", "Combined / All Analyses"
+]
 
 def find_subject(search_text):
     if not search_text: return "General Human Anatomy"
