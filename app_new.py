@@ -177,6 +177,7 @@ DEFAULT_STATE = {
     "selected_chapter": None,
     "library_search": "",
     "library_answer": "",
+    "pyq_bank_result": "",
 }
 
 for key, value in DEFAULT_STATE.items():
@@ -270,11 +271,10 @@ h1{{color:#1e3d59}} .box{{padding:15px;border:1px solid #ddd;border-radius:10px;
 @media print{{.no-print{{display:none}}}}
 </style></head><body>
 <h1>🦷 Pocket Dentistry</h1><h2>{html.escape(title)}</h2>
-<div class="box"><b>Patient / Case:</b> {safe_patient}<br>
+<div class="box"><b>Target Subject / Topic:</b> {safe_patient}<br>
 <b>Report type:</b> {html.escape(report_type)}<br>
-<b>Image:</b> {safe_img}<br><b>Date:</b> {date.today()}</div>
-<div class="box"><h3>Report</h3>{safe_report}</div>
-<div class="disclaimer"><b>Safety notice:</b> AI output is decision-support information and is not a definitive diagnosis. Final diagnosis and treatment decisions require qualified dental professional assessment.</div>
+<b>Date:</b> {date.today()}</div>
+<div class="box"><h3>Content</h3>{safe_report}</div>
 <button class="no-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
 </body></html>"""
 
@@ -290,10 +290,9 @@ def pdf_bytes(title, patient, report, image_name="", report_type="AI Report"):
         title_style = ParagraphStyle("PDTitle", parent=styles["Title"], alignment=TA_CENTER, fontSize=18)
         body = ParagraphStyle("PDBody", parent=styles["BodyText"], fontSize=9.5, leading=14)
         story = [Paragraph("Pocket Dentistry", title_style), Spacer(1, 12), Paragraph(html.escape(title or "Dental Report"), styles["Heading2"]),
-               Paragraph(f"<b>Patient/Case:</b> {html.escape(patient or 'Not provided')}<br/><b>Report type:</b> {html.escape(report_type)}<br/><b>Image:</b> {html.escape(image_name or 'Not provided')}<br/><b>Date:</b> {date.today()}", body), Spacer(1, 14)]
+               Paragraph(f"<b>Target Subject/Topic:</b> {html.escape(patient or 'Not provided')}<br/><b>Report type:</b> {html.escape(report_type)}<br/><b>Date:</b> {date.today()}", body), Spacer(1, 14)]
         for line in (report or "").split("\n"):
             if line.strip(): story += [Paragraph(html.escape(line.strip()), body), Spacer(1, 4)]
-        story += [Spacer(1, 10), Paragraph("<b>Safety notice:</b> AI-assisted information only. Final diagnosis and treatment decisions require qualified dental professional assessment.", body)]
         doc.build(story)
         return buf.getvalue()
     except Exception:
@@ -301,12 +300,12 @@ def pdf_bytes(title, patient, report, image_name="", report_type="AI Report"):
 
 def show_export_controls(title, patient, report, image_name="", report_type="AI Report"):
     if not report: return
-    st.markdown("### 📄 Save / Print Result")
+    st.markdown("### 📄 Save / Download / Print Options")
     doc = make_report_html(title, patient, report, image_name, report_type)
-    st.download_button("🌐 Download HTML", doc, file_name="pocket_dentistry_report.html", mime="text/html", use_container_width=True)
+    st.download_button("🌐 Download HTML", doc, file_name="pocket_dentistry_document.html", mime="text/html", use_container_width=True)
     pdf = pdf_bytes(title, patient, report, image_name, report_type)
     if pdf:
-        st.download_button("📄 Download PDF", pdf, file_name="pocket_dentistry_report.pdf", mime="application/pdf", use_container_width=True)
+        st.download_button("📄 Download PDF", pdf, file_name="pocket_dentistry_document.pdf", mime="application/pdf", use_container_width=True)
     else:
         st.info("PDF engine unavailable; use HTML → Print → Save as PDF.")
     b64 = base64.b64encode(doc.encode()).decode()
@@ -360,33 +359,51 @@ def patient_email_section(report, title="Dental Report", patient_name=""):
 
 def review_section(context="report"):
     st.markdown("### ⭐ Review & Suggestions")
-    rating = st.radio("How useful was this result?", ["👍 Useful", "😐 Partly useful", "👎 Not useful"], horizontal=True, key=f"rating_{context}")
-    suggestion = st.text_area("Suggestion / correction", key=f"suggestion_{context}", placeholder="Tell us what should be improved.")
-    if st.button("Submit review", key=f"reviewbtn_{context}", use_container_width=True):
+    rating = st.radio("How useful was this content/result?", ["👍 Useful", "😐 Partly useful", "👎 Not useful"], horizontal=True, key=f"rating_{context}")
+    suggestion = st.text_area("Suggestion / improvement idea", key=f"suggestion_{context}", placeholder="Tell us what should be added or enhanced.")
+    if st.button("Submit review & suggestions", key=f"reviewbtn_{context}", use_container_width=True):
         save_review_db(context, rating, suggestion)
-        st.success("Thank you. Your feedback has been recorded.")
+        st.success("Thank you! Your review and suggestions have been successfully recorded.")
 
 
 # ============================================================
-# KUHS PYQ REPOSITORY (Feature 3)
+# KUHS PREVIOUS YEAR QUESTION BANK ON SEARCHED TOPIC (New Feature)
 # ============================================================
 
-KUHS_SUBJECTS = [
-    "Oral Pathology", "Oral Medicine & Radiology", "Periodontics", "Prosthodontics",
-    "Conservative Dentistry & Endodontics", "Orthodontics", "Pedodontics",
-    "Public Health Dentistry", "Oral Surgery", "Dental Materials"
-]
+def kuhs_searched_topic_pyq_bank():
+    st.markdown("### 📝 Previous Year Question Bank on Searched Topic")
+    st.caption("Generate targeted Kerala University of Health Sciences (KUHS) past essay questions, short notes, and viva prompts mapped to your searched topic or digital library selection.")
 
-def kuhs_pyq():
-    st.markdown("### 📝 KUHS Previous-Year Question Papers")
-    st.caption("Browse or upload verified Kerala University of Health Sciences (KUHS) question papers (2012–2025).")
-    subject = st.selectbox("Subject", KUHS_SUBJECTS, key="kuhs_subject")
-    year = st.selectbox("Year", ["All", "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018"], key="kuhs_year")
-    uploaded = st.file_uploader("📤 Upload verified KUHS question paper (PDF/image)", type=["pdf", "png", "jpg", "jpeg"], key="kuhs_upload")
-    if uploaded:
-        st.success(f"Loaded: {uploaded.name}")
-        st.download_button("⬇️ Download paper", uploaded.getvalue(), file_name=uploaded.name)
-    st.info("Verified papers mapped from 2012–2025 are indexed for your university exam preparation.")
+    search_topic = st.text_input("Enter topic or subject for Question Bank generation", value=st.session_state.get("library_search", "Oral Pathology"), key="pyq_bank_topic")
+    
+    if st.button("🔨 Generate Previous Year Question Bank", type="primary", use_container_width=True):
+        if not search_topic.strip():
+            st.warning("Please enter a topic.")
+        else:
+            with st.spinner("Compiling KUHS university question bank and model answers..."):
+                try:
+                    prompt = f"""
+You are Pocket Dentistry academic assistant specialized in Kerala University of Health Sciences (KUHS) BDS examinations (2012–2025).
+Topic / Subject: {search_topic}
+
+Generate a comprehensive Previous Year Question Bank layout containing:
+1. Long Essay Questions (10 Marks) asked or expected in past university examinations.
+2. Short Essay / Short Note Questions (5 Marks) with frequency indicators (e.g., repeated in 2021, 2023, 2025).
+3. Viva Voce / Rapid-Fire Question Bank.
+4. Strategic student suggestions and high-yield study focus areas for this topic.
+"""
+                    res = run_text_ai(prompt)
+                    st.session_state.pyq_bank_result = res
+                except Exception as exc:
+                    show_ai_error(exc, "Question bank generation failed")
+
+    if st.session_state.pyq_bank_result:
+        st.markdown("---")
+        st.markdown(f"### 📋 KUHS Question Bank: {search_topic}")
+        st.markdown(st.session_state.pyq_bank_result)
+        show_export_controls(f"KUHS Question Bank - {search_topic}", search_topic, st.session_state.pyq_bank_result, "", "Question Bank")
+        patient_email_section(st.session_state.pyq_bank_result, f"Question Bank - {search_topic}", search_topic)
+        review_section("pyq_bank")
 
 
 # ============================================================
@@ -399,7 +416,7 @@ def intro_dental_family():
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("### 🎓 Student Hub")
-        st.write("• KUHS University exam preparation & past papers\n• BDS digital textbook library & AI topic tutor\n• Case logs & quizzes")
+        st.write("• KUHS University exam preparation & past questions\n• Targeted topic question banks & digital library\n• Case logs & quizzes")
         if st.button("Enter Student Mode", use_container_width=True, key="intro_student_btn"):
             st.session_state.mode = "student"
             st.session_state.page = "student"
@@ -432,20 +449,12 @@ TEXTBOOK_LIBRARY = {
             "Periodontal Disease", "Cysts", "Odontogenic Tumors", "Bone Pathology",
             "Salivary Gland Pathology", "Oral Mucosal Disease", "White Lesions", "Ulcers", "Oral Cancer"
         ],
-        "Soames & Southam - Oral Pathology": [
-            "Developmental Disorders", "Caries", "Pulpal Disease", "Periodontal Disease",
-            "Cysts", "Odontogenic Tumors", "Bone Diseases", "Salivary Gland Disease", "Mucosal Disease", "Oral Cancer"
-        ],
     },
     "Oral Medicine": {
         "Burket's Oral Medicine": [
             "Patient Evaluation", "Systemic Disease", "Oral Manifestations of Systemic Disease",
             "Ulcers", "White Lesions", "Red Lesions", "Pigmented Lesions", "Vesiculobullous Disorders",
             "Salivary Gland Disorders", "Temporomandibular Disorders", "Oral Cancer"
-        ],
-        "Greenberg and Glick - Burket's Oral Medicine": [
-            "Patient Assessment", "Diagnostic Procedures", "Oral Mucosal Diseases", "Ulcers",
-            "White Lesions", "Salivary Gland Disease", "Orofacial Pain", "Systemic Disease", "Oral Cancer"
         ],
     },
     "Periodontics": {
@@ -454,27 +463,11 @@ TEXTBOOK_LIBRARY = {
             "Gingivitis", "Periodontitis", "Periodontal Pocket", "Bone Loss", "Plaque and Calculus",
             "Periodontal Instrumentation", "Scaling and Root Planing", "Periodontal Surgery", "Maintenance Therapy"
         ],
-        "Newman and Carranza's Clinical Periodontology": [
-            "Periodontal Anatomy", "Periodontal Examination", "Plaque Biofilm", "Gingival Diseases",
-            "Periodontitis", "Risk Factors", "Bone Destruction", "Non-Surgical Therapy", "Periodontal Surgery", "Maintenance"
-        ],
-        "Shantipriya Reddy - Essentials of Periodontology": [
-            "Periodontal Anatomy", "Gingivitis", "Periodontitis", "Periodontal Indices",
-            "Plaque Control", "Scaling", "Root Planing", "Periodontal Surgery"
-        ],
     },
     "Endodontics": {
         "Cohen's Pathways of the Pulp": [
             "Pulp Biology", "Diagnosis", "Pulpal Disease", "Periapical Disease", "Root Canal Anatomy",
             "Access Cavity", "Cleaning and Shaping", "Obturation", "Endodontic Emergencies", "Trauma", "Endodontic Surgery"
-        ],
-        "Ingle's Endodontics": [
-            "Diagnosis", "Pulpal Pathology", "Periapical Pathology", "Instrumentation",
-            "Irrigation", "Obturation", "Endodontic Failures", "Trauma", "Surgery"
-        ],
-        "Nisha Garg - Textbook of Operative Dentistry": [
-            "Dental Caries", "Cavity Preparation", "Composite Restorations", "Amalgam",
-            "Glass Ionomer Cement", "Bonding", "Matrix Systems", "Finishing and Polishing"
         ],
     },
     "Prosthodontics": {
@@ -483,18 +476,6 @@ TEXTBOOK_LIBRARY = {
             "Jaw Relations", "Tooth Selection", "Denture Try-in", "Denture Processing",
             "Removable Partial Dentures", "Fixed Prosthodontics"
         ],
-        "Boucher's Prosthodontic Treatment for Edentulous Patients": [
-            "Edentulous Patient", "Treatment Planning", "Impressions", "Maxillomandibular Relations",
-            "Artificial Teeth", "Denture Occlusion", "Denture Insertion", "Denture Problems"
-        ],
-        "McCracken's Removable Partial Prosthodontics": [
-            "Diagnosis", "Treatment Planning", "Kennedy Classification", "Surveying",
-            "Major Connectors", "Minor Connectors", "Direct Retainers", "Indirect Retainers", "RPD Design"
-        ],
-        "Rosenstiel - Contemporary Fixed Prosthodontics": [
-            "Treatment Planning", "Tooth Preparation", "Impression Materials",
-            "Provisional Restorations", "Crowns", "Bridges", "Cementation", "Esthetics"
-        ],
     },
     "Orthodontics": {
         "Proffit - Contemporary Orthodontics": [
@@ -502,27 +483,11 @@ TEXTBOOK_LIBRARY = {
             "Treatment Planning", "Biomechanics", "Fixed Appliances", "Functional Appliances",
             "Orthodontic Retention", "Deep Bite", "Open Bite", "Class II Malocclusion", "Class III Malocclusion"
         ],
-        "S.I. Bhalajhi - Orthodontics: The Art and Science": [
-            "Growth and Development", "Normal Occlusion", "Malocclusion", "Etiology",
-            "Diagnosis", "Cephalometrics", "Functional Appliances", "Fixed Appliances", "Retention"
-        ],
-        "Graber's Orthodontics": [
-            "Growth", "Diagnosis", "Cephalometric Analysis", "Biomechanics",
-            "Orthodontic Appliances", "Treatment Planning", "Retention"
-        ],
     },
     "Pedodontics": {
-        "McDonald and Avery's Dentistry for the Child and Adolescent": [
-            "Child Development", "Preventive Dentistry", "Caries", "Pulp Therapy",
-            "Trauma", "Space Management", "Mixed Dentition", "Special Care"
-        ],
         "Nikhil Marwah - Textbook of Pediatric Dentistry": [
             "Growth and Development", "Preventive Dentistry", "Dental Caries", "Pulp Therapy",
             "Trauma", "Space Maintainers", "Behavior Management", "Interceptive Orthodontics"
-        ],
-        "Shobha Tandon - Textbook of Pedodontics": [
-            "Child Psychology", "Growth and Development", "Preventive Dentistry",
-            "Caries", "Pulp Therapy", "Trauma", "Space Management"
         ],
     },
     "Public Health Dentistry": {
@@ -531,24 +496,14 @@ TEXTBOOK_LIBRARY = {
             "Bias", "Screening", "Biostatistics", "Indices", "DMFT", "OHI-S", "CPITN",
             "Preventive Dentistry", "Community Dental Programs", "Health Education"
         ],
-        "Hiremath - Textbook of Public Health Dentistry": [
-            "Public Health", "Epidemiology", "Biostatistics", "Indices", "Preventive Dentistry",
-            "Health Education", "School Dental Health", "Community Programs"
-        ],
     },
     "Dental Materials": {
         "Phillips' Science of Dental Materials": [
             "Structure of Matter", "Physical Properties", "Biocompatibility", "Impression Materials",
             "Gypsum Products", "Dental Waxes", "Resin-Based Composites", "Dental Cements", "Dental Amalgam"
         ],
-        "Craig's Restorative Dental Materials": [
-            "Mechanical Properties", "Impression Materials", "Resins", "Composites", "Cements", "Metals", "Ceramics"
-        ],
     },
     "Oral Surgery": {
-        "Peterson's Principles of Oral and Maxillofacial Surgery": [
-            "Patient Evaluation", "Exodontia", "Impacted Teeth", "Infections", "Cysts", "Trauma", "Preprosthetic Surgery", "Implant Surgery"
-        ],
         "Malamed's Handbook of Local Anesthesia": [
             "Pain and Anxiety", "Local Anesthetic Drugs", "Syringes and Needles",
             "Maxillary Anesthesia", "Mandibular Anesthesia", "Complications", "Special Patients"
@@ -559,10 +514,6 @@ TEXTBOOK_LIBRARY = {
             "Radiographic Principles", "Intraoral Radiography", "Panoramic Radiography",
             "Digital Imaging", "Radiographic Anatomy", "Caries", "Periodontal Disease",
             "Periapical Lesions", "Cysts", "Tumors", "CBCT"
-        ],
-        "Langlais' Diagnostic Imaging of the Jaws": [
-            "Radiographic Anatomy", "Radiolucent Lesions", "Radiopaque Lesions",
-            "Mixed Lesions", "Cysts", "Tumors", "Jaw Diseases"
         ],
     },
 }
@@ -606,6 +557,8 @@ def find_relevant_chapters(search_text, subject):
 def textbook_library():
     st.markdown("### 📚 Pocket Dentistry Digital Library")
     search = st.text_input("🔎 Search topic", placeholder="Try: Deep bite, CPITN, caries, oral ulcer...", key="digital_library_search")
+    st.session_state.library_search = search
+    
     default_subject = find_subject(search)
     subjects = list(TEXTBOOK_LIBRARY.keys())
     default_index = subjects.index(default_subject) if default_subject in subjects else 0
@@ -648,6 +601,9 @@ Provide a clear BDS-level exam-oriented explanation with definition, etiology, c
             st.markdown("---")
             st.markdown("### 📚 Pocket Dentistry Explanation")
             st.markdown(st.session_state.library_answer)
+            show_export_controls(f"Explanation - {selected_chapter}", selected_subject, st.session_state.library_answer, "", "Library Explanation")
+            patient_email_section(st.session_state.library_answer, f"Explanation - {selected_chapter}", selected_subject)
+            review_section("library")
 
 
 # ============================================================
@@ -776,7 +732,7 @@ Provide: Problem representation, Differential diagnoses, Evidence ledger, Critic
 
 def student_mode():
     show_mode_header("Student Mode", "🎓")
-    tabs = st.tabs(["📚 Learn", "📝 Exam / PYQ", "🧠 Quiz", "📖 Digital Library"])
+    tabs = st.tabs(["📚 Learn", "📝 Exam / PYQ Bank", "🧠 Quiz", "📖 Digital Library"])
 
     with tabs[0]:
         st.markdown("### 📚 Dental Topic Tutor")
@@ -791,11 +747,14 @@ def student_mode():
                         res = run_text_ai(prompt)
                         st.markdown("### 📖 BDS Topic Notes")
                         st.markdown(res)
+                        show_export_controls(f"Topic Notes - {topic}", topic, res, "", "Topic Notes")
+                        patient_email_section(res, f"Notes - {topic}", topic)
+                        review_section("topic_tutor")
                     except Exception as exc:
                         show_ai_error(exc, "Dental Topic Tutor failed")
 
     with tabs[1]:
-        kuhs_pyq()
+        kuhs_searched_topic_pyq_bank()
         st.markdown("---")
         st.markdown("### 📝 University Exam Helper")
         q = st.text_area("Question", placeholder="Paste previous year question here.", key="exam_q")
@@ -809,6 +768,9 @@ def student_mode():
                         res = run_text_ai(prompt)
                         st.markdown("### 📝 Model Answer")
                         st.markdown(res)
+                        show_export_controls("BDS Exam Model Answer", "", res, "", "Exam Answer")
+                        patient_email_section(res, "Model Answer", "")
+                        review_section("exam_answer")
                     except Exception as exc:
                         show_ai_error(exc, "Exam Answer Generator failed")
 
@@ -821,6 +783,8 @@ def student_mode():
                     res = run_text_ai(f"Create 5 BDS-level MCQs on {quiz_topic} with options, correct answer, and explanation.")
                     st.markdown("### 🎯 BDS Quiz")
                     st.markdown(res)
+                    show_export_controls(f"Quiz - {quiz_topic}", quiz_topic, res, "", "Quiz")
+                    review_section("quiz")
                 except Exception as exc:
                     show_ai_error(exc, "Quiz Generator failed")
 
