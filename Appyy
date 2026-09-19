@@ -1,0 +1,132 @@
+import os
+from flask import Flask, render_template_string, request, jsonify, send_file
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+app = Flask(__name__)
+
+# Directory setup for uploads and reports
+UPLOAD_FOLDER = 'uploads/clinical_data'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# --- FEATURE 3: KUHS Previous Year Question Paper Repository ---
+# Mapped for final-year BDS academic preparation (2012-2025)
+KUHS_PAPERS_DB = {
+    "Periodontology": [
+        {"year": 2025, "title": "KUHS Final Year BDS Periodontology - 2025", "file": "perio_2025.pdf"},
+        {"year": 2024, "title": "KUHS Final Year BDS Periodontology - 2024", "file": "perio_2024.pdf"}
+    ],
+    "Orthodontics": [
+        {"year": 2025, "title": "KUHS Final Year BDS Orthodontics - 2025", "file": "ortho_2025.pdf"}
+    ],
+    "Conservative Dentistry & Endodontics": [
+        {"year": 2025, "title": "KUHS Final Year BDS Conservative Dentistry - 2025", "file": "cons_2025.pdf"}
+    ]
+}
+
+
+@app.route('/api/review', methods=['POST'])
+def handle_review():
+    """1st Review and Suggestions API"""
+    data = request.json
+    suggestion_text = data.get('suggestion')
+    # Save review logic to your database here
+    print(f"Review/Suggestion logged: {suggestion_text}")
+    return jsonify({"status": "success", "message": "Review and suggestion recorded successfully!"})
+
+
+@app.route('/api/send-patient-gmail', methods=['POST'])
+def save_history_to_patient_gmail():
+    """2nd History Save in Patient Gmail API"""
+    data = request.json
+    patient_email = data.get('email')
+    consultation_history = data.get('history')
+
+    # Configure your SMTP credentials (or environment variables)
+    SMTP_SERVER = "smtp.gmail.com"
+    SMTP_PORT = 587
+    SENDER_EMAIL = "your_email@gmail.com"
+    SENDER_PASSWORD = "your_app_password"
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = patient_email
+        msg['Subject'] = "Your Dental Consultation History & Treatment Record"
+
+        msg.attach(MIMEText(consultation_history, 'plain'))
+
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.sendmail(SENDER_EMAIL, patient_email, msg.as_string())
+        server.quit()
+
+        return jsonify({"status": "success", "message": f"History successfully sent to patient email: {patient_email}"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/kuhs-papers', methods=['GET'])
+def get_kuhs_papers():
+    """3rd Previous Year Question Paper KUHS University API"""
+    subject = request.args.get('subject')
+    if subject and subject in KUHS_PAPERS_DB:
+        return jsonify({subject: KUHS_PAPERS_DB[subject]})
+    return jsonify(KUHS_PAPERS_DB)
+
+
+@app.route('/api/export-result', methods=['POST'])
+def export_result_report():
+    """4th Result Save as PDF or HTML & Print Option API"""
+    data = request.json
+    html_content = data.get('html_content', '<h3>Diagnostic Report</h3><p>No details found.</p>')
+    
+    # Save content as an HTML file format ready for browser print/save-as-PDF
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Patient_Diagnostic_Result.html')
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+        
+    return send_file(file_path, as_attachment=True, download_name='Patient_Diagnostic_Result.html')
+
+
+@app.route('/api/upload-soft-tissue', methods=['POST'])
+def upload_soft_tissue():
+    """5th Soft Tissue Upload Option API"""
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "message": "No file section found"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"status": "error", "message": "No file selected"}), 400
+        
+    if file:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(file_path)
+        return jsonify({"status": "success", "message": f"Soft tissue file '{file.filename}' uploaded securely!"})
+
+
+@app.route('/api/dental-family', methods=['GET'])
+def intro_to_dental_family():
+    """6th Extra Option: Intro to Dental Family (Student & Doctor) API"""
+    community_hub = {
+        "title": "Intro to Dental Family",
+        "description": "Connecting undergraduate students and experienced practitioners for mentorship and case sharing.",
+        "sections": {
+            "students": {
+                "role": "Dental Undergraduates (BDS)",
+                "focus": "KUHS exam preparation, clinical case logs, and peer discussions."
+            },
+            "doctors": {
+                "role": "Practicing Clinicians & Specialists",
+                "focus": "Expert case mentorship, advanced treatment reviews, and professional guidance."
+            }
+        }
+    }
+    return jsonify(community_hub)
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
