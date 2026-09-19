@@ -466,7 +466,7 @@ Generate a comprehensive Previous Year Question Bank layout containing Long Essa
 
 
 # ============================================================
-# INTRO TO DENTAL FAMILY, BASIC DENTISTRY & DENTAL CHAIR WITH PIC
+# INTRO TO DENTAL FAMILY, BASIC DENTISTRY & DENTAL CHAIR WITH GITHUB PIC
 # ============================================================
 
 def intro_dental_family():
@@ -480,10 +480,10 @@ def intro_dental_family():
 
     st.markdown("### 💺 Anatomy of a Dental Chair & Unit (Parts & Functions)")
     
-    # Displaying a clear dental unit/chair diagram link or reference image
+    # Custom GitHub Raw Image Link added here
     st.image(
-        "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80", 
-        caption="Modern Dental Unit & Operator Setup", 
+        "https://raw.githubusercontent.com/USERNAME/REPOSITORY/main/images/dental_chair.jpg", 
+        caption="Dental Unit & Operator Setup Anatomy", 
         use_container_width=True
     )
     
