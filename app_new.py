@@ -15,7 +15,7 @@ from google.genai import types
 
 # ============================================================
 # POCKET DENTISTRY
-# AI-Powered Dental Learning & Clinical Decision-Support
+# AI-Powered Dental & Medical Learning & Clinical Decision-Support
 # ============================================================
 
 st.set_page_config(
@@ -261,7 +261,6 @@ def run_text_ai(prompt):
 def make_report_html(title, patient, report, image_name="", report_type="AI Report"):
     safe_report = html.escape(report or "").replace("\n", "<br>")
     safe_patient = html.escape(patient or "Not provided")
-    safe_img = html.escape(image_name or "Not provided")
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <title>{html.escape(title)}</title>
 <style>
@@ -270,7 +269,7 @@ h1{{color:#1e3d59}} .box{{padding:15px;border:1px solid #ddd;border-radius:10px;
 .disclaimer{{background:#fff8e1;padding:15px;border-left:5px solid #f0ad00}}
 @media print{{.no-print{{display:none}}}}
 </style></head><body>
-<h1>🦷 Pocket Dentistry</h1><h2>{html.escape(title)}</h2>
+<h1>🦷 Pocket Dentistry & Medical Hub</h1><h2>{html.escape(title)}</h2>
 <div class="box"><b>Target Subject / Topic:</b> {safe_patient}<br>
 <b>Report type:</b> {html.escape(report_type)}<br>
 <b>Date:</b> {date.today()}</div>
@@ -289,7 +288,7 @@ def pdf_bytes(title, patient, report, image_name="", report_type="AI Report"):
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle("PDTitle", parent=styles["Title"], alignment=TA_CENTER, fontSize=18)
         body = ParagraphStyle("PDBody", parent=styles["BodyText"], fontSize=9.5, leading=14)
-        story = [Paragraph("Pocket Dentistry", title_style), Spacer(1, 12), Paragraph(html.escape(title or "Dental Report"), styles["Heading2"]),
+        story = [Paragraph("Pocket Dentistry", title_style), Spacer(1, 12), Paragraph(html.escape(title or "Medical/Dental Report"), styles["Heading2"]),
                Paragraph(f"<b>Target Subject/Topic:</b> {html.escape(patient or 'Not provided')}<br/><b>Report type:</b> {html.escape(report_type)}<br/><b>Date:</b> {date.today()}", body), Spacer(1, 14)]
         for line in (report or "").split("\n"):
             if line.strip(): story += [Paragraph(html.escape(line.strip()), body), Spacer(1, 4)]
@@ -336,7 +335,7 @@ def send_report_email(patient_email, subject, body):
         s.login(user, password)
         s.send_message(msg)
 
-def patient_email_section(report, title="Dental Report", patient_name=""):
+def patient_email_section(report, title="Medical/Dental Report", patient_name=""):
     with st.expander("📧 Send report to patient Gmail"):
         email = st.text_input("Patient Gmail address", key=f"mail_{title}")
         consent = st.checkbox("I confirm that the patient has consented to receiving this report by email.", key=f"consent_{title}")
@@ -367,28 +366,28 @@ def review_section(context="report"):
 
 
 # ============================================================
-# KUHS PREVIOUS YEAR QUESTION BANK ON SEARCHED TOPIC (New Feature)
+# KUHS PREVIOUS YEAR QUESTION BANK ON SEARCHED TOPIC
 # ============================================================
 
 def kuhs_searched_topic_pyq_bank():
     st.markdown("### 📝 Previous Year Question Bank on Searched Topic")
-    st.caption("Generate targeted Kerala University of Health Sciences (KUHS) past essay questions, short notes, and viva prompts mapped to your searched topic or digital library selection.")
+    st.caption("Generate targeted Kerala University of Health Sciences (KUHS) past medical & dental exam questions, short notes, and viva prompts.")
 
-    search_topic = st.text_input("Enter topic or subject for Question Bank generation", value=st.session_state.get("library_search", "Oral Pathology"), key="pyq_bank_topic")
+    search_topic = st.text_input("Enter topic or subject for Question Bank generation", value=st.session_state.get("library_search", "General Human Anatomy"), key="pyq_bank_topic")
     
     if st.button("🔨 Generate Previous Year Question Bank", type="primary", use_container_width=True):
         if not search_topic.strip():
             st.warning("Please enter a topic.")
         else:
-            with st.spinner("Compiling KUHS university question bank and model answers..."):
+            with st.spinner("Compiling university question bank and model answers..."):
                 try:
                     prompt = f"""
-You are Pocket Dentistry academic assistant specialized in Kerala University of Health Sciences (KUHS) BDS examinations (2012–2025).
+You are Pocket Dentistry & Medical Hub academic assistant specialized in Kerala University of Health Sciences (KUHS) BDS and Medical examinations (2012–2025).
 Topic / Subject: {search_topic}
 
 Generate a comprehensive Previous Year Question Bank layout containing:
 1. Long Essay Questions (10 Marks) asked or expected in past university examinations.
-2. Short Essay / Short Note Questions (5 Marks) with frequency indicators (e.g., repeated in 2021, 2023, 2025).
+2. Short Essay / Short Note Questions (5 Marks) with frequency indicators.
 3. Viva Voce / Rapid-Fire Question Bank.
 4. Strategic student suggestions and high-yield study focus areas for this topic.
 """
@@ -412,11 +411,11 @@ Generate a comprehensive Previous Year Question Bank layout containing:
 
 def intro_dental_family():
     st.markdown("## 🦷 Intro to Dental Family")
-    st.write("Welcome to Pocket Dentistry — bridging undergraduate students and practicing clinicians.")
+    st.write("Welcome to Pocket Dentistry — bridging undergraduate students and practicing clinicians across dental and core medical subjects.")
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("### 🎓 Student Hub")
-        st.write("• KUHS University exam preparation & past questions\n• Targeted topic question banks & digital library\n• Case logs & quizzes")
+        st.write("• KUHS University exam preparation for Dental & Non-Dental Medical Subjects (Anatomy, Physiology, Pathology, Surgery, etc.)\n• Comprehensive Digital Library & AI Topic Tutor\n• Case logs & quizzes")
         if st.button("Enter Student Mode", use_container_width=True, key="intro_student_btn"):
             st.session_state.mode = "student"
             st.session_state.page = "student"
@@ -428,103 +427,165 @@ def intro_dental_family():
             st.session_state.mode = "doctor"
             st.rerun()
     st.markdown("### 🌱 Community Mission")
-    st.write("Empowering dental learners and professionals with accurate decision-support tools.")
+    st.write("Empowering medical and dental learners with accurate, multi-disciplinary decision-support tools.")
 
 
 # ============================================================
-# BDS DIGITAL TEXTBOOK DATABASE (All Subjects Included)
+# COMPREHENSIVE TEXTBOOK LIBRARY (Dental + 1st, 2nd, 3rd Year Non-Dental Subjects)
 # ============================================================
 
 TEXTBOOK_LIBRARY = {
+    # --- 1st Year Non-Dental Subjects ---
+    "General Human Anatomy": {
+        "BD Chaurasia's Human Anatomy (Vol 1-3)": [
+            "General Anatomy & Introduction", "Upper Limb and Thorax", "Abdomen and Pelvis",
+            "Head, Neck and Brain", "Lower Limb", "Embryology & General Histology", "Osteology"
+        ],
+        "Vishram Singh - General Anatomy": [
+            "Introduction to Anatomy", "Skeletal System", "Joints & Muscular System",
+            "Cardiovascular & Nervous System", "Basic Embryology"
+        ]
+    },
+    "General Human Physiology": {
+        "Guyton and Hall Textbook of Medical Physiology": [
+            "General Physiology & Cell Physiology", "Nerve and Muscle", "Heart and Circulation",
+            "The Body Fluids and Kidneys", "Respiration", "Nervous System: Central & Special Senses",
+            "Gastrointestinal Physiology", "Endocrinology and Reproduction", "Metabolism and Temperature Regulation"
+        ],
+        "Sembulingam Physiology": [
+            "General Physiology", "Blood", "Muscle Physiology", "Digestive System",
+            "Renal Physiology", "Endocrinology", "Reproductive System", "Nervous System"
+        ]
+    },
+    "Biochemistry": {
+        "Vasudevan Textbook of Biochemistry": [
+            "Carbohydrate Chemistry & Metabolism", "Lipid Chemistry & Metabolism", "Amino Acids & Proteins",
+            "Enzymes", "Vitamins", "Mineral Metabolism", "Clinical Biochemistry", "Nutrition and Dietetics"
+        ],
+        "Satyanarayana Biochemistry": [
+            "Biomolecules", "Metabolic Pathways", "Molecular Biology", "Clinical Biochemistry & Immunology", "Nutrition"
+        ]
+    },
+
+    # --- 2nd Year Non-Dental Subjects ---
+    "General Pathology": {
+        "Robbins & Cotran Pathologic Basis of Disease": [
+            "Cell Injury, Death, and Adaptation", "Inflammation and Repair", "Hemodynamic Disorders, Thrombosis, and Shock",
+            "Diseases of the Immune System", "Neoplasia", "Genetic and Pediatric Diseases",
+            "Environmental and Nutritional Diseases", "General Pathology of Infectious Diseases"
+        ],
+        "Harsh Mohan Textbook of Pathology": [
+            "Basic Pathology & Cell Injury", "Inflammation", "Healing and Repair",
+            "Immune System Disorders", "Neoplasia", "Infectious Diseases", "Hematopathology"
+        ]
+    },
+    "Microbiology": {
+        "Ananthanarayan and Paniker's Textbook of Microbiology": [
+            "General Microbiology", "Bacteriology", "Immunology", "Virology",
+            "Mycology", "Parasitology", "Clinical / Applied Microbiology"
+        ],
+        "CP Baweja Microbiology": [
+            "Introduction & General Bacteriology", "Systemic Bacteriology", "Virology", "Mycology", "Parasitology"
+        ]
+    },
+    "General Pharmacology": {
+        "KD Tripathi Essentials of Medical Pharmacology": [
+            "General Pharmacokinetics & Pharmacodynamics", "Autonomic Nervous System", "Cardiovascular Drugs",
+            "Drugs Acting on CNS", "Autacoids & NSAIDs", "Respiratory System Drugs",
+            "Hormones & Related Drugs", "Chemotherapy & Antimicrobial Drugs", "Toxicology"
+        ],
+        "Shanbhag Pharmacology": [
+            "General Pharmacology", "ANS", "CNS", "CVS", "Chemotherapy", "Endocrine Pharmacology"
+        ]
+    },
+
+    # --- 3rd Year Non-Dental Subjects ---
+    "General Medicine": {
+        "Davidson's Principles and Practice of Medicine": [
+            "Good Practice in Medicine", "Cardiovascular Disease", "Respiratory Disease",
+            "Endocrine Disease", "Gastrointestinal Disease", "Infectious Disease",
+            "Neurological Disease", "Renal Disease", "Hematological Disease"
+        ],
+        "API Textbook of Medicine": [
+            "Clinical Methods", "Infectious Diseases", "Cardiovascular Disorders",
+            "Respiratory Disorders", "Endocrinology", "Neurology", "Emergency Medicine"
+        ]
+    },
+    "General Surgery": {
+        "Bailey & Love's Short Practice of Surgery": [
+            "Metabolic Response to Injury", "Shock and Blood Transfusion", "Wounds, Tissue Repair and Scars",
+            "Burns", "Surgical Infection", "Principles of Oncology", "Head and Neck Surgery",
+            "Breast and Endocrine Surgery", "Abdominal Surgery & Emergencies"
+        ],
+        "SRB's Manual of Surgery": [
+            "General Surgery Principles", "Ulcers, Sinuses and Fistulae", "Swellings",
+            "Peripheral Vascular Diseases", "Abdominal Emergencies", "Trauma and Management"
+        ]
+    },
+
+    # --- Dental Subjects ---
     "Oral Pathology": {
         "Shafer's Textbook of Oral Pathology": [
-            "Introduction to Oral Pathology", "Developmental Disturbances", "Dental Caries",
-            "Pulp and Periapical Diseases", "Periodontal Diseases", "Cysts of the Oral Region",
-            "Odontogenic Tumors", "Benign Tumors", "Malignant Tumors", "Diseases of Bone",
-            "Diseases of Salivary Glands", "Oral Mucosal Diseases", "White Lesions",
-            "Red and Pigmented Lesions", "Ulcers", "Infections"
-        ],
-        "Neville's Oral and Maxillofacial Pathology": [
-            "Developmental Disorders", "Dental Caries", "Pulpal and Periapical Disease",
-            "Periodontal Disease", "Cysts", "Odontogenic Tumors", "Bone Pathology",
-            "Salivary Gland Pathology", "Oral Mucosal Disease", "White Lesions", "Ulcers", "Oral Cancer"
-        ],
+            "Developmental Disturbances", "Dental Caries", "Pulp and Periapical Diseases",
+            "Periodontal Diseases", "Cysts of the Oral Region", "Odontogenic Tumors", "Oral Mucosal Diseases"
+        ]
     },
-    "Oral Medicine": {
+    "Oral Medicine & Radiology": {
         "Burket's Oral Medicine": [
-            "Patient Evaluation", "Systemic Disease", "Oral Manifestations of Systemic Disease",
-            "Ulcers", "White Lesions", "Red Lesions", "Pigmented Lesions", "Vesiculobullous Disorders",
-            "Salivary Gland Disorders", "Temporomandibular Disorders", "Oral Cancer"
-        ],
+            "Patient Evaluation", "Oral Mucosal Diseases", "Ulcers", "White Lesions", "Salivary Gland Disorders"
+        ]
     },
     "Periodontics": {
         "Carranza's Clinical Periodontology": [
-            "Periodontal Anatomy", "Periodontal Examination", "Classification of Periodontal Diseases",
-            "Gingivitis", "Periodontitis", "Periodontal Pocket", "Bone Loss", "Plaque and Calculus",
-            "Periodontal Instrumentation", "Scaling and Root Planing", "Periodontal Surgery", "Maintenance Therapy"
-        ],
+            "Periodontal Anatomy", "Gingivitis", "Periodontitis", "Scaling and Root Planing", "Periodontal Surgery"
+        ]
     },
-    "Endodontics": {
+    "Conservative Dentistry & Endodontics": {
         "Cohen's Pathways of the Pulp": [
-            "Pulp Biology", "Diagnosis", "Pulpal Disease", "Periapical Disease", "Root Canal Anatomy",
-            "Access Cavity", "Cleaning and Shaping", "Obturation", "Endodontic Emergencies", "Trauma", "Endodontic Surgery"
-        ],
+            "Pulp Biology", "Diagnosis", "Root Canal Anatomy", "Cleaning and Shaping", "Obturation"
+        ]
     },
     "Prosthodontics": {
         "Nallaswamy - Textbook of Prosthodontics": [
-            "Diagnosis and Treatment Planning", "Complete Dentures", "Impression Making",
-            "Jaw Relations", "Tooth Selection", "Denture Try-in", "Denture Processing",
-            "Removable Partial Dentures", "Fixed Prosthodontics"
-        ],
+            "Complete Dentures", "Impression Making", "Jaw Relations", "Removable Partial Dentures", "Fixed Prosthodontics"
+        ]
     },
     "Orthodontics": {
         "Proffit - Contemporary Orthodontics": [
-            "Growth and Development", "Development of Dentition", "Malocclusion", "Diagnosis",
-            "Treatment Planning", "Biomechanics", "Fixed Appliances", "Functional Appliances",
-            "Orthodontic Retention", "Deep Bite", "Open Bite", "Class II Malocclusion", "Class III Malocclusion"
-        ],
+            "Growth and Development", "Malocclusion", "Diagnosis & Treatment Planning", "Fixed Appliances", "Retention"
+        ]
     },
     "Pedodontics": {
         "Nikhil Marwah - Textbook of Pediatric Dentistry": [
-            "Growth and Development", "Preventive Dentistry", "Dental Caries", "Pulp Therapy",
-            "Trauma", "Space Maintainers", "Behavior Management", "Interceptive Orthodontics"
-        ],
+            "Child Development", "Preventive Dentistry", "Dental Caries", "Pulp Therapy", "Space Maintainers"
+        ]
     },
     "Public Health Dentistry": {
         "Soben Peter - Essentials of Preventive and Community Dentistry": [
-            "Introduction to Public Health", "Health and Disease", "Epidemiology", "Study Designs",
-            "Bias", "Screening", "Biostatistics", "Indices", "DMFT", "OHI-S", "CPITN",
-            "Preventive Dentistry", "Community Dental Programs", "Health Education"
-        ],
+            "Epidemiology", "Biostatistics", "Indices (DMFT, OHI-S, CPITN)", "Preventive Dentistry", "Community Programs"
+        ]
     },
     "Dental Materials": {
         "Phillips' Science of Dental Materials": [
-            "Structure of Matter", "Physical Properties", "Biocompatibility", "Impression Materials",
-            "Gypsum Products", "Dental Waxes", "Resin-Based Composites", "Dental Cements", "Dental Amalgam"
+            "Physical Properties", "Impression Materials", "Gypsum Products", "Resin Composites", "Dental Cements"
         ],
     },
     "Oral Surgery": {
         "Malamed's Handbook of Local Anesthesia": [
-            "Pain and Anxiety", "Local Anesthetic Drugs", "Syringes and Needles",
-            "Maxillary Anesthesia", "Mandibular Anesthesia", "Complications", "Special Patients"
-        ],
-    },
-    "Radiology": {
-        "White and Pharoah's Oral Radiology": [
-            "Radiographic Principles", "Intraoral Radiography", "Panoramic Radiography",
-            "Digital Imaging", "Radiographic Anatomy", "Caries", "Periodontal Disease",
-            "Periapical Lesions", "Cysts", "Tumors", "CBCT"
-        ],
+            "Pain and Anxiety", "Local Anesthetic Drugs", "Maxillary Anesthesia", "Mandibular Anesthesia", "Complications"
+        ]
     },
 }
 
 REFERENCE_ALIASES = {
-    "caries": "Endodontics", "rct": "Endodontics", "pulp": "Endodontics",
-    "gum disease": "Periodontics", "periodontal": "Periodontics", "periodontitis": "Periodontics",
-    "cpitn": "Public Health Dentistry", "dmft": "Public Health Dentistry",
-    "opg": "Radiology", "iopa": "Radiology", "bitewing": "Radiology", "ceph": "Orthodontics",
-    "pedo": "Pedodontics", "prostho": "Prosthodontics", "surgery": "Oral Surgery",
-    "ulcer": "Oral Medicine", "pathology": "Oral Pathology"
+    "anatomy": "General Human Anatomy", "embryology": "General Human Anatomy", "histology": "General Human Anatomy",
+    "physiology": "General Human Physiology", "biochemistry": "Biochemistry", "nutrition": "Biochemistry",
+    "pathology": "General Pathology", "microbiology": "Microbiology", "pharmacology": "General Pharmacology",
+    "medicine": "General Medicine", "surgery": "General Surgery",
+    "caries": "Conservative Dentistry & Endodontics", "rct": "Conservative Dentistry & Endodontics",
+    "gum disease": "Periodontics", "periodontal": "Periodontics", "cpitn": "Public Health Dentistry",
+    "opg": "Radiology", "iopa": "Radiology", "ceph": "Orthodontics", "pedo": "Pedodontics",
+    "prostho": "Prosthodontics", "ulcer": "Oral Medicine"
 }
 
 CEPH_ANALYSES = [
@@ -534,14 +595,14 @@ CEPH_ANALYSES = [
 ]
 
 def find_subject(search_text):
-    if not search_text: return "Oral Pathology"
+    if not search_text: return "General Human Anatomy"
     search = search_text.strip().lower()
     if search in REFERENCE_ALIASES: return REFERENCE_ALIASES[search]
     for alias, subject in REFERENCE_ALIASES.items():
         if alias in search: return subject
     for subject in TEXTBOOK_LIBRARY:
         if subject.lower() in search: return subject
-    return "Oral Pathology"
+    return "General Human Anatomy"
 
 def find_relevant_chapters(search_text, subject):
     results = []
@@ -555,14 +616,16 @@ def find_relevant_chapters(search_text, subject):
     return results
 
 def textbook_library():
-    st.markdown("### 📚 Pocket Dentistry Digital Library")
-    search = st.text_input("🔎 Search topic", placeholder="Try: Deep bite, CPITN, caries, oral ulcer...", key="digital_library_search")
+    st.markdown("### 📚 Comprehensive Medical & Dental Digital Library")
+    st.caption("Includes 1st, 2nd, & 3rd-Year Non-Dental Medical Subjects + Full BDS Dental Curriculum.")
+    
+    search = st.text_input("🔎 Search topic (Dental or Medical)", placeholder="Try: Anatomy, Physiology, Pathology, Surgery, CPITN, deep bite...", key="digital_library_search")
     st.session_state.library_search = search
     
     default_subject = find_subject(search)
     subjects = list(TEXTBOOK_LIBRARY.keys())
     default_index = subjects.index(default_subject) if default_subject in subjects else 0
-    selected_subject = st.selectbox("📚 Select subject", subjects, index=default_index, key="digital_library_subject")
+    selected_subject = st.selectbox("📚 Select subject (Medical / Dental)", subjects, index=default_index, key="digital_library_subject")
     books = TEXTBOOK_LIBRARY[selected_subject]
 
     if search.strip():
@@ -580,26 +643,26 @@ def textbook_library():
     if selected_chapter != "Select a chapter":
         st.success(f"Selected chapter: {selected_chapter}")
         question = st.text_area("What do you want to understand?", key=f"question_{selected_book}_{selected_chapter}")
-        if st.button("🤖 Ask the Textbook", type="primary", use_container_width=True):
+        if st.button("🤖 Ask the Library", type="primary", use_container_width=True):
             if not question.strip():
                 st.warning("Enter a question first.")
             else:
-                with st.spinner("Preparing textbook-oriented explanation..."):
+                with st.spinner("Preparing comprehensive medical/dental explanation..."):
                     try:
-                        prompt = f"""You are Pocket Dentistry, a BDS educational assistant.
+                        prompt = f"""You are Pocket Dentistry & Medical Hub academic assistant.
 Subject: {selected_subject}
 Textbook: {selected_book}
 Chapter/topic: {selected_chapter}
 Student question: {question}
-Provide a clear BDS-level exam-oriented explanation with definition, etiology, classification, clinical features, and viva points."""
+Provide a clear, high-yield professional academic explanation suitable for health science examinations."""
                         st.session_state.library_answer = run_text_ai(prompt)
                     except Exception as exc:
                         st.session_state.library_answer = ""
-                        show_ai_error(exc, "Textbook AI response failed")
+                        show_ai_error(exc, "Library AI response failed")
 
         if st.session_state.library_answer:
             st.markdown("---")
-            st.markdown("### 📚 Pocket Dentistry Explanation")
+            st.markdown("### 📚 Academic Explanation")
             st.markdown(st.session_state.library_answer)
             show_export_controls(f"Explanation - {selected_chapter}", selected_subject, st.session_state.library_answer, "", "Library Explanation")
             patient_email_section(st.session_state.library_answer, f"Explanation - {selected_chapter}", selected_subject)
@@ -611,7 +674,7 @@ Provide a clear BDS-level exam-oriented explanation with definition, etiology, c
 # ============================================================
 
 COMMON_SAFETY_RULES = """
-You are Pocket Dentistry, an AI-assisted dental learning and clinical decision-support system.
+You are Pocket Dentistry & Medical Hub, an AI-assisted learning and clinical decision-support system.
 CORE SAFETY PRINCIPLE: Do good for the patient and never cause harm.
 - Analyze only information provided.
 - Never invent radiographic findings or tooth numbers.
@@ -735,53 +798,53 @@ def student_mode():
     tabs = st.tabs(["📚 Learn", "📝 Exam / PYQ Bank", "🧠 Quiz", "📖 Digital Library"])
 
     with tabs[0]:
-        st.markdown("### 📚 Dental Topic Tutor")
-        topic = st.text_input("Topic", placeholder="Example: CPITN, deep bite, oral ulcer", key="learn_topic")
+        st.markdown("### 📚 Medical & Dental Topic Tutor")
+        topic = st.text_input("Topic", placeholder="Example: Anatomy of neck, Physiology of heart, CPITN, Pathology of inflammation", key="learn_topic")
         if st.button("📖 Teach Me", type="primary", use_container_width=True):
             if not topic.strip():
                 st.warning("Enter a topic.")
             else:
-                with st.spinner("Preparing BDS notes..."):
+                with st.spinner("Preparing comprehensive study notes..."):
                     try:
-                        prompt = f"You are Pocket Dentistry, a BDS education assistant. Teach BDS topic: {topic}. Give definition, etiology, classification, clinical features, diagnosis, management, and viva questions."
+                        prompt = f"You are Pocket Dentistry & Medical Hub assistant. Teach topic: {topic}. Give definition, etiology/anatomy, classification, clinical features, pathophysiology, diagnosis, management, and viva questions."
                         res = run_text_ai(prompt)
-                        st.markdown("### 📖 BDS Topic Notes")
+                        st.markdown("### 📖 Detailed Study Notes")
                         st.markdown(res)
                         show_export_controls(f"Topic Notes - {topic}", topic, res, "", "Topic Notes")
                         patient_email_section(res, f"Notes - {topic}", topic)
                         review_section("topic_tutor")
                     except Exception as exc:
-                        show_ai_error(exc, "Dental Topic Tutor failed")
+                        show_ai_error(exc, "Topic Tutor failed")
 
     with tabs[1]:
         kuhs_searched_topic_pyq_bank()
         st.markdown("---")
         st.markdown("### 📝 University Exam Helper")
-        q = st.text_area("Question", placeholder="Paste previous year question here.", key="exam_q")
+        q = st.text_area("Question", placeholder="Paste previous year question here (Medical or Dental).", key="exam_q")
         if st.button("✍️ Generate Answer", type="primary", use_container_width=True):
             if not q.strip():
                 st.warning("Enter the examination question first.")
             else:
-                with st.spinner("Generating BDS examination answer..."):
+                with st.spinner("Generating university examination answer..."):
                     try:
-                        prompt = f"You are Pocket Dentistry, a BDS university examination assistant. Write a structured BDS model answer for:\n{q}"
+                        prompt = f"You are Pocket Dentistry & Medical Hub university examination assistant. Write a structured model answer for:\n{q}"
                         res = run_text_ai(prompt)
                         st.markdown("### 📝 Model Answer")
                         st.markdown(res)
-                        show_export_controls("BDS Exam Model Answer", "", res, "", "Exam Answer")
+                        show_export_controls("University Exam Model Answer", "", res, "", "Exam Answer")
                         patient_email_section(res, "Model Answer", "")
                         review_section("exam_answer")
                     except Exception as exc:
                         show_ai_error(exc, "Exam Answer Generator failed")
 
     with tabs[2]:
-        st.markdown("### 🧠 Dental Quiz")
-        quiz_topic = st.text_input("Quiz topic", placeholder="Example: Oral pathology", key="quiz_topic")
+        st.markdown("### 🧠 Health Science Quiz")
+        quiz_topic = st.text_input("Quiz topic", placeholder="Example: General Anatomy, Pathology, Pharmacology", key="quiz_topic")
         if st.button("🎯 Generate Quiz", type="primary", use_container_width=True) and quiz_topic.strip():
-            with st.spinner("Creating BDS quiz..."):
+            with st.spinner("Creating quiz..."):
                 try:
-                    res = run_text_ai(f"Create 5 BDS-level MCQs on {quiz_topic} with options, correct answer, and explanation.")
-                    st.markdown("### 🎯 BDS Quiz")
+                    res = run_text_ai(f"Create 5 MCQs on {quiz_topic} with options, correct answer, and detailed explanation.")
+                    st.markdown("### 🎯 Practice Quiz")
                     st.markdown(res)
                     show_export_controls(f"Quiz - {quiz_topic}", quiz_topic, res, "", "Quiz")
                     review_section("quiz")
@@ -834,8 +897,8 @@ def doctor_mode():
 # ============================================================
 
 def show_home():
-    st.markdown('<div class="hero-title">🦷 Pocket Dentistry</div>', unsafe_allow_html=True)
-    st.markdown('<div class="hero-subtitle">AI-Powered Dental Learning & Clinical Decision-Support Platform</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-title">🦷 Pocket Dentistry & Medical Hub</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-subtitle">AI-Powered Dental & Medical Learning & Clinical Decision-Support Platform</div>', unsafe_allow_html=True)
     
     if st.button("🦷 Intro to Dental Family", use_container_width=True):
         st.session_state.page = "intro"
@@ -843,7 +906,7 @@ def show_home():
 
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown('<div class="mode-card"><h3>🎓 Student Mode</h3><p>Learn dental topics, prepare university answers, practice quizzes, KUHS PYQs and Digital Library.</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="mode-card"><h3>🎓 Student Mode</h3><p>Covers Dental + 1st, 2nd, & 3rd-Year Non-Dental Medical Subjects (Anatomy, Physiology, Pathology, Surgery, etc.), KUHS PYQs, & Digital Library.</p></div>', unsafe_allow_html=True)
         if st.button("🎓 Enter Student Mode", use_container_width=True):
             st.session_state.mode = "student"
             st.session_state.page = "student"
@@ -856,7 +919,7 @@ def show_home():
             st.rerun()
 
     st.markdown("---")
-    st.markdown('<div class="safety-box"><b>🛡️ Safety Principle</b><br>Pocket Dentistry provides AI-assisted educational information and clinical decision support.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="safety-box"><b>🛡️ Safety Principle</b><br>Pocket Dentistry & Medical Hub provides AI-assisted educational information and clinical decision support.</div>', unsafe_allow_html=True)
 
 
 # ============================================================
