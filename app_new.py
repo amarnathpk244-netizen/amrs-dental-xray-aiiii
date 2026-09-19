@@ -29,7 +29,7 @@ MODEL_NAME = "gemini-3.6-flash"
 
 
 # ============================================================
-# GLOBAL CSS (Fixed text color to prevent red text bugs)
+# GLOBAL CSS (Fixed text color bug)
 # ============================================================
 
 st.markdown(
@@ -111,7 +111,7 @@ st.markdown(
 
 
 # ============================================================
-# PERSISTENT DATABASE (SQLite for Cases, Reviews & Practicals)
+# PERSISTENT DATABASE (SQLite)
 # ============================================================
 DB_FILE = "pocket_dentistry.db"
 
@@ -257,7 +257,7 @@ def run_text_ai(prompt):
 
 
 # ============================================================
-# REPORT / EXPORT & EMAIL UTILITIES
+# EXPORT, PRINT & GMAIL UTILITIES
 # ============================================================
 
 def make_report_html(title, patient, report, report_type="AI Report"):
@@ -271,7 +271,7 @@ h1{{color:#1e3d59}} .box{{padding:15px;border:1px solid #ddd;border-radius:10px;
 @media print{{.no-print{{display:none}}}}
 </style></head><body>
 <h1>🦷 Pocket Dentistry & Medical Hub</h1><h2>{html.escape(title)}</h2>
-<div class="box"><b>Target Subject / Topic:</b> {safe_patient}<br>
+<div class="box"><b>Target Subject / Patient:</b> {safe_patient}<br>
 <b>Report type:</b> {html.escape(report_type)}<br>
 <b>Date:</b> {date.today()}</div>
 <div class="box"><h3>Content</h3>{safe_report}</div>
@@ -290,7 +290,7 @@ def pdf_bytes(title, patient, report, report_type="AI Report"):
         title_style = ParagraphStyle("PDTitle", parent=styles["Title"], alignment=TA_CENTER, fontSize=18)
         body = ParagraphStyle("PDBody", parent=styles["BodyText"], fontSize=9.5, leading=14)
         story = [Paragraph("Pocket Dentistry", title_style), Spacer(1, 12), Paragraph(html.escape(title or "Report"), styles["Heading2"]),
-               Paragraph(f"<b>Target Subject/Topic:</b> {html.escape(patient or 'Not provided')}<br/><b>Report type:</b> {html.escape(report_type)}<br/><b>Date:</b> {date.today()}", body), Spacer(1, 14)]
+               Paragraph(f"<b>Target Subject/Patient:</b> {html.escape(patient or 'Not provided')}<br/><b>Report type:</b> {html.escape(report_type)}<br/><b>Date:</b> {date.today()}", body), Spacer(1, 14)]
         for line in (report or "").split("\n"):
             if line.strip(): story += [Paragraph(html.escape(line.strip()), body), Spacer(1, 4)]
         doc.build(story)
@@ -306,6 +306,8 @@ def show_export_controls(title, patient, report, report_type="AI Report"):
     pdf = pdf_bytes(title, patient, report, report_type)
     if pdf:
         st.download_button("📄 Download PDF", pdf, file_name="document.pdf", mime="application/pdf", use_container_width=True)
+    b64 = base64.b64encode(doc.encode()).decode()
+    st.markdown(f'<a href="data:text/html;base64,{b64}" target="_blank">🖨️ Open printable report window</a>', unsafe_allow_html=True)
 
 def send_report_email(patient_email, subject, body):
     import smtplib
@@ -349,7 +351,7 @@ def review_section(context="report"):
 
 
 # ============================================================
-# STUDENT PRACTICALS & MEDIA SECTION (Animated Photos, Videos & Notes)
+# STUDENT PRACTICALS & MEDIA SECTION
 # ============================================================
 
 def student_practicals_section():
@@ -468,145 +470,63 @@ def intro_dental_family():
 
 
 # ============================================================
-# COMPREHENSIVE TEXTBOOK LIBRARY (All Dental & Medical Subjects Included)
+# COMPREHENSIVE TEXTBOOK LIBRARY
 # ============================================================
 
 TEXTBOOK_LIBRARY = {
     "General Human Anatomy": {
-        "BD Chaurasia's Human Anatomy (Vol 1-3)": [
-            "General Anatomy & Introduction", "Upper Limb and Thorax", "Abdomen and Pelvis",
-            "Head, Neck and Brain", "Lower Limb", "Embryology & General Histology", "Osteology"
-        ],
-        "Vishram Singh - General Anatomy": [
-            "Introduction to Anatomy", "Skeletal System", "Joints & Muscular System",
-            "Cardiovascular & Nervous System", "Basic Embryology"
-        ]
+        "BD Chaurasia's Human Anatomy (Vol 1-3)": ["General Anatomy & Introduction", "Upper Limb and Thorax", "Abdomen and Pelvis", "Head, Neck and Brain", "Lower Limb", "Embryology & General Histology", "Osteology"]
     },
     "General Human Physiology": {
-        "Guyton and Hall Textbook of Medical Physiology": [
-            "General Physiology & Cell Physiology", "Nerve and Muscle", "Heart and Circulation",
-            "The Body Fluids and Kidneys", "Respiration", "Nervous System: Central & Special Senses",
-            "Gastrointestinal Physiology", "Endocrinology and Reproduction", "Metabolism and Temperature Regulation"
-        ],
-        "Sembulingam Physiology": [
-            "General Physiology", "Blood", "Muscle Physiology", "Digestive System",
-            "Renal Physiology", "Endocrinology", "Reproductive System", "Nervous System"
-        ]
+        "Guyton and Hall Textbook of Medical Physiology": ["General Physiology & Cell Physiology", "Nerve and Muscle", "Heart and Circulation", "The Body Fluids and Kidneys", "Respiration", "Nervous System", "Gastrointestinal Physiology", "Endocrinology"]
     },
     "Biochemistry": {
-        "Vasudevan Textbook of Biochemistry": [
-            "Carbohydrate Chemistry & Metabolism", "Lipid Chemistry & Metabolism", "Amino Acids & Proteins",
-            "Enzymes", "Vitamins", "Mineral Metabolism", "Clinical Biochemistry", "Nutrition and Dietetics"
-        ],
-        "Satyanarayana Biochemistry": [
-            "Biomolecules", "Metabolic Pathways", "Molecular Biology", "Clinical Biochemistry & Immunology", "Nutrition"
-        ]
+        "Vasudevan Textbook of Biochemistry": ["Carbohydrate Metabolism", "Lipid Metabolism", "Amino Acids", "Enzymes", "Vitamins", "Clinical Biochemistry"]
     },
     "General Pathology": {
-        "Robbins & Cotran Pathologic Basis of Disease": [
-            "Cell Injury, Death, and Adaptation", "Inflammation and Repair", "Hemodynamic Disorders, Thrombosis, and Shock",
-            "Diseases of the Immune System", "Neoplasia", "Genetic and Pediatric Diseases",
-            "Environmental and Nutritional Diseases", "General Pathology of Infectious Diseases"
-        ],
-        "Harsh Mohan Textbook of Pathology": [
-            "Basic Pathology & Cell Injury", "Inflammation", "Healing and Repair",
-            "Immune System Disorders", "Neoplasia", "Infectious Diseases", "Hematopathology"
-        ]
+        "Robbins & Cotran Pathologic Basis of Disease": ["Cell Injury", "Inflammation and Repair", "Hemodynamics", "Neoplasia", "Genetic Diseases"]
     },
     "Microbiology": {
-        "Ananthanarayan and Paniker's Textbook of Microbiology": [
-            "General Microbiology", "Bacteriology", "Immunology", "Virology",
-            "Mycology", "Parasitology", "Clinical / Applied Microbiology"
-        ]
+        "Ananthanarayan and Paniker's Textbook of Microbiology": ["General Microbiology", "Bacteriology", "Immunology", "Virology", "Mycology"]
     },
     "General Pharmacology": {
-        "KD Tripathi Essentials of Medical Pharmacology": [
-            "General Pharmacokinetics & Pharmacodynamics", "Autonomic Nervous System", "Cardiovascular Drugs",
-            "Drugs Acting on CNS", "Autacoids & NSAIDs", "Respiratory System Drugs",
-            "Hormones & Related Drugs", "Chemotherapy & Antimicrobial Drugs", "Toxicology"
-        ]
+        "KD Tripathi Essentials of Medical Pharmacology": ["Pharmacokinetics", "Autonomic Nervous System", "Cardiovascular Drugs", "CNS Drugs", "Chemotherapy"]
     },
     "General Medicine": {
-        "Davidson's Principles and Practice of Medicine": [
-            "Good Practice in Medicine", "Cardiovascular Disease", "Respiratory Disease",
-            "Endocrine Disease", "Gastrointestinal Disease", "Infectious Disease",
-            "Neurological Disease", "Renal Disease", "Hematological Disease"
-        ]
+        "Davidson's Principles and Practice of Medicine": ["Cardiovascular Disease", "Respiratory Disease", "Endocrine Disease", "Gastrointestinal Disease", "Neurological Disease"]
     },
     "General Surgery": {
-        "Bailey & Love's Short Practice of Surgery": [
-            "Metabolic Response to Injury", "Shock and Blood Transfusion", "Wounds, Tissue Repair and Scars",
-            "Burns", "Surgical Infection", "Principles of Oncology", "Head and Neck Surgery",
-            "Breast and Endocrine Surgery", "Abdominal Surgery & Emergencies"
-        ]
+        "Bailey & Love's Short Practice of Surgery": ["Wounds and Scars", "Burns", "Surgical Infection", "Head and Neck Surgery", "Abdominal Surgery"]
     },
     "Oral Pathology": {
-        "Shafer's Textbook of Oral Pathology": [
-            "Introduction to Oral Pathology", "Developmental Disturbances", "Dental Caries",
-            "Pulp and Periapical Diseases", "Periodontal Diseases", "Cysts of the Oral Region",
-            "Odontogenic Tumors", "Benign Tumors", "Malignant Tumors", "Diseases of Bone",
-            "Diseases of Salivary Glands", "Oral Mucosal Diseases", "White Lesions",
-            "Red and Pigmented Lesions", "Ulcers", "Infections"
-        ]
+        "Shafer's Textbook of Oral Pathology": ["Developmental Disturbances", "Dental Caries", "Pulp Diseases", "Periodontal Diseases", "Cysts", "Odontogenic Tumors"]
     },
     "Oral Medicine & Radiology": {
-        "Burket's Oral Medicine": [
-            "Patient Evaluation", "Systemic Disease", "Oral Manifestations of Systemic Disease",
-            "Ulcers", "White Lesions", "Red Lesions", "Pigmented Lesions", "Vesiculobullous Disorders",
-            "Salivary Gland Disorders", "Temporomandibular Disorders", "Oral Cancer"
-        ]
+        "Burket's Oral Medicine": ["Patient Evaluation", "Oral Mucosal Diseases", "Ulcers", "White Lesions", "Salivary Gland Disorders"]
     },
     "Periodontics": {
-        "Carranza's Clinical Periodontology": [
-            "Periodontal Anatomy", "Periodontal Examination", "Classification of Periodontal Diseases",
-            "Gingivitis", "Periodontitis", "Periodontal Pocket", "Bone Loss", "Plaque and Calculus",
-            "Periodontal Instrumentation", "Scaling and Root Planing", "Periodontal Surgery", "Maintenance Therapy"
-        ]
+        "Carranza's Clinical Periodontology": ["Periodontal Anatomy", "Gingivitis", "Periodontitis", "Scaling and Root Planing", "Periodontal Surgery"]
     },
     "Conservative Dentistry & Endodontics": {
-        "Cohen's Pathways of the Pulp": [
-            "Pulp Biology", "Diagnosis", "Pulpal Disease", "Periapical Disease", "Root Canal Anatomy",
-            "Access Cavity", "Cleaning and Shaping", "Obturation", "Endodontic Emergencies", "Trauma", "Endodontic Surgery"
-        ]
+        "Cohen's Pathways of the Pulp": ["Pulp Biology", "Diagnosis", "Root Canal Anatomy", "Cleaning and Shaping", "Obturation"]
     },
     "Prosthodontics": {
-        "Nallaswamy - Textbook of Prosthodontics": [
-            "Diagnosis and Treatment Planning", "Complete Dentures", "Impression Making",
-            "Jaw Relations", "Tooth Selection", "Denture Try-in", "Denture Processing",
-            "Removable Partial Dentures", "Fixed Prosthodontics"
-        ]
+        "Nallaswamy - Textbook of Prosthodontics": ["Complete Dentures", "Impression Making", "Jaw Relations", "Removable Partial Dentures", "Fixed Prosthodontics"]
     },
     "Orthodontics": {
-        "Proffit - Contemporary Orthodontics": [
-            "Growth and Development", "Development of Dentition", "Malocclusion", "Diagnosis",
-            "Treatment Planning", "Biomechanics", "Fixed Appliances", "Functional Appliances",
-            "Orthodontic Retention", "Deep Bite", "Open Bite", "Class II Malocclusion", "Class III Malocclusion"
-        ]
+        "Proffit - Contemporary Orthodontics": ["Growth and Development", "Malocclusion", "Diagnosis", "Fixed Appliances", "Retention"]
     },
     "Pedodontics": {
-        "Nikhil Marwah - Textbook of Pediatric Dentistry": [
-            "Growth and Development", "Preventive Dentistry", "Dental Caries", "Pulp Therapy",
-            "Trauma", "Space Maintainers", "Behavior Management", "Interceptive Orthodontics"
-        ]
+        "Nikhil Marwah - Textbook of Pediatric Dentistry": ["Preventive Dentistry", "Dental Caries", "Pulp Therapy", "Space Maintainers", "Behavior Management"]
     },
     "Public Health Dentistry": {
-        "Soben Peter - Essentials of Preventive and Community Dentistry": [
-            "Introduction to Public Health", "Health and Disease", "Epidemiology", "Study Designs",
-            "Bias", "Screening", "Biostatistics", "Indices", "DMFT", "OHI-S", "CPITN",
-            "Preventive Dentistry", "Community Dental Programs", "Health Education"
-        ]
+        "Soben Peter - Essentials of Preventive and Community Dentistry": ["Epidemiology", "Biostatistics", "Indices (DMFT, OHI-S, CPITN)", "Preventive Dentistry"]
     },
     "Dental Materials": {
-        "Phillips' Science of Dental Materials": [
-            "Structure of Matter", "Physical Properties", "Biocompatibility", "Impression Materials",
-            "Gypsum Products", "Dental Waxes", "Resin-Based Composites", "Dental Cements", "Dental Amalgam"
-        ]
+        "Phillips' Science of Dental Materials": ["Physical Properties", "Impression Materials", "Gypsum Products", "Resin Composites", "Cements"]
     },
     "Oral Surgery": {
-        "Malamed's Handbook of Local Anesthesia": [
-            "Pain and Anxiety", "Local Anesthetic Drugs", "Syringes and Needles",
-            "Maxillary Anesthesia", "Mandibular Anesthesia", "Complications", "Special Patients"
-        ]
+        "Malamed's Handbook of Local Anesthesia": ["Local Anesthetic Drugs", "Maxillary Anesthesia", "Mandibular Anesthesia", "Complications"]
     }
 }
 
@@ -615,8 +535,8 @@ REFERENCE_ALIASES = {
     "pathology": "General Pathology", "microbiology": "Microbiology", "pharmacology": "General Pharmacology",
     "medicine": "General Medicine", "surgery": "General Surgery", "caries": "Conservative Dentistry & Endodontics",
     "rct": "Conservative Dentistry & Endodontics", "gum disease": "Periodontics", "periodontal": "Periodontics",
-    "cpitn": "Public Health Dentistry", "opg": "Radiology", "iopa": "Radiology", "ceph": "Orthodontics",
-    "pedo": "Pedodontics", "prostho": "Prosthodontics", "ulcer": "Oral Medicine & Radiology"
+    "cpitn": "Public Health Dentistry", "opg": "Oral Medicine & Radiology", "iopa": "Oral Medicine & Radiology", 
+    "ceph": "Orthodontics", "pedo": "Pedodontics", "prostho": "Prosthodontics", "ulcer": "Oral Medicine & Radiology"
 }
 
 CEPH_ANALYSES = [
@@ -689,37 +609,112 @@ def textbook_library():
 
 
 # ============================================================
-# RADIOGRAPH & SOFT TISSUE
+# RADIOGRAPH & SOFT TISSUE (Restored Fully)
 # ============================================================
 
-COMMON_SAFETY_RULES = "You are Pocket Dentistry. Do no harm. Do not provide definitive diagnosis."
+COMMON_SAFETY_RULES = """
+You are Pocket Dentistry & Medical Hub, an AI-assisted clinical decision-support system.
+CORE SAFETY PRINCIPLE: Do good for the patient and never cause harm.
+- Analyze only information provided.
+- Never invent radiographic findings or tooth numbers.
+- Clearly state uncertainty. Do not provide a definitive diagnosis.
+"""
+
+RADIOGRAPH_PROMPTS = {
+    "IOPA": COMMON_SAFETY_RULES + "\nAnalyze IOPA radiograph for image quality, caries, restorations, bone levels, and periapical status.",
+    "OPG": COMMON_SAFETY_RULES + "\nAnalyze OPG panoramic radiograph for dentition, missing/impacted teeth, bone levels, sinuses, and condyles.",
+    "Bitewing": COMMON_SAFETY_RULES + "\nAnalyze bitewing radiograph for interproximal caries, restorations, and alveolar crest levels.",
+    "Occlusal": COMMON_SAFETY_RULES + "\nAnalyze occlusal radiograph for teeth, development, impacted teeth, and jaw structures.",
+    "Facial Radiograph": COMMON_SAFETY_RULES + "\nAnalyze facial radiograph for skeletal alignment, continuity, and obvious fracture findings.",
+}
 
 def radiograph_analyzer():
     st.markdown("### 🩻 AI Radiographic Assessment")
-    rtype = st.selectbox("Type", ["IOPA", "OPG", "Bitewing"])
-    uploaded = st.file_uploader("Upload X-ray", type=["png", "jpg", "jpeg", "webp"])
-    if uploaded: st.image(uploaded, use_container_width=True)
-    if st.button("🔍 Analyze X-ray", type="primary", use_container_width=True):
-        if uploaded:
-            with st.spinner("Analyzing..."):
-                try:
-                    rep = run_image_analysis(uploaded, COMMON_SAFETY_RULES + f"\nAnalyze {rtype}")
-                    st.markdown(rep)
-                    show_export_controls(f"{rtype} Report", "", rep, "Radiograph")
-                except Exception as exc: show_ai_error(exc)
+    remaining = DAILY_ANALYSIS_LIMIT - st.session_state.analysis_count
+    st.caption(f"AI analyses remaining today: {remaining}/{DAILY_ANALYSIS_LIMIT}")
+    
+    rtype = st.selectbox("Select radiograph type", list(RADIOGRAPH_PROMPTS.keys()) + ["Lateral Cephalogram (Ceph)"])
+    ceph = st.selectbox("Cephalometric Analysis Type", CEPH_ANALYSES) if rtype == "Lateral Cephalogram (Ceph)" else ""
+
+    st.markdown("#### 📏 Scale Calibration Settings")
+    calibration_mode = st.radio("Select Scale Calibration Mode", ["🤖 Auto-Calculate / AI Estimation", "✏️ Enter Known Calibration Scale (mm/pixel)"])
+    scale_val = st.text_input("Enter known scale value", value="1.0 mm/pixel") if "Enter" in calibration_mode else "Auto-estimated"
+
+    uploaded = st.file_uploader("📤 Upload dental radiograph", type=["png", "jpg", "jpeg", "webp"])
+    if uploaded: st.image(uploaded, caption="Uploaded radiograph", use_container_width=True)
+
+    patient_name = st.text_input("Patient / Case identifier", key="xray_patient_name")
+    patient_email = st.text_input("Patient Gmail / email (optional)", key="xray_patient_email", placeholder="patient@gmail.com")
+
+    if st.button("🔍 Analyze X-ray", type="primary", use_container_width=True, disabled=st.session_state.analysis_count >= DAILY_ANALYSIS_LIMIT):
+        if uploaded is None:
+            st.warning("Please upload a radiograph first.")
+            return
+        with st.spinner("Analyzing radiograph..."):
+            try:
+                prompt = COMMON_SAFETY_RULES + f"\nRadiograph: {rtype}\nCeph: {ceph}\nScale: {scale_val}"
+                report = run_image_analysis(uploaded, prompt)
+                st.session_state.analysis_count += 1
+                st.session_state.last_report = report
+                st.session_state.last_image_name = uploaded.name
+                
+                save_case(patient_email, patient_name, rtype, uploaded.name, f"{rtype} Assessment", report)
+
+                st.success("Analysis completed.")
+                st.markdown("### 📋 AI Assessment Report")
+                st.markdown(report)
+                show_export_controls(f"{rtype} Assessment", patient_name, report, "Radiographic AI")
+                patient_email_section(report, f"{rtype} Report")
+                review_section("radiograph")
+            except Exception as exc:
+                show_ai_error(exc, "Radiographic AI analysis failed")
 
 def soft_tissue_section():
-    st.markdown("### 👄 Soft-Tissue Clinical Reasoning & Upload")
-    img = st.file_uploader("Upload clinical photo", type=["png", "jpg", "jpeg", "webp"])
-    if img: st.image(img, use_container_width=True)
-    site = st.text_input("Anatomical Location")
-    if st.button("🧠 Build Reasoning", type="primary", use_container_width=True):
-        with st.spinner("Processing..."):
+    st.markdown("### 👄 Advanced Soft-Tissue Clinical Reasoning & Upload")
+    st.caption("Upload clinical photographs of oral mucosal lesions for professional reasoning support.")
+    
+    patient_name = st.text_input("Patient / Case identifier", key="soft_patient_name")
+    patient_email = st.text_input("Patient Gmail / email (optional)", key="soft_patient_email", placeholder="patient@gmail.com")
+    
+    soft_image = st.file_uploader("📷 Upload intraoral/extraoral clinical photograph", type=["png", "jpg", "jpeg", "webp"], key="soft_tissue_file_uploader")
+    if soft_image: st.image(soft_image, caption="Uploaded soft-tissue photograph", use_container_width=True)
+
+    lesion_type = st.selectbox("Primary Lesion Appearance", ["White lesion", "Red lesion", "Red-white lesion", "Ulcer", "Pigmented lesion", "Swelling / mass", "Vesicle / blister", "Other / unclear"])
+    lesion_site = st.text_input("Anatomical Location", placeholder="e.g., Left buccal mucosa")
+    lesion_duration = st.text_input("Duration & Progression", placeholder="e.g., 2 weeks")
+    lesion_pain = st.selectbox("Pain Status", ["Painless", "Mild discomfort", "Painful / Burning"])
+    lesion_scrapable = st.selectbox("Scrapability", ["Not applicable", "Scrapable", "Non-scrapable"])
+    additional_features = st.text_area("Additional Clinical Findings & History")
+
+    if st.button("🧠 Build Professional Clinical Reasoning", type="primary", use_container_width=True):
+        with st.spinner("Processing clinical reasoning..."):
             try:
-                rep = run_text_ai(COMMON_SAFETY_RULES + f"\nAnalyze soft tissue lesion at site: {site}")
-                st.markdown(rep)
-                show_export_controls("Soft Tissue Report", site, rep, "Soft Tissue")
-            except Exception as exc: show_ai_error(exc)
+                prompt = f"""{COMMON_SAFETY_RULES}
+Analyze this oral mucosal lesion case:
+Appearance: {lesion_type}
+Site: {lesion_site}
+Duration: {lesion_duration}
+Pain: {lesion_pain}
+Scrapability: {lesion_scrapable}
+Additional History: {additional_features}
+Provide: Problem representation, Differential diagnoses, Evidence ledger, Critical missing info, Next clinical question, Diagnostic test, Management considerations, Red flags."""
+                
+                if soft_image:
+                    report = run_image_analysis(soft_image, prompt)
+                    img_name = soft_image.name
+                else:
+                    report = run_text_ai(prompt)
+                    img_name = "None"
+
+                save_case(patient_email, patient_name, "Soft Tissue", img_name, "Soft-Tissue Clinical Reasoning", report)
+
+                st.markdown("### 📋 Clinical Decision Support Report")
+                st.markdown(report)
+                show_export_controls("Soft-Tissue Clinical Reasoning", patient_name, report, "Clinical Decision Support")
+                patient_email_section(report, "Soft-Tissue Clinical Report")
+                review_section("soft_tissue")
+            except Exception as exc:
+                show_ai_error(exc, "Soft-tissue reasoning failed")
 
 
 # ============================================================
@@ -752,14 +747,25 @@ def student_mode():
 
 def doctor_mode():
     show_mode_header("Doctor Mode", "🩺")
-    tabs = st.tabs(["🩻 X-ray AI", "👄 Soft Tissue", "📜 Case History"])
+    tabs = st.tabs(["🩻 X-ray AI", "👄 Soft Tissue Reasoning", "📖 Clinical Library", "📜 Case History"])
     with tabs[0]: radiograph_analyzer()
     with tabs[1]: soft_tissue_section()
-    with tabs[2]:
-        st.markdown("### 📜 Saved Patient History")
-        for row in get_cases():
-            with st.expander(f"{row[1]} — {row[3] or 'Case'}"):
-                st.markdown(row[7])
+    with tabs[2]: textbook_library()
+    with tabs[3]:
+        st.markdown("### 📜 Saved Patient History & Case Records")
+        search_email = st.text_input("Search patient email", key="history_email", placeholder="patient@gmail.com")
+        rows = get_cases(search_email)
+        if not rows:
+            st.info("No saved cases found.")
+        else:
+            for row in rows:
+                cid, created, email, name, ctype, img, title, report = row
+                with st.expander(f"{created} — {name or 'Case'} — {ctype or 'Report'}"):
+                    st.write(f"**Patient:** {name or 'Not provided'}")
+                    st.write(f"**Email:** {email or 'Not provided'}")
+                    st.markdown(report)
+                    show_export_controls(title or "Saved Case", name or "", report, ctype or "Saved report")
+                    if email: patient_email_section(report, f"Saved Case {cid}")
 
 
 # ============================================================
@@ -780,7 +786,7 @@ def show_home():
         if st.button("🎓 Enter Student Mode", use_container_width=True):
             st.session_state.mode = "student"; st.session_state.page = "student"; st.rerun()
     with c2:
-        st.markdown('<div class="mode-card doctor"><h3>🩺 Doctor Mode</h3><p>Radiographic AI, soft-tissue reasoning, and case records.</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="mode-card doctor"><h3>🩺 Doctor Mode</h3><p>Radiographic AI with scale calibration, soft-tissue clinical reasoning, and case history.</p></div>', unsafe_allow_html=True)
         if st.button("🩺 Enter Doctor Mode", use_container_width=True):
             st.session_state.mode = "doctor"; st.rerun()
 
