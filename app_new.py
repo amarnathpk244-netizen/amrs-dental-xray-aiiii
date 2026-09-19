@@ -346,7 +346,7 @@ def review_section(context="report"):
 
 
 # ============================================================
-# NEW FEATURE: STUDENT PRACTICALS SECTION (Animated Photos, Videos & Notes)
+# STUDENT PRACTICALS SECTION (Animated Photos, Videos & Notes)
 # ============================================================
 
 def student_practicals_section():
@@ -375,7 +375,6 @@ def student_practicals_section():
                 file_name = uploaded_media.name if uploaded_media else "No Media"
                 file_type = uploaded_media.type if uploaded_media else "None"
                 
-                # If media file is uploaded, save it locally in an uploads folder
                 if uploaded_media:
                     os.makedirs("uploads/practicals", exist_ok=True)
                     file_path = os.path.join("uploads/practicals", uploaded_media.name)
@@ -466,41 +465,208 @@ def intro_dental_family():
 
 
 # ============================================================
-# COMPREHENSIVE TEXTBOOK LIBRARY
+# COMPREHENSIVE TEXTBOOK LIBRARY (All Dental & Medical Subjects Included)
 # ============================================================
 
 TEXTBOOK_LIBRARY = {
     "General Human Anatomy": {
-        "BD Chaurasia's Human Anatomy": ["Upper Limb", "Thorax", "Abdomen", "Head & Neck", "Embryology"]
+        "BD Chaurasia's Human Anatomy (Vol 1-3)": [
+            "General Anatomy & Introduction", "Upper Limb and Thorax", "Abdomen and Pelvis",
+            "Head, Neck and Brain", "Lower Limb", "Embryology & General Histology", "Osteology"
+        ],
+        "Vishram Singh - General Anatomy": [
+            "Introduction to Anatomy", "Skeletal System", "Joints & Muscular System",
+            "Cardiovascular & Nervous System", "Basic Embryology"
+        ]
     },
     "General Human Physiology": {
-        "Guyton and Hall Physiology": ["Nerve & Muscle", "Heart & Circulation", "Renal System", "Nervous System"]
+        "Guyton and Hall Textbook of Medical Physiology": [
+            "General Physiology & Cell Physiology", "Nerve and Muscle", "Heart and Circulation",
+            "The Body Fluids and Kidneys", "Respiration", "Nervous System: Central & Special Senses",
+            "Gastrointestinal Physiology", "Endocrinology and Reproduction", "Metabolism and Temperature Regulation"
+        ],
+        "Sembulingam Physiology": [
+            "General Physiology", "Blood", "Muscle Physiology", "Digestive System",
+            "Renal Physiology", "Endocrinology", "Reproductive System", "Nervous System"
+        ]
+    },
+    "Biochemistry": {
+        "Vasudevan Textbook of Biochemistry": [
+            "Carbohydrate Chemistry & Metabolism", "Lipid Chemistry & Metabolism", "Amino Acids & Proteins",
+            "Enzymes", "Vitamins", "Mineral Metabolism", "Clinical Biochemistry", "Nutrition and Dietetics"
+        ],
+        "Satyanarayana Biochemistry": [
+            "Biomolecules", "Metabolic Pathways", "Molecular Biology", "Clinical Biochemistry & Immunology", "Nutrition"
+        ]
+    },
+    "General Pathology": {
+        "Robbins & Cotran Pathologic Basis of Disease": [
+            "Cell Injury, Death, and Adaptation", "Inflammation and Repair", "Hemodynamic Disorders, Thrombosis, and Shock",
+            "Diseases of the Immune System", "Neoplasia", "Genetic and Pediatric Diseases",
+            "Environmental and Nutritional Diseases", "General Pathology of Infectious Diseases"
+        ],
+        "Harsh Mohan Textbook of Pathology": [
+            "Basic Pathology & Cell Injury", "Inflammation", "Healing and Repair",
+            "Immune System Disorders", "Neoplasia", "Infectious Diseases", "Hematopathology"
+        ]
+    },
+    "Microbiology": {
+        "Ananthanarayan and Paniker's Textbook of Microbiology": [
+            "General Microbiology", "Bacteriology", "Immunology", "Virology",
+            "Mycology", "Parasitology", "Clinical / Applied Microbiology"
+        ]
+    },
+    "General Pharmacology": {
+        "KD Tripathi Essentials of Medical Pharmacology": [
+            "General Pharmacokinetics & Pharmacodynamics", "Autonomic Nervous System", "Cardiovascular Drugs",
+            "Drugs Acting on CNS", "Autacoids & NSAIDs", "Respiratory System Drugs",
+            "Hormones & Related Drugs", "Chemotherapy & Antimicrobial Drugs", "Toxicology"
+        ]
+    },
+    "General Medicine": {
+        "Davidson's Principles and Practice of Medicine": [
+            "Good Practice in Medicine", "Cardiovascular Disease", "Respiratory Disease",
+            "Endocrine Disease", "Gastrointestinal Disease", "Infectious Disease",
+            "Neurological Disease", "Renal Disease", "Hematological Disease"
+        ]
+    },
+    "General Surgery": {
+        "Bailey & Love's Short Practice of Surgery": [
+            "Metabolic Response to Injury", "Shock and Blood Transfusion", "Wounds, Tissue Repair and Scars",
+            "Burns", "Surgical Infection", "Principles of Oncology", "Head and Neck Surgery",
+            "Breast and Endocrine Surgery", "Abdominal Surgery & Emergencies"
+        ]
     },
     "Oral Pathology": {
-        "Shafer's Textbook of Oral Pathology": ["Dental Caries", "Pulp Diseases", "Cysts", "Odontogenic Tumors"]
+        "Shafer's Textbook of Oral Pathology": [
+            "Introduction to Oral Pathology", "Developmental Disturbances", "Dental Caries",
+            "Pulp and Periapical Diseases", "Periodontal Diseases", "Cysts of the Oral Region",
+            "Odontogenic Tumors", "Benign Tumors", "Malignant Tumors", "Diseases of Bone",
+            "Diseases of Salivary Glands", "Oral Mucosal Diseases", "White Lesions",
+            "Red and Pigmented Lesions", "Ulcers", "Infections"
+        ]
+    },
+    "Oral Medicine & Radiology": {
+        "Burket's Oral Medicine": [
+            "Patient Evaluation", "Systemic Disease", "Oral Manifestations of Systemic Disease",
+            "Ulcers", "White Lesions", "Red Lesions", "Pigmented Lesions", "Vesiculobullous Disorders",
+            "Salivary Gland Disorders", "Temporomandibular Disorders", "Oral Cancer"
+        ]
+    },
+    "Periodontics": {
+        "Carranza's Clinical Periodontology": [
+            "Periodontal Anatomy", "Periodontal Examination", "Classification of Periodontal Diseases",
+            "Gingivitis", "Periodontitis", "Periodontal Pocket", "Bone Loss", "Plaque and Calculus",
+            "Periodontal Instrumentation", "Scaling and Root Planing", "Periodontal Surgery", "Maintenance Therapy"
+        ]
     },
     "Conservative Dentistry & Endodontics": {
-        "Cohen's Pathways of the Pulp": ["Pulp Biology", "Access Cavity", "Cleaning & Shaping", "Obturation"]
+        "Cohen's Pathways of the Pulp": [
+            "Pulp Biology", "Diagnosis", "Pulpal Disease", "Periapical Disease", "Root Canal Anatomy",
+            "Access Cavity", "Cleaning and Shaping", "Obturation", "Endodontic Emergencies", "Trauma", "Endodontic Surgery"
+        ]
+    },
+    "Prosthodontics": {
+        "Nallaswamy - Textbook of Prosthodontics": [
+            "Diagnosis and Treatment Planning", "Complete Dentures", "Impression Making",
+            "Jaw Relations", "Tooth Selection", "Denture Try-in", "Denture Processing",
+            "Removable Partial Dentures", "Fixed Prosthodontics"
+        ]
+    },
+    "Orthodontics": {
+        "Proffit - Contemporary Orthodontics": [
+            "Growth and Development", "Development of Dentition", "Malocclusion", "Diagnosis",
+            "Treatment Planning", "Biomechanics", "Fixed Appliances", "Functional Appliances",
+            "Orthodontic Retention", "Deep Bite", "Open Bite", "Class II Malocclusion", "Class III Malocclusion"
+        ]
+    },
+    "Pedodontics": {
+        "Nikhil Marwah - Textbook of Pediatric Dentistry": [
+            "Growth and Development", "Preventive Dentistry", "Dental Caries", "Pulp Therapy",
+            "Trauma", "Space Maintainers", "Behavior Management", "Interceptive Orthodontics"
+        ]
+    },
+    "Public Health Dentistry": {
+        "Soben Peter - Essentials of Preventive and Community Dentistry": [
+            "Introduction to Public Health", "Health and Disease", "Epidemiology", "Study Designs",
+            "Bias", "Screening", "Biostatistics", "Indices", "DMFT", "OHI-S", "CPITN",
+            "Preventive Dentistry", "Community Dental Programs", "Health Education"
+        ]
+    },
+    "Dental Materials": {
+        "Phillips' Science of Dental Materials": [
+            "Structure of Matter", "Physical Properties", "Biocompatibility", "Impression Materials",
+            "Gypsum Products", "Dental Waxes", "Resin-Based Composites", "Dental Cements", "Dental Amalgam"
+        ]
+    },
+    "Oral Surgery": {
+        "Malamed's Handbook of Local Anesthesia": [
+            "Pain and Anxiety", "Local Anesthetic Drugs", "Syringes and Needles",
+            "Maxillary Anesthesia", "Mandibular Anesthesia", "Complications", "Special Patients"
+        ]
     }
 }
 
+REFERENCE_ALIASES = {
+    "anatomy": "General Human Anatomy", "physiology": "General Human Physiology", "biochemistry": "Biochemistry",
+    "pathology": "General Pathology", "microbiology": "Microbiology", "pharmacology": "General Pharmacology",
+    "medicine": "General Medicine", "surgery": "General Surgery", "caries": "Conservative Dentistry & Endodontics",
+    "rct": "Conservative Dentistry & Endodontics", "gum disease": "Periodontics", "periodontal": "Periodontics",
+    "cpitn": "Public Health Dentistry", "opg": "Radiology", "iopa": "Radiology", "ceph": "Orthodontics",
+    "pedo": "Pedodontics", "prostho": "Prosthodontics", "ulcer": "Oral Medicine & Radiology"
+}
+
+def find_subject(search_text):
+    if not search_text: return "General Human Anatomy"
+    search = search_text.strip().lower()
+    if search in REFERENCE_ALIASES: return REFERENCE_ALIASES[search]
+    for alias, subject in REFERENCE_ALIASES.items():
+        if alias in search: return subject
+    for subject in TEXTBOOK_LIBRARY:
+        if subject.lower() in search: return subject
+    return "General Human Anatomy"
+
+def find_relevant_chapters(search_text, subject):
+    results = []
+    if not search_text: return results
+    query = search_text.lower().strip()
+    books = TEXTBOOK_LIBRARY.get(subject, {})
+    for book, chapters in books.items():
+        for chapter in chapters:
+            if query in chapter.lower():
+                results.append((book, chapter))
+    return results
+
 def textbook_library():
-    st.markdown("### 📚 Comprehensive Digital Library")
-    search = st.text_input("🔎 Search topic", placeholder="Try: Anatomy, Caries, Root Canal...", key="digital_library_search")
+    st.markdown("### 📚 Comprehensive Medical & Dental Digital Library")
+    search = st.text_input("🔎 Search topic", placeholder="Try: Anatomy, Physiology, Pathology, Surgery, Caries...", key="digital_library_search")
     st.session_state.library_search = search
     
-    selected_subject = st.selectbox("📚 Select subject", list(TEXTBOOK_LIBRARY.keys()), key="digital_library_subject")
+    default_subject = find_subject(search)
+    subjects = list(TEXTBOOK_LIBRARY.keys())
+    default_index = subjects.index(default_subject) if default_subject in subjects else 0
+    selected_subject = st.selectbox("📚 Select subject", subjects, index=default_index, key="digital_library_subject")
     books = TEXTBOOK_LIBRARY[selected_subject]
+
+    if search.strip():
+        st.markdown(f"#### 🔍 Search results for: **{search}**")
+        relevant = find_relevant_chapters(search, selected_subject)
+        if relevant:
+            for book, chapter in relevant[:10]:
+                st.markdown(f'<div class="chapter-card">📑 <b>{chapter}</b><br><small>📕 {book}</small></div>', unsafe_allow_html=True)
+
+    st.markdown("#### 📕 Available Textbooks")
     selected_book = st.selectbox("Select textbook", list(books.keys()), key="digital_library_book")
-    selected_chapter = st.selectbox("Choose chapter", ["Select a chapter"] + books[selected_book], key=f"chapter_{selected_book}")
+    chapters = books[selected_book]
+    selected_chapter = st.selectbox("Choose chapter", ["Select a chapter"] + chapters, key=f"chapter_{selected_book}")
 
     if selected_chapter != "Select a chapter":
         st.success(f"Selected: {selected_chapter}")
-        question = st.text_area("What do you want to understand?", key=f"q_{selected_book}")
+        question = st.text_area("What do you want to understand?", key=f"question_{selected_book}_{selected_chapter}")
         if st.button("🤖 Ask the Library", type="primary", use_container_width=True) and question.strip():
-            with st.spinner("Preparing explanation..."):
+            with st.spinner("Preparing academic explanation..."):
                 try:
-                    prompt = f"Subject: {selected_subject}\nChapter: {selected_chapter}\nQuestion: {question}\nProvide an academic explanation."
+                    prompt = f"Subject: {selected_subject}\nTextbook: {selected_book}\nChapter: {selected_chapter}\nQuestion: {question}\nProvide an academic explanation."
                     st.session_state.library_answer = run_text_ai(prompt)
                 except Exception as exc:
                     show_ai_error(exc, "Failed")
@@ -570,7 +736,7 @@ def student_mode():
         kuhs_searched_topic_pyq_bank()
 
     with tabs[2]:
-        student_practicals_section()  # <-- PRACTICALS & ANIMATED MEDIA SECTION HERE!
+        student_practicals_section()
 
     with tabs[3]:
         textbook_library()
