@@ -5,6 +5,7 @@ from datetime import date, datetime
 from io import BytesIO
 import base64
 import html
+import sqlite3
 
 import streamlit as st
 from google import genai
@@ -18,7 +19,7 @@ st.set_page_config(
 )
 
 DAILY_ANALYSIS_LIMIT = 3
-MODEL_NAME = "gemini-3.6-flash"
+MODEL_NAME = "gemini-2.5-flash"
 
 # ============================================================
 # STYLE
@@ -43,6 +44,7 @@ div.stButton>button{border-radius:12px;min-height:2.7rem;font-weight:700}
 # ============================================================
 DEFAULT_STATE = {
     "mode": None,
+    "page": "home",
     "analysis_date": str(date.today()),
     "analysis_count": 0,
     "last_report": "",
@@ -58,6 +60,40 @@ for k,v in DEFAULT_STATE.items():
 if st.session_state.analysis_date != str(date.today()):
     st.session_state.analysis_date=str(date.today())
     st.session_state.analysis_count=0
+
+# ============================================================
+# PERSISTENT CASE DATABASE
+# ============================================================
+DB_FILE = "pocket_dentistry.db"
+
+def db_connect():
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+    conn.execute("""CREATE TABLE IF NOT EXISTS cases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, patient_email TEXT,
+        patient_name TEXT, case_type TEXT, image_name TEXT, report_title TEXT, report TEXT)""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, context TEXT, rating TEXT, suggestion TEXT)""")
+    conn.commit()
+    return conn
+
+def save_case(patient_email, patient_name, case_type, image_name, report_title, report):
+    conn=db_connect()
+    conn.execute("INSERT INTO cases(created_at,patient_email,patient_name,case_type,image_name,report_title,report) VALUES(?,?,?,?,?,?,?)",
+                 (str(datetime.now()),patient_email,patient_name,case_type,image_name,report_title,report))
+    conn.commit(); conn.close()
+
+def get_cases(patient_email=""):
+    conn=db_connect()
+    if patient_email.strip():
+        rows=conn.execute("SELECT id,created_at,patient_email,patient_name,case_type,image_name,report_title,report FROM cases WHERE patient_email=? ORDER BY id DESC",(patient_email.strip(),)).fetchall()
+    else:
+        rows=conn.execute("SELECT id,created_at,patient_email,patient_name,case_type,image_name,report_title,report FROM cases ORDER BY id DESC LIMIT 50").fetchall()
+    conn.close(); return rows
+
+def save_review_db(context,rating,suggestion):
+    conn=db_connect()
+    conn.execute("INSERT INTO reviews(created_at,context,rating,suggestion) VALUES(?,?,?,?)",(str(datetime.now()),context,rating,suggestion))
+    conn.commit(); conn.close()
 
 # ============================================================
 # GEMINI
@@ -123,17 +159,39 @@ h1{{color:#1e3d59}} .box{{padding:15px;border:1px solid #ddd;border-radius:10px;
 <button class="no-print" onclick="window.print()">🖨️ Print</button>
 </body></html>"""
 
+def pdf_bytes(title, patient, report, image_name="", report_type="AI Report"):
+    try:
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.enums import TA_CENTER
+        buf=BytesIO()
+        doc=SimpleDocTemplate(buf,pagesize=A4,rightMargin=40,leftMargin=40,topMargin=40,bottomMargin=40)
+        styles=getSampleStyleSheet()
+        title_style=ParagraphStyle("PDTitle",parent=styles["Title"],alignment=TA_CENTER,fontSize=18)
+        body=ParagraphStyle("PDBody",parent=styles["BodyText"],fontSize=9.5,leading=14)
+        story=[Paragraph("Pocket Dentistry",title_style),Spacer(1,12),Paragraph(html.escape(title or "Dental Report"),styles["Heading2"]),
+               Paragraph(f"<b>Patient/Case:</b> {html.escape(patient or 'Not provided')}<br/><b>Report type:</b> {html.escape(report_type)}<br/><b>Image:</b> {html.escape(image_name or 'Not provided')}<br/><b>Date:</b> {date.today()}",body),Spacer(1,14)]
+        for line in (report or "").split("\n"):
+            if line.strip(): story += [Paragraph(html.escape(line.strip()),body),Spacer(1,4)]
+        story += [Spacer(1,10),Paragraph("<b>Safety notice:</b> AI-assisted information only. Final diagnosis and treatment decisions require qualified dental professional assessment.",body)]
+        doc.build(story)
+        return buf.getvalue()
+    except Exception:
+        return None
+
 def show_export_controls(title,patient,report,image_name="",report_type="AI Report"):
     if not report: return
     st.markdown("### 📄 Save / Print Result")
     doc=make_report_html(title,patient,report,image_name,report_type)
     st.download_button("🌐 Download HTML",doc,file_name="pocket_dentistry_report.html",mime="text/html",use_container_width=True)
-    # Browser print is available through the HTML report; this avoids pretending that
-    # a PDF was generated when the deployment does not have a PDF engine.
-    st.info("🖨️ For PDF: download the HTML report, open it in a browser, choose Print → Save as PDF.")
-    if st.button("🖨️ Open printable report",use_container_width=True):
-        b64=base64.b64encode(doc.encode()).decode()
-        st.markdown(f'<a href="data:text/html;base64,{b64}" target="_blank">Open printable report ↗</a>',unsafe_allow_html=True)
+    pdf=pdf_bytes(title,patient,report,image_name,report_type)
+    if pdf:
+        st.download_button("📄 Download PDF",pdf,file_name="pocket_dentistry_report.pdf",mime="application/pdf",use_container_width=True)
+    else:
+        st.info("PDF package is unavailable in this deployment. Use HTML → Print → Save as PDF.")
+    b64=base64.b64encode(doc.encode()).decode()
+    st.markdown(f'<a href="data:text/html;base64,{b64}" target="_blank">🖨️ Open printable report</a>',unsafe_allow_html=True)
 
 # ============================================================
 # EMAIL
@@ -142,7 +200,6 @@ def email_configured():
     return bool(st.secrets.get("SMTP_HOST","") if hasattr(st,"secrets") else False)
 
 def send_report_email(patient_email,subject,body):
-    """Optional SMTP integration. Configure SMTP_* secrets before enabling."""
     import smtplib
     from email.message import EmailMessage
     host=st.secrets.get("SMTP_HOST","")
@@ -156,7 +213,7 @@ def send_report_email(patient_email,subject,body):
     with smtplib.SMTP(host,port) as s:
         s.starttls(); s.login(user,password); s.send_message(msg)
 
-def patient_email_section(report,title="Dental Buddy Report"):
+def patient_email_section(report,title="Dental Buddy Report",patient_name=""):
     with st.expander("📧 Send report to patient Gmail"):
         email=st.text_input("Patient Gmail address",key=f"mail_{title}")
         consent=st.checkbox("I confirm that the patient has consented to receiving this report by email.",key=f"consent_{title}")
@@ -179,6 +236,7 @@ def review_section(context="report"):
     suggestion=st.text_area("Suggestion / correction",key=f"suggestion_{context}",placeholder="Tell us what should be improved.")
     if st.button("Submit review",key=f"reviewbtn_{context}",use_container_width=True):
         st.session_state.review.append({"date":str(datetime.now()),"context":context,"rating":rating,"suggestion":suggestion})
+        save_review_db(context,rating,suggestion)
         st.success("Thank you. Your feedback has been recorded for this session.")
 
 # ============================================================
@@ -211,12 +269,12 @@ def intro_dental_family():
         st.markdown("### 🎓 Student")
         st.write("Learn topics • Exam preparation • KUHS PYQs • Quiz • Digital Library • Case learning")
         if st.button("Enter Student Mode",use_container_width=True,key="intro_student"):
-            st.session_state.mode="student"; st.rerun()
+            st.session_state.mode="student"; st.session_state.page="student"; st.rerun()
     with c2:
         st.markdown("### 🩺 Doctor")
         st.write("Radiographic assessment • Soft-tissue reasoning • Clinical decision support • Reports")
         if st.button("Enter Doctor Mode",use_container_width=True,key="intro_doctor"):
-            st.session_state.mode="doctor"; st.rerun()
+            st.session_state.mode="doctor"; st.session_state.page="doctor"; st.rerun()
     st.markdown("### 🌱 Dental Family")
     st.write("Students learn, clinicians assess, and both can use the platform as an AI-assisted educational/clinical support tool.")
 
@@ -274,6 +332,7 @@ def radiograph_analyzer():
     uploaded=st.file_uploader("📤 Upload dental radiograph",type=["png","jpg","jpeg","webp"],key="xray_upload")
     if uploaded: st.image(uploaded,caption="Uploaded radiograph",use_container_width=True)
     patient=st.text_input("Patient / Case identifier (avoid unnecessary personal data)",key="xray_patient")
+    patient_email=st.text_input("Patient Gmail / email (optional)",key="xray_patient_email",placeholder="patient@gmail.com")
     if st.button("🔍 Analyze X-ray",type="primary",use_container_width=True,disabled=st.session_state.analysis_count>=DAILY_ANALYSIS_LIMIT):
         if not uploaded: st.warning("Upload a radiograph first."); return
         prompt=COMMON+f"\nRadiograph: {rtype}\nAnalysis: {ceph}\n"+RADIOGRAPH_PROMPTS.get(rtype,"Analyze the lateral cephalogram and selected analysis.")
@@ -284,11 +343,12 @@ def radiograph_analyzer():
             st.session_state.last_report=report
             st.session_state.last_image_name=uploaded.name
             st.session_state.last_report_title=f"{rtype} AI Assessment"
-            st.session_state.patient_history.append({"date":str(datetime.now()),"patient":patient,"type":rtype,"image":uploaded.name,"report":report})
+            st.session_state.patient_history.append({"date":str(datetime.now()),"patient":patient,"email":patient_email,"type":rtype,"image":uploaded.name,"report":report})
+            save_case(patient_email,patient,rtype,uploaded.name,f"{rtype} AI Assessment",report)
             st.success("Analysis completed.")
             st.markdown("### 📋 AI Assessment Report"); st.markdown(report)
             show_export_controls(f"{rtype} AI Assessment",patient,report,uploaded.name,"Radiographic AI")
-            patient_email_section(report,f"{rtype} Dental Report")
+            patient_email_section(report,f"{rtype} Dental Report",patient)
             review_section("radiograph")
         except Exception as e: st.error(f"❌ Analysis failed\n\n{friendly_ai_error(e)}")
 
@@ -297,6 +357,8 @@ def radiograph_analyzer():
 # ============================================================
 def soft_tissue():
     st.markdown("### 👄 Soft-Tissue Clinical Reasoning")
+    patient=st.text_input("Patient / Case identifier (optional)",key="soft_patient")
+    patient_email=st.text_input("Patient Gmail / email (optional)",key="soft_patient_email",placeholder="patient@gmail.com")
     image=st.file_uploader("📷 Upload intraoral/extraoral clinical photograph",type=["png","jpg","jpeg","webp"],key="soft_image")
     if image: st.image(image,use_container_width=True)
     lesion=st.selectbox("Primary appearance",["White lesion","Red lesion","Red-white lesion","Ulcer","Pigmented lesion","Swelling / mass","Vesicle / blister","Other / unclear"])
@@ -332,10 +394,11 @@ Do not give a definitive diagnosis."""
             with st.spinner("Building reasoning..."): report=run_text_ai(prompt)
             st.session_state.last_report=report
             st.session_state.last_report_title="Soft-Tissue Clinical Reasoning"
-            st.session_state.patient_history.append({"date":str(datetime.now()),"type":"Soft Tissue","image":image.name if image else "None","report":report})
+            st.session_state.patient_history.append({"date":str(datetime.now()),"patient":patient,"email":patient_email,"type":"Soft Tissue","image":image.name if image else "None","report":report})
+            save_case(patient_email,patient,"Soft Tissue",image.name if image else "","Soft-Tissue Clinical Reasoning",report)
             st.markdown("### 📋 Clinical Decision Support Report"); st.markdown(report)
-            show_export_controls("Soft-Tissue Clinical Reasoning","",report,image.name if image else "","Clinical decision support")
-            patient_email_section(report,"Soft Tissue Clinical Report")
+            show_export_controls("Soft-Tissue Clinical Reasoning",patient,report,image.name if image else "","Clinical decision support")
+            patient_email_section(report,"Soft Tissue Clinical Report",patient)
             review_section("soft_tissue")
         except Exception as e: st.error(friendly_ai_error(e))
 
@@ -345,7 +408,7 @@ Do not give a definitive diagnosis."""
 def header(title,icon):
     a,b=st.columns([1,5])
     with a:
-        if st.button("← Home",use_container_width=True): st.session_state.mode=None; st.rerun()
+        if st.button("← Home",use_container_width=True): st.session_state.mode=None; st.session_state.page="home"; st.rerun()
     with b: st.markdown(f"## {icon} {title}")
 
 def student_mode():
@@ -373,10 +436,15 @@ def student_mode():
             except Exception as e: st.error(friendly_ai_error(e))
     with tabs[3]: textbook_library()
     with tabs[4]:
-        st.markdown("### 📜 Session History")
-        for x in reversed(st.session_state.patient_history[-20:]):
-            st.markdown(f"**{x.get('date','')} — {x.get('type','Case')}**")
-            st.caption(x.get("image",""))
+        st.markdown("### 📜 Saved Patient / Case History")
+        search_email=st.text_input("Patient email (optional)",key="student_history_email")
+        rows=get_cases(search_email)
+        if not rows: st.info("No saved cases found.")
+        for row in rows[:20]:
+            cid,created,email,name,ctype,img,title,report=row
+            with st.expander(f"{created} — {name or 'Case'} — {ctype or 'Report'}"):
+                st.markdown(report)
+                show_export_controls(title or "Saved Case",name or "",report,img or "",ctype or "Saved report")
 
 def doctor_mode():
     header("Doctor Mode","🩺")
@@ -386,11 +454,21 @@ def doctor_mode():
     with tabs[2]: textbook_library()
     with tabs[3]:
         st.markdown("### 📜 Patient / Case History")
-        if not st.session_state.patient_history: st.info("No cases saved in this session.")
-        for i,x in enumerate(reversed(st.session_state.patient_history[-20:])):
-            with st.expander(f"{x.get('date','')} — {x.get('patient','Case')} — {x.get('type','')}"):
-                st.write(x.get("report",""))
-                show_export_controls("Saved Case",x.get("patient",""),x.get("report",""),x.get("image",""),x.get("type",""))
+        search_email=st.text_input("Search patient email",key="history_email",placeholder="patient@gmail.com")
+        rows=get_cases(search_email)
+        if not rows:
+            st.info("No saved cases found.")
+        else:
+            st.success(f"{len(rows)} saved case(s) found.")
+            for row in rows:
+                cid,created,email,name,ctype,img,title,report=row
+                with st.expander(f"{created} — {name or 'Case'} — {ctype or 'Report'}"):
+                    st.write(f"**Patient:** {name or 'Not provided'}")
+                    st.write(f"**Email:** {email or 'Not provided'}")
+                    st.write(f"**Image:** {img or 'Not provided'}")
+                    st.markdown(report)
+                    show_export_controls(title or "Saved Case",name or "",report,img or "",ctype or "Saved report")
+                    if email: patient_email_section(report,f"Saved Case {cid}",name or "")
 
 # ============================================================
 # HOME
@@ -398,14 +476,16 @@ def doctor_mode():
 def home():
     st.markdown('<div class="hero-title">🦷 Pocket Dentistry</div>',unsafe_allow_html=True)
     st.markdown('<div class="hero-subtitle">AI-Powered Dental Learning & Clinical Decision-Support Platform</div>',unsafe_allow_html=True)
-    if st.button("🦷 Intro to Dental Family",use_container_width=True): intro_dental_family()
+    if st.button("🦷 Intro to Dental Family",use_container_width=True):
+        st.session_state.page="intro"
+        st.rerun()
     c1,c2=st.columns(2)
     with c1:
         st.markdown('<div class="mode-card"><h3>🎓 Student Mode</h3><p>Learn, prepare for KUHS exams, use PYQs, quizzes and digital library.</p></div>',unsafe_allow_html=True)
-        if st.button("🎓 Enter Student Mode",use_container_width=True): st.session_state.mode="student"; st.rerun()
+        if st.button("🎓 Enter Student Mode",use_container_width=True): st.session_state.mode="student"; st.session_state.page="student"; st.rerun()
     with c2:
         st.markdown('<div class="mode-card"><h3>🩺 Doctor Mode</h3><p>Radiographic AI, soft-tissue reasoning, clinical support and reports.</p></div>',unsafe_allow_html=True)
-        if st.button("🩺 Enter Doctor Mode",use_container_width=True): st.session_state.mode="doctor"; st.rerun()
+        if st.button("🩺 Enter Doctor Mode",use_container_width=True): st.session_state.mode="doctor"; st.session_state.page="doctor"; st.rerun()
     st.markdown('<div class="safety-box"><b>🛡️ Safety Principle</b><br>AI-assisted information only. Final diagnosis and treatment decisions require qualified dental professional assessment.</div>',unsafe_allow_html=True)
 
 def sidebar():
@@ -413,11 +493,16 @@ def sidebar():
         st.markdown("## 🦷 Pocket Dentistry")
         if st.session_state.mode: st.write(f"Mode: **{st.session_state.mode.title()}**")
         st.write(f"AI analyses today: {st.session_state.analysis_count}/{DAILY_ANALYSIS_LIMIT}")
-        if st.button("🏠 Home",use_container_width=True): st.session_state.mode=None; st.rerun()
-        if st.button("📜 Session History",use_container_width=True):
-            st.session_state.mode="doctor"; st.rerun()
+        if st.button("🏠 Home",use_container_width=True): st.session_state.mode=None; st.session_state.page="home"; st.rerun()
+        if st.button("🦷 Intro to Dental Family",use_container_width=True): st.session_state.page="intro"; st.rerun()
+        if st.button("📜 Patient/Case History",use_container_width=True): st.session_state.mode="doctor"; st.session_state.page="history"; st.rerun()
 
 sidebar()
-if st.session_state.mode is None: home()
+if st.session_state.get("page") == "intro":
+    intro_dental_family()
+elif st.session_state.get("page") == "history":
+    st.session_state.mode = "doctor"
+    doctor_mode()
+elif st.session_state.mode is None: home()
 elif st.session_state.mode=="student": student_mode()
 elif st.session_state.mode=="doctor": doctor_mode()
