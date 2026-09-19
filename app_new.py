@@ -29,80 +29,109 @@ MODEL_NAME = "gemini-3.6-flash"
 
 
 # ============================================================
-# GLOBAL CSS (Fixed text color bug)
+# GLOBAL CSS (Vibrant, Colorful & Modern Styling)
 # ============================================================
 
 st.markdown(
     """
     <style>
-    body, .stMarkdown, p, span, label, div {
-        color: #1e3d59;
-    }
     .block-container {
         max-width: 900px;
         padding-top: 2.5rem;
         padding-bottom: 3rem;
+        background: radial-gradient(circle at top right, rgba(23,185,120,0.05), transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(0,136,145,0.05), transparent 40%);
     }
+
+    h1, h2, h3, h4, h5, h6 {
+        background: linear-gradient(90deg, #00b4d8, #17b978, #008891);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+
     .hero-title {
         text-align: center;
         font-size: 3rem;
         font-weight: 900;
-        background: linear-gradient(90deg, #1e3d59, #17b978, #008891);
+        background: linear-gradient(90deg, #ff758c, #ff7eb3, #17b978, #00b4d8);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.2rem;
+        text-shadow: 0 2px 10px rgba(23,185,120,0.2);
     }
+
     .hero-subtitle {
         text-align: center;
-        font-size: 1.1rem;
-        color: #008891;
-        font-weight: 600;
+        font-size: 1.15rem;
+        background: linear-gradient(90deg, #00b4d8, #90e0ef);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
         margin-bottom: 2rem;
     }
+
     .mode-card {
-        padding: 1.35rem;
+        padding: 1.5rem;
         border-radius: 20px;
         border: 2px solid #00acc1;
-        background: linear-gradient(135deg, #e0f7fa, #80deea);
+        background: linear-gradient(135deg, rgba(0,172,193,0.15), rgba(128,222,234,0.1));
         margin-bottom: 1rem;
-        color: #004d40;
-        box-shadow: 0 4px 12px rgba(0,151,167,0.2);
+        box-shadow: 0 8px 20px rgba(0,172,193,0.2);
+        transition: transform 0.3s ease;
     }
+    
+    .mode-card:hover {
+        transform: translateY(-3px);
+    }
+
     .mode-card h3, .mode-card p {
-        color: #004d40 !important;
+        color: #e0f7fa !important;
     }
+
     .mode-card.doctor {
         border-color: #43a047;
-        background: linear-gradient(135deg, #e8f5e9, #a5d6a7);
-        color: #1b5e20;
+        background: linear-gradient(135deg, rgba(67,160,71,0.15), rgba(165,214,167,0.1));
+        box-shadow: 0 8px 20px rgba(67,160,71,0.2);
     }
+
+    .mode-card.doctor h3, .mode-card.doctor p {
+        color: #e8f5e9 !important;
+    }
+
     .safety-box {
-        padding: 1rem;
+        padding: 1.2rem;
         border-radius: 15px;
-        border-left: 5px solid #17b978;
-        background: rgba(23,185,120,0.1);
-        color: #1e3d59;
+        border-left: 6px solid #17b978;
+        background: linear-gradient(135deg, rgba(23,185,120,0.15), rgba(0,136,145,0.05));
         margin-top: 1rem;
+        box-shadow: 0 4px 15px rgba(23,185,120,0.1);
     }
+
     .chapter-card {
-        padding: 0.8rem 1rem;
-        border-radius: 12px;
-        border: 1px solid #d0d7de;
-        background: #f8fafb;
-        margin-bottom: 0.5rem;
+        padding: 1rem 1.2rem;
+        border-radius: 14px;
+        border: 1px solid rgba(0,180,216,0.3);
+        background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,180,216,0.05));
+        margin-bottom: 0.8rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
+
     div.stButton > button {
-        border-radius: 12px;
-        min-height: 2.8rem;
+        border-radius: 14px;
+        min-height: 3rem;
         font-weight: 700;
-        background: linear-gradient(90deg,#1e3d59,#17b978);
+        background: linear-gradient(90deg, #0077b6, #00b4d8, #17b978);
         color: white;
         border: none;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 15px rgba(0,180,216,0.3);
+        transition: all 0.3s ease;
     }
+
     div.stButton > button:hover {
-        background: linear-gradient(90deg,#17b978,#1e3d59);
-        color: white;
+        background: linear-gradient(90deg, #17b978, #00b4d8, #0077b6);
+        box-shadow: 0 6px 20px rgba(23,185,120,0.4);
+        transform: translateY(-2px);
     }
     </style>
     """,
